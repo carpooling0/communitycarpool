@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Hub - Community Carpool</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💬</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            /* Very light background instead of gradient */
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            /* Softer shadow */
+            padding: 40px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-img {
+            display: block;
+            max-width: 250px;
+            /* Slogan logo might be wider */
+            width: 100%;
+            height: auto;
+            margin: 0 auto 10px auto;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #1a365d;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .required {
+            color: #ef4444;
+        }
+
+        .optional {
+            color: #94a3b8;
+            font-weight: 400;
+            font-size: 12px;
+        }
+
+        select,
+        input[type="email"],
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        select:focus,
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #10b981;
+            /* Green focus */
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .rating-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+            justify-content: center;
+        }
+
+        .star {
+            font-size: 32px;
+            cursor: pointer;
+            color: #cbd5e1;
+            transition: all 0.2s ease;
+        }
+
+        .star:hover,
+        .star.active {
+            color: #fbbf24;
+            transform: scale(1.1);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: #10b981;
+            /* Green background */
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            background: #059669;
+            /* Darker green on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+        }
+
+        .submit-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .message {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .message.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        /* Thank You Page Styles */
+        .thank-you {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .thank-you-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            color: #10b981;
+        }
+
+        .thank-you h2 {
+            color: #1a365d;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .thank-you p {
+            color: #64748b;
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 14px 30px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 25px 15px;
+                border-radius: 15px;
+            }
+
+            .logo-img {
+                max-width: 200px;
+            }
+
+            .logo h1 {
+                font-size: 22px;
+            }
+
+            .star {
+                font-size: 28px;
+            }
+
+            .thank-you-icon {
+                font-size: 60px;
+            }
+
+            .thank-you h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Logo -->
+        <img src="Car_Pool_with slogan.png" alt="Community Carpool Logo" class="logo-img">
+
+        <div class="logo">
+            <h1>💬 Support Hub</h1>
+        </div>
+
+        <!-- Form Section -->
+        <div id="formSection">
+            <div id="message" class="message"></div>
+
+            <form id="supportForm">
+                <!-- Request Type Selector -->
+                <div class="form-group">
+                    <label for="requestType">What can we help you with? <span class="required">*</span></label>
+                    <select id="requestType" name="requestType" required>
+                        <option value="">Select a request type...</option>
+                        <option value="deletion">Data Deletion Request</option>
+                        <option value="feedback">Feedback</option>
+                        <option value="success">Report Successful Match</option>
+                        <option value="issue">Report an Issue</option>
+                    </select>
+                </div>
+
+                <!-- Data Deletion Fields -->
+                <div id="deletionFields" class="hidden">
+                    <div class="form-group">
+                        <label for="deletionEmail">What Email did you use to submit the form? <span
+                                class="required">*</span></label>
+                        <input type="email" id="deletionEmail" name="deletionEmail" placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="deletionDetails">Additional details (optional): <span class="optional">Is it a
+                                specific Journey or All Journeys</span></label>
+                        <textarea id="deletionDetails" name="deletionDetails"
+                            placeholder="e.g., Delete Journey #5 only, or Delete all my journeys..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Feedback Fields -->
+                <div id="feedbackFields" class="hidden">
+                    <div class="form-group">
+                        <label>How would you rate your experience? <span class="required">*</span></label>
+                        <div class="rating-container" id="ratingStars">
+                            <span class="star" data-rating="1">★</span>
+                            <span class="star" data-rating="2">★</span>
+                            <span class="star" data-rating="3">★</span>
+                            <span class="star" data-rating="4">★</span>
+                            <span class="star" data-rating="5">★</span>
+                        </div>
+                        <input type="hidden" id="rating" name="rating">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="experience">Tell us about your experience <span class="required">*</span></label>
+                        <textarea id="experience" name="experience" placeholder="Share your thoughts..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="suggestions">Any suggestions for improvement? <span
+                                class="required">*</span></label>
+                        <textarea id="suggestions" name="suggestions"
+                            placeholder="We'd love to hear your ideas..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="recommend">Would you recommend this to a friend? <span
+                                class="optional">(optional)</span></label>
+                        <select id="recommend" name="recommend">
+                            <option value="">Select...</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                            <option value="Maybe">Maybe</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Successful Match Fields -->
+                <div id="successFields" class="hidden">
+                    <div class="form-group">
+                        <label for="successEmail">Your Email <span class="required">*</span></label>
+                        <input type="email" id="successEmail" name="successEmail" placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="matchId">Match ID <span class="required">*</span> <span class="optional">(Found in
+                                your Match Emails sent by us)</span></label>
+                        <input type="text" id="matchId" name="matchId" placeholder="e.g., 123">
+                    </div>
+                    <div class="form-group">
+                        <label for="successDetails">Additional details (optional):</label>
+                        <textarea id="successDetails" name="successDetails"
+                            placeholder="Tell us about your successful match..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Issue Report Fields -->
+                <div id="issueFields" class="hidden">
+                    <div class="form-group">
+                        <label for="reporterEmail">What Email did you use to submit the form? <span
+                                class="required">*</span></label>
+                        <input type="email" id="reporterEmail" name="reporterEmail" placeholder="your@email.com">
+                    </div>
+
+                    <!-- Updated Field: Replaced Subject Email with User Description TextArea -->
+                    <div class="form-group">
+                        <label for="userDescription">Reporting on another User - Please share their Email and / or your
+                            concern <span class="required">*</span></label>
+                        <textarea id="userDescription" name="userDescription"
+                            placeholder="Please provide their email address and explain the issue..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="issueDescription">Please describe the issue you encountered with this match.</label>
+                        <select id="issueDescription" name="issueDescription">
+                            <option value="">Select issue type...</option>
+                            <option value="Spam/Harassment">Spam/Harassment</option>
+                            <option value="Fake Profile">Fake Profile</option>
+                            <option value="Safety Concern">Safety Concern</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">Submit</button>
+            </form>
+        </div>
+
+        <!-- Thank You Section -->
+        <div id="thankYouSection" class="thank-you hidden">
+            <div class="thank-you-icon">✅</div>
+            <h2>Thank You!</h2>
+            <p>Your request has been submitted successfully.<br>We'll review it and get back to you if needed.</p>
+            <a href="support.html" class="back-btn">Submit Another Request</a>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0ZY200s7rjktsFWshKCRIMu3GA8jPTMUk6CPX4k6UrrPr6yBo0x3NAZE_iv6wMQk/exec';
+
+        const form = document.getElementById('supportForm');
+        const requestType = document.getElementById('requestType');
+        const message = document.getElementById('message');
+        const submitBtn = document.getElementById('submitBtn');
+        const formSection = document.getElementById('formSection');
+        const thankYouSection = document.getElementById('thankYouSection');
+
+        // Field containers
+        const deletionFields = document.getElementById('deletionFields');
+        const feedbackFields = document.getElementById('feedbackFields');
+        const successFields = document.getElementById('successFields');
+        const issueFields = document.getElementById('issueFields');
+
+        // Rating stars
+        const stars = document.querySelectorAll('.star');
+        const ratingInput = document.getElementById('rating');
+        let selectedRating = 0;
+        let userIP = '';
+
+        // Get IP for tracking (Harmonized with index.html for reliability)
+        async function getIPInfo() {
+            const apis = [
+                { url: 'https://ipwho.is/', parse: d => d.ip },
+                { url: 'https://api.ipify.org?format=json', parse: d => d.ip },
+                { url: 'https://api.db-ip.com/v2/free/self', parse: d => d.ipAddress }
+            ];
+
+            for (const api of apis) {
+                try {
+                    const res = await fetch(api.url);
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    const ip = api.parse(data);
+                    if (ip) {
+                        userIP = ip;
+                        console.log('Detected IP:', userIP);
+                        return;
+                    }
+                } catch (e) {
+                    console.log('IP fetch failed for ' + api.url);
+                }
+            }
+            userIP = 'unknown';
+        }
+        getIPInfo();
+
+        // Show/hide fields based on request type
+        requestType.addEventListener('change', function () {
+            // Hide all field groups
+            deletionFields.classList.add('hidden');
+            feedbackFields.classList.add('hidden');
+            successFields.classList.add('hidden');
+            issueFields.classList.add('hidden');
+
+            // Clear previous validation
+            clearValidation();
+
+            // Show relevant fields
+            switch (this.value) {
+                case 'deletion':
+                    deletionFields.classList.remove('hidden');
+                    break;
+                case 'feedback':
+                    feedbackFields.classList.remove('hidden');
+                    break;
+                case 'success':
+                    successFields.classList.remove('hidden');
+                    break;
+                case 'issue':
+                    issueFields.classList.remove('hidden');
+                    break;
+            }
+        });
+
+        // Star rating functionality
+        stars.forEach(star => {
+            star.addEventListener('click', function () {
+                selectedRating = parseInt(this.dataset.rating);
+                ratingInput.value = selectedRating;
+                updateStars();
+            });
+
+            star.addEventListener('mouseenter', function () {
+                const hoverRating = parseInt(this.dataset.rating);
+                stars.forEach((s, index) => {
+                    if (index < hoverRating) {
+                        s.classList.add('active');
+                    } else {
+                        s.classList.remove('active');
+                    }
+                });
+            });
+        });
+
+        document.getElementById('ratingStars').addEventListener('mouseleave', updateStars);
+
+        function updateStars() {
+            stars.forEach((star, index) => {
+                if (index < selectedRating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        // Form submission
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            if (!validateForm()) {
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            data.ip = userIP || 'unknown'; // Use 'ip' to match main project pattern
+
+            try {
+                // Apps Script quirk: use text/plain to avoid CORS preflight (OPTIONS request)
+                const response = await fetch(SCRIPT_URL + '?ip=' + encodeURIComponent(userIP || 'unknown'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Show thank you page
+                    formSection.classList.add('hidden');
+                    thankYouSection.classList.remove('hidden');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    showMessage('Error: ' + (result.message || 'Something went wrong. Please try again.'), 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit';
+                }
+            } catch (error) {
+                showMessage('Error: Unable to submit form. Please try again later.', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit';
+            }
+        });
+
+        function validateForm() {
+            const type = requestType.value;
+
+            if (!type) {
+                showMessage('Please select a request type.', 'error');
+                return false;
+            }
+
+            switch (type) {
+                case 'deletion':
+                    const deletionEmail = document.getElementById('deletionEmail').value;
+                    if (!deletionEmail) {
+                        showMessage('Please enter your email address.', 'error');
+                        return false;
+                    }
+                    break;
+
+                case 'feedback':
+                    if (!selectedRating) {
+                        showMessage('Please select a rating.', 'error');
+                        return false;
+                    }
+                    if (!document.getElementById('experience').value) {
+                        showMessage('Please describe your experience.', 'error');
+                        return false;
+                    }
+                    if (!document.getElementById('suggestions').value) {
+                        showMessage('Please provide suggestions.', 'error');
+                        return false;
+                    }
+                    // "recommend" is now optional - no validation required
+                    break;
+
+                case 'success':
+                    if (!document.getElementById('successEmail').value) {
+                        showMessage('Please enter your email address.', 'error');
+                        return false;
+                    }
+                    if (!document.getElementById('matchId').value) {
+                        showMessage('Please enter the Match ID.', 'error');
+                        return false;
+                    }
+                    break;
+
+                case 'issue':
+                    if (!document.getElementById('reporterEmail').value) {
+                        showMessage('Please enter your email address.', 'error');
+                        return false;
+                    }
+                    if (!document.getElementById('userDescription').value) {
+                        showMessage('Please provide description and email of whom you are reporting on.', 'error');
+                        return false;
+                    }
+                    break;
+            }
+
+            return true;
+        }
+
+        function clearValidation() {
+            message.classList.remove('show');
+        }
+
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = 'message ' + type + ' show';
+            message.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    </script>
+</body>
+
+</html>
