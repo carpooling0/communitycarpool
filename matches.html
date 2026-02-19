@@ -131,14 +131,14 @@
       position: relative;
       flex-shrink: 0;
     }
-    /* Underline indicator — appears below selected tab with a gap */
+    /* Underline indicator — appears below selected tab with a gap, full tab width */
     .tab.tab-selected::after {
       content: '';
       position: absolute;
       bottom: -10px;       /* 10px gap between tab bottom and line */
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60%;
+      left: 0;
+      right: 0;
+      width: 100%;
       height: 3px;
       border-radius: 2px;
     }
