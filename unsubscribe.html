@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Preferences | Community Carpool</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: #f9fafb;
+      color: #111827;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+      padding: 40px 36px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+    }
+    .logo { margin-bottom: 28px; }
+    .logo img { height: 60px; width: auto; }
+    h1 { font-size: 22px; font-weight: 700; color: #111827; margin-bottom: 8px; }
+    .subtitle { font-size: 14px; color: #6b7280; margin-bottom: 28px; line-height: 1.5; }
+    .btn {
+      display: inline-block;
+      padding: 12px 28px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+      border: none;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    .btn-unsubscribe {
+      background: #fee2e2;
+      color: #dc2626;
+      border: 1.5px solid #fca5a5;
+    }
+    .btn-unsubscribe:hover { background: #dc2626; color: white; }
+    .btn-keep {
+      background: #16a34a;
+      color: white;
+      border: 1.5px solid #16a34a;
+    }
+    .btn-keep:hover { background: #15803d; }
+    .divider { border: none; border-top: 1px solid #e5e7eb; margin: 20px 0; }
+    .footer-links { font-size: 13px; color: #9ca3af; }
+    .footer-links a { color: #6b7280; text-decoration: none; }
+    .footer-links a:hover { color: #16a34a; }
+    .success-state { display: none; }
+    .success-icon { font-size: 48px; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <div class="card" id="mainCard">
+    <div class="logo">
+      <a href="https://communitycarpool.org">
+        <img src="logo_with slogan.png" alt="Community Carpool" />
+      </a>
+    </div>
+
+    <div id="defaultState">
+      <h1>Email Preferences</h1>
+      <p class="subtitle">You're currently receiving match notification emails from Community Carpool. Would you like to unsubscribe?</p>
+
+      <button class="btn btn-unsubscribe" id="unsubBtn">Unsubscribe from emails</button>
+      <a href="https://communitycarpool.org/matches.html" id="dashboardLink" class="btn btn-keep">↩ Back to My Matches</a>
+
+      <hr class="divider" />
+      <div class="footer-links">
+        <a href="https://communitycarpool.org">communitycarpool.org</a>
+        &nbsp;·&nbsp;
+        <a href="https://communitycarpool.org/support.html">Support</a>
+      </div>
+    </div>
+
+    <div id="successState" class="success-state">
+      <div class="success-icon">✉️</div>
+      <h1>You've been unsubscribed</h1>
+      <p class="subtitle" style="margin-bottom:24px;">You won't receive match notification emails from Community Carpool. Your journey registrations remain active.</p>
+      <a href="https://communitycarpool.org" class="btn btn-keep">Go to Homepage</a>
+      <hr class="divider" />
+      <div class="footer-links">Changed your mind? <a href="https://communitycarpool.org/support.html">Contact us</a> to re-subscribe.</div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://tbkjealpnoriwdosvmju.supabase.co'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRia2plYWxwbm9yaXdkb3N2bWp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk3NjI0NTQsImV4cCI6MjA1NTMzODQ1NH0.K0iS87GLgAZhYwFIQNphVFrarMzFxECkFYFvxpeVcsA'
+
+    const params = new URLSearchParams(window.location.search)
+    const token = params.get('token')
+
+    // Set the "Back to Matches" link with token if available
+    if (token) {
+      document.getElementById('dashboardLink').href = `https://communitycarpool.org/matches.html?token=${token}`
+    }
+
+    document.getElementById('unsubBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('unsubBtn')
+      btn.textContent = 'Unsubscribing...'
+      btn.disabled = true
+
+      try {
+        if (token) {
+          // Track unsubscribe event via track-event edge function
+          await fetch(`${SUPABASE_URL}/functions/v1/track-event`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+            body: JSON.stringify({ eventType: 'unsubscribed', token })
+          })
+        }
+      } catch (e) { /* silent fail — still show success */ }
+
+      // Show success state
+      document.getElementById('defaultState').style.display = 'none'
+      document.getElementById('successState').style.display = 'block'
+    })
+  </script>
+</body>
+</html>
