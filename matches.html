@@ -409,7 +409,7 @@
       background: var(--yellow-light);
       color: var(--yellow);
     }
-    /* Combined route line: ● From → To as single link */
+    /* Combined route: FROM on line 1, TO on line 2 (stacked vertically) */
     .route-combined-link {
       color: var(--blue);
       text-decoration: none;
@@ -418,26 +418,31 @@
       padding: 2px 4px;
       transition: background 0.15s;
       display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      flex-wrap: wrap;
-      line-height: 1.5;
+      flex-direction: column;   /* stack FROM and TO vertically */
+      gap: 3px;
+      line-height: 1.4;
     }
     .route-combined-link:hover {
       background: var(--yellow-light);
       color: var(--yellow);
     }
+    /* Each line: dot + text side by side */
+    .route-line {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
     .route-dot-from { color: #16a34a; font-size: 11px; flex-shrink: 0; }
     .route-dot-to   { color: #dc2626; font-size: 11px; flex-shrink: 0; }
-    .route-arrow-inline { color: var(--text-muted); font-size: 13px; flex-shrink: 0; }
+    .route-arrow-inline { display: none; }  /* kept for compat, not used in two-line layout */
     .route-text {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      max-width: 120px;
+      max-width: 240px;   /* wider: up to 44 chars comfortably */
     }
-    /* Wider route column */
-    th.col-route, td.col-route { min-width: 240px; width: 32%; }
+    /* Wider route column to accommodate two-line layout */
+    th.col-route, td.col-route { min-width: 220px; width: 30%; }
 
     /* Interest status pills */
     .interest-pill {
@@ -855,12 +860,10 @@
         padding-top: 2px;
       }
       tbody td:empty { display: none; }
-      /* Route on mobile — allow wrapping but not mid-word */
+      /* Route on mobile — allow wider text */
       tbody td[data-label="Their Route"]::before { min-width: 80px; }
       .route-combined-link {
         font-size: 14px;
-        flex-wrap: wrap;
-        gap: 3px;
       }
       .route-text { max-width: 200px; white-space: normal; word-break: break-word; }
       .actions-cell { flex-wrap: wrap; gap: 6px; margin-top: 4px; }
@@ -1214,9 +1217,8 @@
           <td data-label="Name">${nameHtml}</td>
           <td data-label="Their Route" class="col-route">
             <a class="route-combined-link" href="${mapUrl}" target="_blank" title="${routeTitle}">
-              <span style="display:inline-flex;align-items:center;gap:2px;flex-shrink:0;min-width:0;overflow:hidden"><span class="route-dot-from">●</span><span class="route-text">${fromDisplay}</span></span>
-              <span class="route-arrow-inline">→</span>
-              <span style="display:inline-flex;align-items:center;gap:2px;flex-shrink:0;min-width:0;overflow:hidden"><span class="route-dot-to">●</span><span class="route-text">${toDisplay}</span></span>
+              <span class="route-line"><span class="route-dot-from">●</span><span class="route-text">${fromDisplay}</span></span>
+              <span class="route-line"><span class="route-dot-to">●</span><span class="route-text">${toDisplay}</span></span>
             </a>
           </td>
           <td data-label="Their Status">${theirStatusHtml}</td>
@@ -1498,8 +1500,8 @@
       return short.length > maxLen ? short.substring(0, maxLen) + '…' : short
     }
 
-    // Truncate POI for route display — keep first 22 chars of first segment
-    function truncatePoi(str, maxLen = 22) {
+    // Truncate POI for route display — keep first 44 chars of first segment
+    function truncatePoi(str, maxLen = 44) {
       if (!str) return ''
       const first = str.split(',')[0].trim()
       return first.length > maxLen ? first.substring(0, maxLen) + '…' : first
