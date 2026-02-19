@@ -109,7 +109,7 @@
       display: flex;
       gap: 8px;
       overflow-x: auto;
-      padding-bottom: 8px;
+      padding-bottom: 16px; /* extra space below tabs for the underline */
       margin-bottom: 24px;
       scrollbar-width: none;
     }
@@ -130,7 +130,17 @@
       font-family: 'DM Sans', sans-serif;
       position: relative;
       flex-shrink: 0;
-      /* Underline indicator using box-shadow on bottom — no clipping */
+    }
+    /* Underline indicator — appears below selected tab with a gap */
+    .tab.tab-selected::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;       /* 10px gap between tab bottom and line */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 3px;
+      border-radius: 2px;
     }
 
     /* Active journey - green */
@@ -143,8 +153,8 @@
       background: var(--green);
       color: white;
       border-color: var(--green);
-      box-shadow: 0 4px 0 0 var(--green-dark);
     }
+    .tab-active.tab-selected::after { background: var(--green-dark); }
 
     /* Active journey with pending - green blinking */
     .tab-active-pending {
@@ -157,8 +167,8 @@
       animation: none;
       background: var(--green-dark);
       border-color: var(--green-dark);
-      box-shadow: 0 4px 0 0 #14532d;
     }
+    .tab-active-pending.tab-selected::after { background: #14532d; }
 
     /* Inactive with interest - yellow blinking */
     .tab-inactive-interest {
@@ -172,8 +182,8 @@
       background: var(--yellow);
       color: white;
       border-color: var(--yellow);
-      box-shadow: 0 4px 0 0 #a16207;
     }
+    .tab-inactive-interest.tab-selected::after { background: #a16207; }
 
     /* Inactive no activity - grey */
     .tab-inactive {
@@ -185,8 +195,8 @@
       background: var(--grey);
       color: white;
       border-color: var(--grey);
-      box-shadow: 0 4px 0 0 #374151;
     }
+    .tab-inactive.tab-selected::after { background: #374151; }
 
     @keyframes blink-green {
       0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4); }
@@ -225,10 +235,13 @@
       margin-bottom: 16px;
       box-shadow: var(--shadow);
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 12px;
+    }
+    .journey-actions {
+      margin-left: auto;  /* push Archive button to the right always */
     }
     .journey-route {
       display: flex;
@@ -249,6 +262,7 @@
     .journey-actions {
       display: flex;
       gap: 8px;
+      flex-shrink: 0;
     }
     .btn-deactivate {
       padding: 8px 16px;
@@ -417,7 +431,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      max-width: 160px;
+      max-width: 120px;
     }
     /* Wider route column */
     th.col-route, td.col-route { min-width: 240px; width: 32%; }
@@ -491,6 +505,12 @@
       transition: all 0.15s;
     }
     .pill-no.clickable:hover { background: var(--red); color: white; }
+    /* Interested pill — clickable to undo */
+    .pill-yes.clickable {
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .pill-yes.clickable:hover { background: #bbf7d0; color: var(--green-dark); }
     .btn-report-carpool {
       padding: 8px 14px;
       border-radius: 8px;
@@ -1176,10 +1196,10 @@
 
       const fromRaw = match.otherUser.fromLocation || ''
       const toRaw = match.otherUser.toLocation || ''
-      // Mapbox Directions URL (no API key needed for web redirect)
+      // Apple Maps URL — works in browser and all Apple devices natively
       const fromEnc = encodeURIComponent(fromRaw + ', Dubai, UAE')
       const toEnc = encodeURIComponent(toRaw + ', Dubai, UAE')
-      const mapUrl = `https://www.mapbox.com/maps/directions/?poi[0]=${fromEnc}&poi[1]=${toEnc}`
+      const mapUrl = `https://maps.apple.com/?saddr=${fromEnc}&daddr=${toEnc}&dirflg=d`
       const fromDisplay = escapeHtml(truncatePoi(fromRaw))
       const toDisplay = escapeHtml(truncatePoi(toRaw))
       const routeTitle = escapeHtml(fromRaw + ' → ' + toRaw)
@@ -1189,9 +1209,9 @@
           <td data-label="Name">${nameHtml}</td>
           <td data-label="Their Route" class="col-route">
             <a class="route-combined-link" href="${mapUrl}" target="_blank" title="${routeTitle}">
-              <span class="route-dot-from">●</span><span class="route-text">${fromDisplay}</span>
+              <span style="display:inline-flex;align-items:center;gap:2px;flex-shrink:0;min-width:0;overflow:hidden"><span class="route-dot-from">●</span><span class="route-text">${fromDisplay}</span></span>
               <span class="route-arrow-inline">→</span>
-              <span class="route-dot-to">●</span><span class="route-text">${toDisplay}</span>
+              <span style="display:inline-flex;align-items:center;gap:2px;flex-shrink:0;min-width:0;overflow:hidden"><span class="route-dot-to">●</span><span class="route-text">${toDisplay}</span></span>
             </a>
           </td>
           <td data-label="Their Status">${theirStatusHtml}</td>
@@ -1203,7 +1223,7 @@
 
     function getMyStatusPill(match) {
       if (match.isMutual) return `<span class="interest-pill pill-mutual">🎉 Mutual!</span>`
-      if (match.myInterest === 'yes') return `<span class="interest-pill pill-yes">✓ Interested</span>`
+      if (match.myInterest === 'yes') return `<span class="interest-pill pill-yes clickable" onclick="undoInterest(${match.matchId}, event)" title="Click to undo – show Yes/No again">✓ Interested  ↺</span>`
       if (match.myInterest === 'no') return `<span class="interest-pill pill-no clickable" onclick="undoDecline(${match.matchId}, event)" title="Click to undo – show Yes/No again">✗ Declined  ↺</span>`
       if (match.theirInterest === 'yes') return `<span class="interest-pill pill-respond">⚡ Respond!</span>`
       return `<span class="interest-pill pill-pending">○ Pending</span>`
@@ -1225,12 +1245,11 @@
           const theirFirstName = escapeHtml(match.otherUser.name.split(' ')[0])
           mutualHtml += `<button class="btn-email" onclick="openEmailModal(${match.matchId}, '${escapeHtml(match.otherUser.email)}', '${theirFirstName}', '${escapeHtml(match.otherUser.name)}', '${escapeHtml(match.myFromLocation || '')}', '${escapeHtml(match.myToLocation || '')}')">✉ Email ${theirFirstName}</button>`
         }
-        const carpoolFirstName = escapeHtml(match.otherUser.name.split(' ')[0])
         const reported = match._carpoolReported
         mutualHtml += `<button class="btn-report-carpool${reported ? ' confirmed' : ''}" id="carpool-btn-${match.matchId}" onclick="toggleCarpoolReport(${match.matchId})">${
           reported
             ? '🌿 Thank you for Sharing Ride<br>and Cutting Emissions'
-            : `🚗 Already Carpooling with ${carpoolFirstName}?<br>Click to Inform Us`
+            : '🚗 Carpooling already?<br>Click to Notify us'
         }</button>`
         return `<div class="actions-cell stacked">${mutualHtml}</div>`
       }
@@ -1474,8 +1493,8 @@
       return short.length > maxLen ? short.substring(0, maxLen) + '…' : short
     }
 
-    // Truncate POI for route display — keep first 28 chars of first segment
-    function truncatePoi(str, maxLen = 28) {
+    // Truncate POI for route display — keep first 22 chars of first segment
+    function truncatePoi(str, maxLen = 22) {
       if (!str) return ''
       const first = str.split(',')[0].trim()
       return first.length > maxLen ? first.substring(0, maxLen) + '…' : first
@@ -1513,6 +1532,22 @@
 
     // Undo a "No" decline — show Yes/No again
     function undoDecline(matchId, event) {
+      event.stopPropagation()
+      for (const journey of journeys) {
+        const match = journey.matches.find(m => m.matchId === matchId)
+        if (match) {
+          match.myInterest = null   // reset so Yes/No buttons reappear
+          match.status = 'notified' // treat as unresponded
+          break
+        }
+      }
+      renderAllPanels()
+      activateTab(activeJourneyIndex, false)
+      showToast('Reverted — please choose Yes or No.', '')
+    }
+
+    // Undo an "Interested / Yes" — show Yes/No again
+    function undoInterest(matchId, event) {
       event.stopPropagation()
       for (const journey of journeys) {
         const match = journey.matches.find(m => m.matchId === matchId)
