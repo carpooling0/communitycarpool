@@ -256,36 +256,7 @@
             border-color: var(--success);
         }
 
-        /* New PlaceAutocompleteElement wrapper */
-        .place-autocomplete-wrapper {
-            width: 100%;
-        }
-        /* Style the gmp-placeautocomplete web component to match existing inputs */
-        gmp-placeautocomplete {
-            width: 100%;
-            display: block;
-        }
-        /* The inner input rendered by gmp-placeautocomplete */
-        gmp-placeautocomplete input,
-        .place-autocomplete-wrapper input {
-            width: 100% !important;
-            padding: 14px 16px !important;
-            font-size: 16px !important;
-            font-family: 'Inter', system-ui, sans-serif !important;
-            border: 2px solid var(--border) !important;
-            border-radius: 10px !important;
-            background: white !important;
-            color: var(--text) !important;
-            outline: none !important;
-            transition: border-color 0.2s !important;
-            box-sizing: border-box !important;
-        }
-        gmp-placeautocomplete input:focus,
-        .place-autocomplete-wrapper input:focus {
-            border-color: var(--primary) !important;
-            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1) !important;
-        }
-        /* Legacy pac-container (fallback) */
+        /* Google Places dropdown */
         .pac-container {
             max-height: 200px !important;
             overflow-y: auto !important;
@@ -295,11 +266,13 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
             margin-top: 4px !important;
         }
+
         .pac-item {
             padding: 10px 14px !important;
             font-size: 14px !important;
             cursor: pointer !important;
         }
+
         .pac-item:hover {
             background: #f0fdf4 !important;
         }
@@ -901,13 +874,6 @@
                         <label class="label"><span>Email</span><span class="req">*</span></label>
                         <input type="email" id="email" class="input" placeholder="you@example.com" />
                         <p id="emailError" class="error-msg">Please enter a valid email</p>
-
-                        <!-- Phone field - hidden until WhatsApp feature enabled -->
-                        <div class="input-group" id="phoneGroup" style="display: none; margin-top: 12px;">
-                            <input type="tel" id="phone" name="phone"
-                                placeholder="WhatsApp Number (e.g. +971 50 123 4567)"
-                                class="input-field" autocomplete="tel" />
-                        </div>
                     </div>
                     <!-- Honeypot field - hidden from humans -->
                     <div class="hp-field" aria-hidden="true">
@@ -933,7 +899,8 @@
                     </h2>
                     <div class="input-group">
                         <div class="location-wrapper">
-                            <div id="fromInputWrapper" class="place-autocomplete-wrapper"></div>
+                            <input type="text" id="fromInput" class="place-input"
+                                placeholder="Search Area / Community or Point of Interest" autocomplete="off" />
                             <div class="location-status" id="fromStatus"></div>
                         </div>
                         <div class="privacy-note">
@@ -957,7 +924,8 @@
                     </h2>
                     <div class="input-group">
                         <div class="location-wrapper">
-                            <div id="toInputWrapper" class="place-autocomplete-wrapper"></div>
+                            <input type="text" id="toInput" class="place-input"
+                                placeholder="Search Area / Community or Point of Interest" autocomplete="off" />
                             <div class="location-status" id="toStatus"></div>
                         </div>
                     </div>
@@ -1075,15 +1043,24 @@
         // ============================================
         // CONFIG
         // ============================================
-        const SUPABASE_URL = 'https://tbkjealpnoriwdosvmju.supabase.co';
+        const SUPABASE_URL = 'https://tbkjealpnoriwdosvmju.supabase.co/functions/v1/submit-journey';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRia2plYWxwbm9yaXdkb3N2bWp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkzMTE5NDQsImV4cCI6MjA1NDg4Nzk0NH0.jO3ROeTiKMhxPlACPB7f3aMRR3X4MuFkbrFpKlVZoHE';
         const SHARE_URL = 'https://communitycarpool.org/';
 
         // ============================================
-        // ORG MODE CONFIG
+        // DAMAC VERSION CONFIG
         // ============================================
-        let orgCode = null;
-        let orgLocations = [];
-        let isOrgMode = false;
+        const DAMAC_LOCATIONS = {
+            'shatha': {
+                name: 'Shatha Tower, Al Sufouh',
+                latlng: '25.0895035,55.1530186'
+            },
+            'executive': {
+                name: 'DAMAC Executive Heights, Barsha Heights',
+                latlng: '25.0953478,55.1728533'
+            }
+        };
+        let isDamacMode = false;
 
         // ============================================
         // SHARE LOGIC
@@ -1133,6 +1110,8 @@
         let fromLatLng = '', toLatLng = '';
         let fromSelected = false, toSelected = false;
         let userIP = '', userCountry = 'ae';
+        let fromAutocomplete = null, toAutocomplete = null;
+        let editToken = null; // For editing via URL
 
         // ============================================
         // DOM
@@ -1143,13 +1122,88 @@
         const emailError = document.getElementById('emailError');
         const submitBtn = document.getElementById('submitBtn');
         const successScreen = document.getElementById('successScreen');
-        // fromInput / toInput are now PlaceAutocompleteElement web components — not plain inputs
+        const fromInput = document.getElementById('fromInput');
+        const toInput = document.getElementById('toInput');
         const distanceSlider = document.getElementById('distanceSlider');
         const distanceValue = document.getElementById('distanceValue');
 
-        // Edit functionality removed - users deactivate and re-submit instead
+        // ============================================
+        // CHECK FOR EDIT TOKEN IN URL
+        // ============================================
+        function checkEditToken() {
+            const params = new URLSearchParams(window.location.search);
+            editToken = params.get('edit');
+            if (editToken) {
+                console.log('Edit token found:', editToken);
+                // Fetch existing data and pre-fill form
+                loadFormData(editToken);
+            }
+        }
 
-        // Delete functionality removed - users manage journeys via matches page
+        async function loadFormData(token) {
+            try {
+                const response = await fetch(APPS_SCRIPT_URL + '?action=getByToken&token=' + encodeURIComponent(token));
+                const data = await response.json();
+                if (data.found) {
+                    firstName.value = data.firstName || '';
+                    email.value = data.email || '';
+                    fromInput.value = data.fromLocation || '';
+                    toInput.value = data.toLocation || '';
+                    fromLocationText = data.fromLocation || '';
+                    toLocationText = data.toLocation || '';
+                    fromSelected = true;
+                    toSelected = true;
+                    if (data.distance) {
+                        const dist = parseInt(data.distance.split('-')[1] || data.distance);
+                        distanceSlider.value = dist;
+                        updateDistanceLabel();
+                    }
+                    setLocationStatus('from', 'success');
+                    setLocationStatus('to', 'success');
+                    updateProgress();
+                    submitBtn.textContent = 'Update My Journey';
+                }
+            } catch (e) {
+                console.log('Could not load form data:', e);
+            }
+        }
+
+        checkEditToken();
+
+        // ============================================
+        // CHECK FOR DELETE TOKEN IN URL
+        // ============================================
+        function checkDeleteToken() {
+            const params = new URLSearchParams(window.location.search);
+            const deleteToken = params.get('delete');
+            if (deleteToken) {
+                // Show confirmation dialog
+                if (confirm('Are you sure you want to delete your data? This action cannot be undone.')) {
+                    deleteUserData(deleteToken);
+                } else {
+                    // Redirect to home page
+                    window.location.href = SHARE_URL;
+                }
+            }
+        }
+
+        async function deleteUserData(token) {
+            try {
+                const response = await fetch(APPS_SCRIPT_URL + '?action=deleteByToken&token=' + encodeURIComponent(token));
+                const data = await response.json();
+                if (data.success) {
+                    alert('Your data has been deleted successfully.');
+                } else {
+                    alert('Could not delete data: ' + (data.message || 'Unknown error'));
+                }
+                window.location.href = SHARE_URL;
+            } catch (e) {
+                alert('Error deleting data. Please try again.');
+                console.log('Delete error:', e);
+            }
+        }
+
+        checkDeleteToken();
 
         // ============================================
         // IP DETECTION (CORS-friendly APIs)
@@ -1195,8 +1249,8 @@
         function updateProgress() {
             const hasName = firstName.value.trim().length > 0;
             const hasEmail = email.value.includes('@');
-            const hasFrom = fromSelected;
-            const hasTo = toSelected;
+            const hasFrom = fromSelected || fromInput.value.trim().length > 3;
+            const hasTo = toSelected || toInput.value.trim().length > 3;
             const hasTerms = termsCheckbox.checked;
 
             const valid = hasName && hasEmail && hasFrom && hasTo && hasTerms;
@@ -1230,30 +1284,29 @@
         });
 
         firstName.addEventListener('input', updateProgress);
-        // fromInput / toInput input events handled inside initAutocomplete()
+        fromInput.addEventListener('input', updateProgress);
+        toInput.addEventListener('input', updateProgress);
 
         // ============================================
         // LOCATION STATUS ICONS
         // ============================================
         function setLocationStatus(type, status) {
             const el = document.getElementById(type + 'Status');
-            // The wrapper div (no longer a plain input — it contains a PlaceAutocompleteElement)
-            const wrapper = document.getElementById(type + 'InputWrapper');
+            const input = document.getElementById(type + 'Input');
             if (status === 'loading') {
                 el.innerHTML = '<svg class="loc-spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>';
-                if (wrapper) wrapper.classList.remove('filled');
+                input.classList.remove('filled');
             } else if (status === 'success') {
                 el.innerHTML = '<svg class="loc-check" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
-                if (wrapper) wrapper.classList.add('filled');
+                input.classList.add('filled');
             } else {
                 el.innerHTML = '';
-                if (wrapper) wrapper.classList.remove('filled');
+                input.classList.remove('filled');
             }
         }
 
         // ============================================
-        // GOOGLE PLACES AUTOCOMPLETE (New API - PlaceAutocompleteElement)
-        // Replaces deprecated google.maps.places.Autocomplete (blocked for new API keys after Mar 2025)
+        // GOOGLE PLACES AUTOCOMPLETE
         // ============================================
         const COUNTRY_CENTERS = {
             'ae': { lat: 24.4539, lng: 54.3773 },
@@ -1268,138 +1321,113 @@
             'kw': { lat: 29.3117, lng: 47.4818 }
         };
 
-        async function initAutocomplete() {
-            try {
-                // Load the new Places library
-                const { PlaceAutocompleteElement } = await google.maps.importLibrary('places');
+        function initAutocomplete() {
+            const countryCenter = COUNTRY_CENTERS[userCountry] || COUNTRY_CENTERS['ae'];
+            const circle = new google.maps.Circle({
+                center: { lat: countryCenter.lat, lng: countryCenter.lng },
+                radius: 500000
+            });
+            const bounds = circle.getBounds();
 
-                const countryCenter = COUNTRY_CENTERS[userCountry] || COUNTRY_CENTERS['ae'];
+            const options = {
+                fields: ['formatted_address', 'name', 'geometry'],
+                types: ['geocode', 'establishment']
+            };
 
-                // Location bias: circle around country center (Dubai by default)
-                const locationBias = new google.maps.Circle({
-                    center: { lat: countryCenter.lat, lng: countryCenter.lng },
-                    radius: 500000
-                });
+            // FROM
+            fromAutocomplete = new google.maps.places.Autocomplete(fromInput, options);
+            fromAutocomplete.setBounds(bounds);
+            fromAutocomplete.addListener('place_changed', () => {
+                const place = fromAutocomplete.getPlace();
+                if (place && (place.formatted_address || place.name)) {
+                    // Prioritize POI name, append area for context
+                    if (place.name && place.formatted_address && place.name !== place.formatted_address) {
+                        fromLocationText = place.name + ' - ' + place.formatted_address;
+                    } else {
+                        fromLocationText = place.name || place.formatted_address;
+                    }
+                    if (place.geometry && place.geometry.location) {
+                        fromLatLng = place.geometry.location.lat() + ',' + place.geometry.location.lng();
+                        fromSelected = true;
+                        setLocationStatus('from', 'success');
+                    } else {
+                        // Geocode the address if geometry is missing
+                        setLocationStatus('from', 'loading');
+                        const geocoder = new google.maps.Geocoder();
+                        geocoder.geocode({ address: fromLocationText }, (results, status) => {
+                            if (status === 'OK' && results[0] && results[0].geometry) {
+                                fromLatLng = results[0].geometry.location.lat() + ',' + results[0].geometry.location.lng();
+                                fromSelected = true;
+                                setLocationStatus('from', 'success');
+                            } else {
+                                console.warn('Geocoding failed for From location:', status);
+                                fromLatLng = '';
+                                setLocationStatus('from', '');
+                            }
+                            updateProgress();
+                        });
+                        return; // Exit early, updateProgress will be called in geocoder callback
+                    }
+                }
+                updateProgress();
+            });
 
-                // ── FROM ──
-                const fromEl = new PlaceAutocompleteElement({
-                    // No type filter = returns all (addresses + establishments)
-                    // locationBias biases toward user's country
-                    locationBias: locationBias.getBounds(),
-                    componentRestrictions: { country: userCountry || 'ae' },
-                    requestedLanguage: 'en'
-                });
-                fromEl.setAttribute('placeholder', 'Search Area / Community or Point of Interest');
-
-                const fromWrapper = document.getElementById('fromInputWrapper');
-                fromWrapper.appendChild(fromEl);
-
-                fromEl.addEventListener('gmp-placeselect', async ({ place }) => {
-                    try {
-                        await place.fetchFields({ fields: ['displayName', 'formattedAddress', 'location'] });
-                        const name = place.displayName || '';
-                        const addr = place.formattedAddress || '';
-                        // Use POI name + abbreviated address for context
-                        if (name && addr && name !== addr) {
-                            fromLocationText = name + ', ' + addr.split(',').slice(0, 2).join(',').trim();
+            // TO
+            if (!isDamacMode) {
+                toAutocomplete = new google.maps.places.Autocomplete(toInput, options);
+                toAutocomplete.setBounds(bounds);
+                toAutocomplete.addListener('place_changed', () => {
+                    const place = toAutocomplete.getPlace();
+                    if (place && (place.formatted_address || place.name)) {
+                        // Prioritize POI name, append area for context
+                        if (place.name && place.formatted_address && place.name !== place.formatted_address) {
+                            toLocationText = place.name + ' - ' + place.formatted_address;
                         } else {
-                            fromLocationText = name || addr;
+                            toLocationText = place.name || place.formatted_address;
                         }
-                        if (place.location) {
-                            fromLatLng = place.location.lat() + ',' + place.location.lng();
-                            fromSelected = true;
-                            setLocationStatus('from', 'success');
+                        if (place.geometry && place.geometry.location) {
+                            toLatLng = place.geometry.location.lat() + ',' + place.geometry.location.lng();
+                            toSelected = true;
+                            setLocationStatus('to', 'success');
                         } else {
-                            fromLatLng = '';
-                            fromSelected = false;
-                            setLocationStatus('from', '');
+                            // Geocode the address if geometry is missing
+                            setLocationStatus('to', 'loading');
+                            const geocoder = new google.maps.Geocoder();
+                            geocoder.geocode({ address: toLocationText }, (results, status) => {
+                                if (status === 'OK' && results[0] && results[0].geometry) {
+                                    toLatLng = results[0].geometry.location.lat() + ',' + results[0].geometry.location.lng();
+                                    toSelected = true;
+                                    setLocationStatus('to', 'success');
+                                } else {
+                                    console.warn('Geocoding failed for To location:', status);
+                                    toLatLng = '';
+                                    setLocationStatus('to', '');
+                                }
+                                updateProgress();
+                            });
+                            return; // Exit early, updateProgress will be called in geocoder callback
                         }
-                    } catch (err) {
-                        console.warn('From place fetch error:', err);
-                        fromLatLng = '';
-                        fromSelected = false;
-                        setLocationStatus('from', '');
                     }
                     updateProgress();
                 });
-
-                // Reset when user types in the from field
-                fromEl.addEventListener('input', () => {
-                    if (fromSelected) {
-                        fromSelected = false;
-                        fromLocationText = '';
-                        fromLatLng = '';
-                        setLocationStatus('from', '');
-                        updateProgress();
-                    }
-                });
-
-                // ── TO ──
-                if (!isOrgMode) {
-                    const toEl = new PlaceAutocompleteElement({
-                        locationBias: locationBias.getBounds(),
-                        componentRestrictions: { country: userCountry || 'ae' },
-                        requestedLanguage: 'en'
-                    });
-                    toEl.setAttribute('placeholder', 'Search Area / Community or Point of Interest');
-
-                    const toWrapper = document.getElementById('toInputWrapper');
-                    toWrapper.appendChild(toEl);
-
-                    toEl.addEventListener('gmp-placeselect', async ({ place }) => {
-                        try {
-                            await place.fetchFields({ fields: ['displayName', 'formattedAddress', 'location'] });
-                            const name = place.displayName || '';
-                            const addr = place.formattedAddress || '';
-                            if (name && addr && name !== addr) {
-                                toLocationText = name + ', ' + addr.split(',').slice(0, 2).join(',').trim();
-                            } else {
-                                toLocationText = name || addr;
-                            }
-                            if (place.location) {
-                                toLatLng = place.location.lat() + ',' + place.location.lng();
-                                toSelected = true;
-                                setLocationStatus('to', 'success');
-                            } else {
-                                toLatLng = '';
-                                toSelected = false;
-                                setLocationStatus('to', '');
-                            }
-                        } catch (err) {
-                            console.warn('To place fetch error:', err);
-                            toLatLng = '';
-                            toSelected = false;
-                            setLocationStatus('to', '');
-                        }
-                        updateProgress();
-                    });
-
-                    toEl.addEventListener('input', () => {
-                        if (toSelected) {
-                            toSelected = false;
-                            toLocationText = '';
-                            toLatLng = '';
-                            setLocationStatus('to', '');
-                            updateProgress();
-                        }
-                    });
-                }
-
-                // Apply matching styles to the inner inputs rendered by the web component
-                // (done via CSS but also set placeholder via attribute above)
-                applyAutocompleteStyles();
-
-            } catch (err) {
-                console.error('Places autocomplete init failed:', err);
             }
-        }
 
-        function applyAutocompleteStyles() {
-            // The PlaceAutocompleteElement renders a shadow DOM — we style via CSS custom properties
-            // and the global CSS rules targeting gmp-placeautocomplete input
-            document.querySelectorAll('gmp-placeautocomplete, gmp-place-autocomplete').forEach(el => {
-                el.style.width = '100%';
-                el.style.display = 'block';
+            // Reset on type
+            fromInput.addEventListener('input', () => {
+                if (fromSelected) {
+                    fromSelected = false;
+                    fromLocationText = '';
+                    fromLatLng = '';
+                    setLocationStatus('from', '');
+                }
+            });
+            toInput.addEventListener('input', () => {
+                if (toSelected) {
+                    toSelected = false;
+                    toLocationText = '';
+                    toLatLng = '';
+                    setLocationStatus('to', '');
+                }
             });
         }
 
@@ -1483,29 +1511,33 @@
             submitBtn.classList.add('loading');
             submitBtn.disabled = true;
 
-            const finalFromLocation = fromLocationText;
-            const finalToLocation = toLocationText;
+            const finalFromLocation = fromLocationText || fromInput.value.trim();
+            const finalToLocation = toLocationText || toInput.value.trim();
 
             const data = {
+                action: editToken ? 'update' : 'new',
+                editToken: editToken || '',
                 firstName: firstNameVal,
                 email: emailVal,
                 fromLocation: finalFromLocation,
                 fromLatLng: fromLatLng,
                 toLocation: finalToLocation,
                 toLatLng: toLatLng,
-                distance: distanceLabel,
-                distanceValue: distanceStep,
+                distance: distanceLabel, // Send label (e.g., "1 - 3 km")
+                distanceValue: distanceStep, // Send step value (1-4)
                 ip: userIP || 'unknown',
-                country: userCountry || 'ae',
-                orgCode: orgCode || null
+                country: userCountry || 'ae'
             };
 
             console.log('Submitting:', data);
 
             try {
-                const response = await fetch(SUPABASE_URL + '/functions/v1/submit-journey', {
+                const response = await fetch(SUPABASE_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY
+                    },
                     body: JSON.stringify(data)
                 });
 
@@ -1513,10 +1545,9 @@
                 console.log('Server response:', result);
 
                 if (result.success) {
-                    // Use actualDist from backend if available, otherwise use distanceStep for calc fallback
                     showSuccess({
                         num: result.num,
-                        journeyNum: result.journeyNum, // Pass journeyNum to showSuccess
+                        journeyNum: result.journeyNum,
                         distanceVal: distanceStep,
                         actualDist: result.actualDist
                     });
@@ -1526,12 +1557,9 @@
 
             } catch (err) {
                 console.error('Submit error:', err);
-                // Fallback for no-cors / opaque response if needed, but we try standard first
-                // If it fails due to CORS but actually succeeded, we might show success anyway?
-                // For now, alert error or assume success if opaque? 
-                // Apps Script return JSON usually fine if deployed as Web App "Anyone".
-                alert('Success! (Note: Response might be opaque in some environments)');
-                showSuccess({ num: 'Pending', distance: distanceStep });
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+                alert('Sorry, something went wrong. Please try again.');
             }
         }
 
@@ -1594,12 +1622,13 @@
 
                 <div style="padding: 20px 24px 40px; background: white; border-radius: 0 0 24px 24px; border: 2px solid #ecfdf5; border-top: none;">
                     
-
-
-                    <div style="margin: 0 0 20px; padding: 16px; background: #f0fdf4; border-radius: 12px; border: 1px solid #bbf7d0; text-align: center;">
-                        <div style="font-size: 13px; color: #15803d; font-weight: 600; margin-bottom: 8px;">📬 Check your email for match updates</div>
-                        <div style="font-size: 12px; color: #6b7280;">We'll email you when we find someone on your route. You can view and manage matches via the link in that email.</div>
+                    <div style="margin: 10px 0 25px; text-align: center;">
+                        <a href="https://script.google.com/macros/s/AKfycbzEPB-vy6L8aFanZCozRq76F5MND31WAhgRkgAuigqhRsnnNuQEfWChdtEHBLWVOIF2/exec?page=carbon" target="_blank" 
+                           style="color: #64748b; font-size: 14px; text-decoration: underline; font-weight: 500;">
+                           Estimated Emissions Calculator
+                        </a>
                     </div>
+
                     <div class="share-yellow-box">
                         <div class="share-yellow-title">Get matched faster by sharing!</div>
                          <div onclick="shareWhatsApp()" class="share-green-btn" style="cursor:pointer; justify-content:center;">
@@ -1641,80 +1670,50 @@
 
 
         // ============================================
-        // ORG MODE INITIALIZATION
+        // DAMAC MODE INITIALIZATION
         // ============================================
-        async function initOrgMode() {
+        function initDamacMode() {
             const params = new URLSearchParams(window.location.search);
-            orgCode = params.get('org');
-            if (!orgCode) return;
+            if (params.get('client') === 'damac') {
+                isDamacMode = true;
+                console.log('Damac client mode active');
 
-            try {
-                const res = await fetch(SUPABASE_URL + '/functions/v1/get-org-locations?org=' + encodeURIComponent(orgCode));
-                const data = await res.json();
-                if (!data.success) return;
-
-                isOrgMode = true;
-                orgLocations = data.locations || [];
-
-                // Show org custom message if any
-                if (data.org.customMessage) {
-                    const msgDiv = document.createElement('div');
-                    msgDiv.style.cssText = 'background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;font-size:13px;color:#15803d;margin-bottom:16px;text-align:center;';
-                    msgDiv.textContent = data.org.customMessage;
-                    document.querySelector('.form-section-box') && document.querySelector('.form-section-box').prepend(msgDiv);
-                }
-
-                // Replace TO PlaceAutocompleteElement with a dropdown for org mode
-                const toWrapper = document.getElementById('toInputWrapper');
-                toWrapper.innerHTML = \`
-                    <select id="toInputOrgSelect" class="place-input" style="height:48px;width:100%;-webkit-appearance:none;appearance:none;background-image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2316a34a%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');background-repeat:no-repeat;background-position:right 0.7rem top 50%;background-size:0.65rem auto;padding-right:3rem;">
+                // Change toInput to a dropdown
+                const toWrapper = toInput.parentElement;
+                toWrapper.innerHTML = `
+                    <select id="toInput" class="place-input" style="height: 48px; -webkit-appearance: none; appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2316a34a%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 0.7rem top 50%; background-size: 0.65rem auto; padding-right: 3rem;">
                         <option value="" disabled selected>Select Destination</option>
-                        \${orgLocations.map(l => \`<option value="\${l.location_id}" data-latlng="\${l.location_latlng}">\${l.location_name}</option>\`).join('')}
+                        <option value="shatha">Shatha Tower</option>
+                        <option value="executive">DAMAC Executive Heights</option>
                     </select>
-                    <div class="location-status" id="toStatus" style="right:40px;"></div>
-                \`;
-                toSelected = false; // org mode To will be set by dropdown selection
+                    <div class="location-status" id="toStatus" style="right: 40px;"></div>
+                `;
 
-                const newToInput = document.getElementById('toInputOrgSelect');
+                // Re-cache reference and add listener
+                const newToInput = document.getElementById('toInput');
                 newToInput.addEventListener('change', (e) => {
-                    const selected = e.target.options[e.target.selectedIndex];
-                    if (selected && selected.dataset.latlng) {
-                        toLocationText = selected.text;
-                        toLatLng = selected.dataset.latlng;
+                    const loc = DAMAC_LOCATIONS[e.target.value];
+                    if (loc) {
+                        toLocationText = loc.name;
+                        toLatLng = loc.latlng;
                         toSelected = true;
                         setLocationStatus('to', 'success');
                     }
                     updateProgress();
                 });
-
-            } catch(e) {
-                console.warn('Org mode init failed:', e);
             }
         }
 
-        // Run org check on load
-        initOrgMode();
+        // Run Damac check before anything else
+        initDamacMode();
 
         // Initial
         updateProgress();
     </script>
 
-    <script>
-        // Load Maps JS API with loading=async (new recommended approach)
-        // initAutocomplete is called as an async function after the API loads
-        (async () => {
-            await new Promise((resolve, reject) => {
-                const s = document.createElement('script');
-                s.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyARzmbbhT0ki5-bZ-43pkkPyJNmOCTz4P0&loading=async&libraries=places';
-                s.async = true;
-                s.defer = true;
-                s.onload = resolve;
-                s.onerror = reject;
-                document.head.appendChild(s);
-            });
-            initAutocomplete();
-        })();
-    </script>
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyARzmbbhT0ki5-bZ-43pkkPyJNmOCTz4P0&libraries=places&loading=async&callback=initAutocomplete"
+        async defer></script>
 </body>
 
 </html>
