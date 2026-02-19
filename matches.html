@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>My Matches | Community Carpool</title>
+  <meta name="description" content="View and manage your carpool matches." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --green: #16a34a;
+      --green-light: #dcfce7;
+      --green-dark: #15803d;
+      --yellow: #ca8a04;
+      --yellow-light: #fef9c3;
+      --grey: #6b7280;
+      --grey-light: #f3f4f6;
+      --red: #dc2626;
+      --red-light: #fee2e2;
+      --blue: #2563eb;
+      --blue-light: #dbeafe;
+      --bg: #f9fafb;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow);
+    }
+    .header-user {
+      color: var(--text-secondary);
+    }
+    .header-user strong {
+      color: var(--text);
+    }
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    .logo img {
+      height: 48px;
+      width: auto;
+    }
+    .header-user {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .header-user strong { color: var(--text); }
+
+    /* ── MAIN ── */
+    .main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px 60px;
+    }
+
+    /* ── PAGE TITLE ── */
+    .page-title {
+      margin-bottom: 24px;
+    }
+    .page-title h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .page-title p {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* ── TABS ── */
+    .tabs-wrapper {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 24px;
+      scrollbar-width: none;
+    }
+    .tabs-wrapper::-webkit-scrollbar { display: none; }
+
+    .tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 100px;
+      border: 2px solid transparent;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+      position: relative;
+      flex-shrink: 0;
+      /* Underline indicator using box-shadow on bottom — no clipping */
+    }
+
+    /* Active journey - green */
+    .tab-active {
+      background: var(--green-light);
+      color: var(--green-dark);
+      border-color: var(--green);
+    }
+    .tab-active.tab-selected {
+      background: var(--green);
+      color: white;
+      border-color: var(--green);
+      box-shadow: 0 4px 0 0 var(--green-dark);
+    }
+
+    /* Active journey with pending - green blinking */
+    .tab-active-pending {
+      background: var(--green);
+      color: white;
+      border-color: var(--green-dark);
+      animation: blink-green 1.5s ease-in-out infinite;
+    }
+    .tab-active-pending.tab-selected {
+      animation: none;
+      background: var(--green-dark);
+      border-color: var(--green-dark);
+      box-shadow: 0 4px 0 0 #14532d;
+    }
+
+    /* Inactive with interest - yellow blinking */
+    .tab-inactive-interest {
+      background: var(--yellow-light);
+      color: var(--yellow);
+      border-color: var(--yellow);
+      animation: blink-yellow 1.5s ease-in-out infinite;
+    }
+    .tab-inactive-interest.tab-selected {
+      animation: none;
+      background: var(--yellow);
+      color: white;
+      border-color: var(--yellow);
+      box-shadow: 0 4px 0 0 #a16207;
+    }
+
+    /* Inactive no activity - grey */
+    .tab-inactive {
+      background: var(--grey-light);
+      color: var(--grey);
+      border-color: var(--border);
+    }
+    .tab-inactive.tab-selected {
+      background: var(--grey);
+      color: white;
+      border-color: var(--grey);
+      box-shadow: 0 4px 0 0 #374151;
+    }
+
+    @keyframes blink-green {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4); }
+      50% { opacity: 0.75; box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
+    }
+    @keyframes blink-yellow {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(202, 138, 4, 0.4); }
+      50% { opacity: 0.75; box-shadow: 0 0 0 6px rgba(202, 138, 4, 0); }
+    }
+
+    .tab-badge {
+      background: white;
+      color: var(--green-dark);
+      border-radius: 100px;
+      padding: 1px 7px;
+      font-size: 11px;
+      font-weight: 700;
+      min-width: 20px;
+      text-align: center;
+    }
+    .tab-active-pending .tab-badge { color: var(--green-dark); }
+    .tab-inactive-interest .tab-badge { color: var(--yellow); }
+    .tab-inactive .tab-badge,
+    .tab-inactive.tab-selected .tab-badge { background: rgba(255,255,255,0.2); color: white; }
+
+    /* ── JOURNEY PANEL ── */
+    .journey-panel { display: none; }
+    .journey-panel.active { display: block; }
+
+    /* Journey header card */
+    .journey-header {
+      background: white;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .journey-route {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 16px;
+    }
+    .journey-route .arrow {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .journey-meta {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    .journey-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-deactivate {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: white;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s;
+    }
+    .btn-deactivate:hover { border-color: var(--red); color: var(--red); background: var(--red-light); }
+    .btn-reactivate {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1.5px solid var(--green);
+      background: var(--green-light);
+      color: var(--green-dark);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s;
+    }
+    .btn-reactivate:hover { background: var(--green); color: white; }
+
+    /* Status badge on journey header */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status-badge.active { background: var(--green-light); color: var(--green-dark); }
+    .status-badge.inactive { background: var(--grey-light); color: var(--grey); }
+    .status-badge.inactive-interest { background: var(--yellow-light); color: var(--yellow); }
+    .status-badge.expired { background: var(--red-light); color: var(--red); }
+
+    /* ── MATCHES TABLE ── */
+    .matches-card {
+      background: white;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .matches-card-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .matches-card-header h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .matches-count {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+    }
+    thead th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f9fafb; }
+    tbody td {
+      padding: 14px 16px;
+      vertical-align: middle;
+    }
+
+    .match-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .match-name {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .match-name.masked {
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+    .match-name.revealed { color: var(--green-dark); }
+    .match-email-revealed {
+      font-size: 13px;
+      color: var(--green);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+    .match-route {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .match-route .route-arrow { color: var(--text-muted); }
+    .route-link {
+      color: var(--blue);
+      text-decoration: none;
+      font-size: 14px;
+      border-radius: 4px;
+      padding: 1px 2px;
+      transition: background 0.15s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 280px;
+      display: inline-block;
+    }
+    .route-link:hover {
+      background: var(--yellow-light);
+      color: var(--yellow);
+    }
+    /* Combined route line: ● From → To as single link */
+    .route-combined-link {
+      color: var(--blue);
+      text-decoration: none;
+      font-size: 14px;
+      border-radius: 4px;
+      padding: 2px 4px;
+      transition: background 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+      line-height: 1.5;
+    }
+    .route-combined-link:hover {
+      background: var(--yellow-light);
+      color: var(--yellow);
+    }
+    .route-dot-from { color: #16a34a; font-size: 11px; flex-shrink: 0; }
+    .route-dot-to   { color: #dc2626; font-size: 11px; flex-shrink: 0; }
+    .route-arrow-inline { color: var(--text-muted); font-size: 13px; flex-shrink: 0; }
+    .route-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 160px;
+    }
+    /* Wider route column */
+    th.col-route, td.col-route { min-width: 240px; width: 32%; }
+
+    /* Interest status pills */
+    .interest-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 11px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .pill-yes { background: var(--green-light); color: var(--green-dark); }
+    .pill-no { background: var(--red-light); color: var(--red); }
+    .pill-pending { background: var(--grey-light); color: var(--grey); }
+    .pill-mutual { background: var(--green); color: white; }
+    .pill-waiting { background: var(--blue-light); color: var(--blue); }
+    .pill-respond { background: #fef3c7; color: #92400e; animation: pulse-orange 2s infinite; }
+
+    @keyframes pulse-orange {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+      50% { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0); }
+    }
+
+    /* Action buttons */
+    .actions-cell {
+      display: flex;
+      gap: 6px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      white-space: nowrap;
+    }
+    /* For mutual: stack email + carpool vertically */
+    .actions-cell.stacked {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 5px;
+    }
+    .btn-yes {
+      padding: 7px 16px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: white;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s;
+    }
+    .btn-yes:hover { background: var(--green); color: white; border-color: var(--green); }
+    .btn-no {
+      padding: 7px 16px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: white;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s;
+    }
+    .btn-no:hover { border-color: var(--red); color: var(--red); background: var(--red-light); }
+    /* Declined pill — clickable to undo */
+    .pill-no.clickable {
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .pill-no.clickable:hover { background: var(--red); color: white; }
+    .btn-report-carpool {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1.5px solid #7c3aed;
+      background: #ede9fe;
+      color: #5b21b6;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      white-space: normal;
+      line-height: 1.4;
+      text-align: center;
+      transition: all 0.15s;
+    }
+    .btn-report-carpool:hover { background: #7c3aed; color: white; }
+    /* Carpooling confirmed state */
+    .btn-report-carpool.confirmed {
+      border-color: var(--green);
+      background: var(--green-light);
+      color: var(--green-dark);
+    }
+    .btn-report-carpool.confirmed:hover { background: var(--green); color: white; border-color: var(--green); }
+
+    .btn-email {
+      padding: 7px 16px;
+      border-radius: 8px;
+      border: 1.5px solid var(--green);
+      background: var(--green);
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+    .btn-email:hover { background: var(--green-dark); }
+
+    /* Strength bar */
+    .strength-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .strength-bar {
+      width: 48px;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .strength-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: var(--green);
+    }
+    .strength-fill.med { background: #f59e0b; }
+    .strength-fill.low { background: var(--grey); }
+    .strength-num {
+      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+      color: var(--text-muted);
+    }
+
+    /* ── PAGINATION ── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .page-btn {
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: white;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s;
+    }
+    .page-btn:hover { border-color: var(--green); color: var(--green); }
+    .page-btn.active { background: var(--green); color: white; border-color: var(--green); }
+    .page-btn:disabled { opacity: 0.4; cursor: default; }
+
+    /* ── EMPTY STATES ── */
+    .empty-state {
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+    .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .empty-state p { font-size: 14px; max-width: 320px; margin: 0 auto; }
+
+    /* ── LOADING ── */
+    .loading-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 16px;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── ERROR SCREEN ── */
+    .error-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 16px;
+      text-align: center;
+      padding: 24px;
+    }
+    .error-screen h2 { font-size: 20px; font-weight: 700; color: var(--text); }
+    .error-screen p { font-size: 14px; color: var(--text-secondary); max-width: 360px; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--text);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 999;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      white-space: nowrap;
+      box-shadow: var(--shadow-md);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.success { background: var(--green); }
+    .toast.error { background: var(--red); }
+
+    /* ── MUTUAL MATCH BANNER ── */
+    .mutual-banner {
+      background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+      border: 2px solid var(--green);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .mutual-banner .banner-icon { font-size: 32px; flex-shrink: 0; }
+    .mutual-banner h3 { font-size: 16px; font-weight: 700; color: var(--green-dark); margin-bottom: 2px; }
+    .mutual-banner p { font-size: 13px; color: var(--text-secondary); }
+
+    /* ── CO2 SAVINGS ── */
+    .journey-co2 {
+      font-size: 12px;
+      color: #166534;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: 6px 10px;
+      margin-top: 8px;
+      display: inline-block;
+    }
+
+    /* ── EMAIL MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 540px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px 28px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .modal-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .modal-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .modal-field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .modal-field input,
+    .modal-field textarea {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+      resize: vertical;
+    }
+    .modal-field input:focus,
+    .modal-field textarea:focus { border-color: var(--green); }
+    .modal-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      padding-top: 6px;
+    }
+    .btn-modal-cancel {
+      padding: 9px 18px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: white;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s;
+    }
+    .btn-modal-cancel:hover { border-color: var(--grey); color: var(--text); }
+    .btn-modal-send {
+      padding: 9px 20px;
+      border-radius: 8px;
+      border: 1.5px solid var(--green);
+      background: var(--green);
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s;
+    }
+    .btn-modal-send:hover { background: var(--green-dark); }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .footer a { color: var(--text-secondary); text-decoration: none; }
+    .footer a:hover { color: var(--green); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .main { padding: 16px 10px 60px; }
+      .header { padding: 10px 14px; }
+      .journey-header { flex-direction: column; align-items: flex-start; padding: 14px 16px; gap: 10px; }
+      .journey-route { font-size: 14px; flex-wrap: wrap; }
+      .page-title h1 { font-size: 21px; }
+      .tabs-wrapper { gap: 6px; }
+      .tab { font-size: 13px; padding: 7px 12px; }
+      .mutual-banner { padding: 12px 14px; gap: 10px; }
+      .mutual-banner .banner-icon { font-size: 22px; }
+      .mutual-banner h3 { font-size: 15px; }
+      /* Toast fix: don't overflow screen */
+      .toast { white-space: normal; text-align: center; max-width: 85vw; font-size: 13px; padding: 10px 16px; }
+      /* Table → card layout on mobile */
+      .table-wrap { overflow-x: visible; }
+      table, thead, tbody, th, td, tr { display: block; }
+      thead { display: none; }
+      tbody tr {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin: 8px 0;
+        padding: 10px 12px;
+        background: white;
+        box-shadow: var(--shadow);
+        position: relative;
+      }
+      tbody td {
+        padding: 5px 0;
+        border: none;
+        font-size: 14px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      tbody td::before {
+        content: attr(data-label) ":";
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        flex-shrink: 0;
+        white-space: nowrap;
+        min-width: 80px;
+        padding-top: 2px;
+      }
+      tbody td:empty { display: none; }
+      /* Route on mobile — allow wrapping but not mid-word */
+      tbody td[data-label="Their Route"]::before { min-width: 80px; }
+      .route-combined-link {
+        font-size: 14px;
+        flex-wrap: wrap;
+        gap: 3px;
+      }
+      .route-text { max-width: 200px; white-space: normal; word-break: break-word; }
+      .actions-cell { flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+      .actions-cell.stacked { gap: 6px; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="https://communitycarpool.org" class="logo">
+        <img src="logo_with slogan.png" alt="Community Carpool" style="height:48px;width:auto;">
+      </a>
+      <div class="header-user" id="headerUser"></div>
+    </div>
+  </header>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Main content -->
+  <main class="main" id="mainContent">
+    <div class="loading-screen" id="loadingScreen">
+      <div class="spinner"></div>
+      <p style="color: var(--text-secondary); font-size: 14px;">Loading your matches...</p>
+    </div>
+  </main>
+
+  <!-- Email Modal -->
+  <div class="modal-overlay" id="emailModal">
+    <div class="modal-box">
+      <div>
+        <div class="modal-title" id="modalTitle">Email your match</div>
+        <div class="modal-subtitle"><strong style="font-size:14px;">Review and adjust YOUR details</strong> before opening your email client.</div>
+      </div>
+
+      <div class="modal-field">
+        <label>Pickup Location (From)</label>
+        <input type="text" id="modalMyFrom" placeholder="e.g. Dubai Marina, Building 5" />
+        <div class="modal-hint">Refine your exact pickup point if needed</div>
+      </div>
+
+      <div class="modal-field">
+        <label>Drop-Off Location (To)</label>
+        <input type="text" id="modalMyTo" placeholder="e.g. DIFC Gate Village" />
+        <div class="modal-hint">Refine your exact drop-off point if needed</div>
+      </div>
+
+      <div class="modal-field">
+        <label>Morning Departure Time</label>
+        <input type="text" id="modalMorning" placeholder="e.g. 7:30 AM" />
+      </div>
+
+      <div class="modal-field">
+        <label>Evening Return Time</label>
+        <input type="text" id="modalEvening" placeholder="e.g. 6:00 PM" />
+      </div>
+
+      <div class="modal-field">
+        <label>Days You Commute</label>
+        <input type="text" id="modalDays" placeholder="e.g. Monday – Thursday" />
+      </div>
+
+      <div class="modal-field">
+        <label>Phone Number (Optional)</label>
+        <input type="text" id="modalPhone" placeholder="e.g. +971 50 123 4567" />
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" onclick="closeEmailModal()">Cancel</button>
+        <button class="btn-modal-send" onclick="sendEmailFromModal()">✉ Open Email</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <a href="https://communitycarpool.org/support.html">Support</a> &nbsp;·&nbsp;
+    <a href="https://communitycarpool.org/terms.html">Terms</a> &nbsp;·&nbsp;
+    <a href="#" id="unsubscribeLink">Unsubscribe</a>
+  </footer>
+
+  <script>
+    // ============================================
+    // CONFIG
+    // ============================================
+    const SUPABASE_URL = 'https://tbkjealpnoriwdosvmju.supabase.co'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRia2plYWxwbm9yaXdkb3N2bWp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk3NjI0NTQsImV4cCI6MjA1NTMzODQ1NH0.K0iS87GLgAZhYwFIQNphVFrarMzFxECkFYFvxpeVcsA'
+    const SITE_URL = 'https://communitycarpool.org'
+    const PAGE_SIZE = 25
+
+    // ============================================
+    // STATE
+    // ============================================
+    let userData = null
+    let journeys = []
+    let activeJourneyIndex = 0
+    let token = null
+    let paginationState = {} // { submissionId: currentPage }
+
+    // ============================================
+    // INIT
+    // ============================================
+    document.addEventListener('DOMContentLoaded', async () => {
+      const params = new URLSearchParams(window.location.search)
+      token = params.get('token')
+      const journeyParam = params.get('journey')
+
+      if (!token) {
+        showError('Link required to access this page', 'This page can only be opened via the match notification email sent to you by Community Carpool. Please check your inbox for an email with the subject "Your Carpool Update" and click the link from there.')
+        return
+      }
+
+      // Set unsubscribe link
+      document.getElementById('unsubscribeLink').href = `${SITE_URL}/unsubscribe?token=${token}`
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/get-matches-page?token=${encodeURIComponent(token)}`, {
+          headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+        })
+        const data = await res.json()
+
+        if (!data.success) {
+          showError('Invalid or expired link', data.error || 'Please request a new match email from your inbox.')
+          return
+        }
+
+        userData = data.user
+        journeys = data.journeys
+
+        // Set header user
+        document.getElementById('headerUser').innerHTML = `Welcome, <strong>${userData.name}</strong>`
+
+        // Render page
+        renderPage(journeyParam)
+
+        // Track event
+        trackEvent('matches_page_viewed')
+
+      } catch (err) {
+        showError('Could not load matches', 'Please try again or contact support.')
+        console.error(err)
+      }
+    })
+
+    // ============================================
+    // RENDER PAGE
+    // ============================================
+    function renderPage(defaultJourneyId = null) {
+      const main = document.getElementById('mainContent')
+
+      // Sort journeys: active first (asc), then inactive_with_interest (asc), then inactive/expired (asc)
+      const sortOrder = { 'active': 0, 'inactive_with_interest': 1, 'inactive': 2, 'expired': 3 }
+      journeys.sort((a, b) => {
+        const ao = sortOrder[a.journeyStatus] ?? 2
+        const bo = sortOrder[b.journeyStatus] ?? 2
+        if (ao !== bo) return ao - bo
+        return a.journeyNum - b.journeyNum
+      })
+
+      // Find default tab index
+      if (defaultJourneyId) {
+        const idx = journeys.findIndex(j => j.submissionId == defaultJourneyId)
+        if (idx > -1) activeJourneyIndex = idx
+      }
+
+      // Count mutual matches across all journeys
+      const mutualCount = journeys.reduce((acc, j) => 
+        acc + j.matches.filter(m => m.isMutual).length, 0)
+
+      main.innerHTML = `
+        ${mutualCount > 0 ? `
+          <div class="mutual-banner">
+            <div class="banner-icon">🎉</div>
+            <div>
+              <h3>You have ${mutualCount} mutual match${mutualCount > 1 ? 'es' : ''}!</h3>
+              <p>Both you and your match expressed interest. Contact details are revealed below.</p>
+            </div>
+          </div>
+        ` : ''}
+
+        <div class="page-title">
+          <h1>Your Matches</h1>
+          <p>${journeys.length} journey${journeys.length !== 1 ? 's' : ''} · ${journeys.reduce((a, j) => a + j.matches.length, 0)} total matches</p>
+        </div>
+
+        <div class="tabs-wrapper" id="tabsWrapper"></div>
+        <div id="journeyPanels"></div>
+      `
+
+      renderTabs()
+      renderAllPanels()
+      activateTab(activeJourneyIndex)
+    }
+
+    // ============================================
+    // RENDER TABS
+    // ============================================
+    function renderTabs() {
+      const wrapper = document.getElementById('tabsWrapper')
+      wrapper.innerHTML = journeys.map((journey, idx) => {
+        const tabClass = getTabClass(journey)
+        const badge = ''
+        const icon = getTabIcon(journey)
+        return `
+          <button class="tab ${tabClass}" onclick="activateTab(${idx})" id="tab-${idx}">
+            Journey #${journey.journeyNum}
+          </button>
+        `
+      }).join('')
+    }
+
+    function getTabClass(journey) {
+      if (journey.journeyStatus === 'inactive_with_interest') return 'tab-inactive-interest'
+      if (journey.journeyStatus === 'inactive' || journey.journeyStatus === 'expired') return 'tab-inactive'
+      if (journey.pendingCount > 0) return 'tab-active-pending'
+      return 'tab-active'
+    }
+
+    function getTabIcon(journey) {
+      if (journey.journeyStatus === 'inactive_with_interest') return '⚡'
+      if (journey.journeyStatus === 'inactive') return '📦'
+      if (journey.journeyStatus === 'expired') return '⏰'
+      if (journey.pendingCount > 0) return '🔔'
+      return '✅'
+    }
+
+    // ============================================
+    // RENDER ALL PANELS
+    // ============================================
+    function renderAllPanels() {
+      const container = document.getElementById('journeyPanels')
+      container.innerHTML = journeys.map((journey, idx) => 
+        renderJourneyPanel(journey, idx)
+      ).join('')
+    }
+
+    function renderJourneyPanel(journey, idx) {
+      const isInactive = journey.journeyStatus === 'inactive' || journey.journeyStatus === 'inactive_with_interest'
+      const isExpired = journey.journeyStatus === 'expired'
+      const statusBadge = getStatusBadge(journey)
+      const deactivateBtn = (isInactive || isExpired)
+        ? `<button class="btn-reactivate" onclick="toggleJourney(${journey.submissionId}, 'reactivate')">↑ Reactivate Journey</button>`
+        : `<button class="btn-deactivate" onclick="toggleJourney(${journey.submissionId}, 'deactivate')">Archive Journey</button>`
+
+      // Pagination
+      if (!paginationState[journey.submissionId]) paginationState[journey.submissionId] = 1
+      const currentPage = paginationState[journey.submissionId]
+      const totalPages = Math.ceil(journey.matches.length / PAGE_SIZE)
+      const pageMatches = journey.matches.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+
+      return `
+        <div class="journey-panel" id="panel-${idx}">
+          <div class="journey-header">
+            <div>
+              <div class="journey-route">
+                <span>${journey.fromLocation}</span>
+                <span class="arrow">→</span>
+                <span>${journey.toLocation}</span>
+              </div>
+              <div class="journey-meta">
+                Journey #${journey.journeyNum} · ${journey.distanceKm ? journey.distanceKm + ' km' : ''} · ${statusBadge}
+              </div>
+              ${journey.createdAt ? `<div class="journey-meta" style="margin-top:4px;">
+                📅 Created ${new Date(journey.createdAt).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'})}
+              </div>` : ''}
+              ${journey.distanceKm ? (() => {
+                const co2kg = Math.round(journey.distanceKm * 2 * 240 * 0.12)
+                const trees = Math.round(co2kg / 21)
+                return `<div class="journey-co2">
+                  🌿 <strong>${co2kg.toLocaleString()} kg</strong> potential annual CO₂ savings · equivalent to planting <strong>${trees} trees</strong>
+                </div>`
+              })() : ''}
+            </div>
+            <div class="journey-actions">
+              ${deactivateBtn}
+            </div>
+          </div>
+
+          ${journey.matches.length === 0 ? `
+            <div class="matches-card">
+              <div class="empty-state">
+                <div class="empty-icon">🔍</div>
+                <h3>No matches yet</h3>
+                <p>We're looking for people on your route. You'll get an email when we find a match!</p>
+              </div>
+            </div>
+          ` : `
+            <div class="matches-card">
+              <div class="matches-card-header">
+                <h3>Matches</h3>
+                <span class="matches-count">${journey.matches.length} match${journey.matches.length !== 1 ? 'es' : ''}</span>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th style="width:70px;">Match Id</th>
+                      <th style="width:110px;">Name</th>
+                      <th class="col-route">Their Route</th>
+                      <th style="width:130px;">Their Status</th>
+                      <th style="width:130px;">My Status</th>
+                      <th>My Next Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-${journey.submissionId}">
+                    ${pageMatches.map((match, i) => renderMatchRow(match, journey.submissionId, (currentPage - 1) * PAGE_SIZE + i + 1)).join('')}
+                  </tbody>
+                </table>
+              </div>
+              ${totalPages > 1 ? renderPagination(journey.submissionId, currentPage, totalPages) : ''}
+            </div>
+          `}
+        </div>
+      `
+    }
+
+    // ============================================
+    // RENDER MATCH ROW
+    // ============================================
+    function renderMatchRow(match, submissionId, rowNum) {
+      const strength = match.matchStrength || 0
+      const strengthClass = strength >= 70 ? '' : strength >= 40 ? 'med' : 'low'
+
+      const truncName = (str) => {
+        if (!str) return ''
+        return str.length > 10 ? str.substring(0, 10) + '…' : str
+      }
+      const nameHtml = match.isMutual
+        ? `<div class="match-name revealed" title="${escapeHtml(match.otherUser.name)}">✓ ${escapeHtml(truncName(match.otherUser.name))}</div>`
+        : `<div class="match-name masked" title="${escapeHtml(match.otherUser.name)}">${escapeHtml(truncName(match.otherUser.name))}</div>`
+
+      const myStatusHtml = getMyStatusPill(match)
+      const theirStatusHtml = getTheirStatusPill(match)
+      const actionsHtml = getActionsHtml(match, submissionId)
+
+      const fromRaw = match.otherUser.fromLocation || ''
+      const toRaw = match.otherUser.toLocation || ''
+      // Mapbox Directions URL (no API key needed for web redirect)
+      const fromEnc = encodeURIComponent(fromRaw + ', Dubai, UAE')
+      const toEnc = encodeURIComponent(toRaw + ', Dubai, UAE')
+      const mapUrl = `https://www.mapbox.com/maps/directions/?poi[0]=${fromEnc}&poi[1]=${toEnc}`
+      const fromDisplay = escapeHtml(truncatePoi(fromRaw))
+      const toDisplay = escapeHtml(truncatePoi(toRaw))
+      const routeTitle = escapeHtml(fromRaw + ' → ' + toRaw)
+      return `
+        <tr id="row-${match.matchId}">
+          <td data-label="Match Id"><span class="match-num">${match.matchId}</span></td>
+          <td data-label="Name">${nameHtml}</td>
+          <td data-label="Their Route" class="col-route">
+            <a class="route-combined-link" href="${mapUrl}" target="_blank" title="${routeTitle}">
+              <span class="route-dot-from">●</span><span class="route-text">${fromDisplay}</span>
+              <span class="route-arrow-inline">→</span>
+              <span class="route-dot-to">●</span><span class="route-text">${toDisplay}</span>
+            </a>
+          </td>
+          <td data-label="Their Status">${theirStatusHtml}</td>
+          <td data-label="My Status">${myStatusHtml}</td>
+          <td data-label="My Next Action">${actionsHtml}</td>
+        </tr>
+      `
+    }
+
+    function getMyStatusPill(match) {
+      if (match.isMutual) return `<span class="interest-pill pill-mutual">🎉 Mutual!</span>`
+      if (match.myInterest === 'yes') return `<span class="interest-pill pill-yes">✓ Interested</span>`
+      if (match.myInterest === 'no') return `<span class="interest-pill pill-no clickable" onclick="undoDecline(${match.matchId}, event)" title="Click to undo – show Yes/No again">✗ Declined  ↺</span>`
+      if (match.theirInterest === 'yes') return `<span class="interest-pill pill-respond">⚡ Respond!</span>`
+      return `<span class="interest-pill pill-pending">○ Pending</span>`
+    }
+
+    function getTheirStatusPill(match) {
+      if (match.isMutual) return `<span class="interest-pill pill-mutual">✓ Interested</span>`
+      if (match.theirInterest === 'yes') return `<span class="interest-pill pill-yes">✓ Interested</span>`
+      if (match.theirInterest === 'no') return `<span class="interest-pill pill-no">✗ Declined</span>`
+      if (match.myInterest === 'yes') return `<span class="interest-pill pill-waiting">◷ Waiting...</span>`
+      return `<span class="interest-pill pill-pending">○ Pending</span>`
+    }
+
+    function getActionsHtml(match, submissionId) {
+      // For mutual matches, stack email + carpool button vertically
+      if (match.isMutual) {
+        let mutualHtml = ''
+        if (match.otherUser.email) {
+          const theirFirstName = escapeHtml(match.otherUser.name.split(' ')[0])
+          mutualHtml += `<button class="btn-email" onclick="openEmailModal(${match.matchId}, '${escapeHtml(match.otherUser.email)}', '${theirFirstName}', '${escapeHtml(match.otherUser.name)}', '${escapeHtml(match.myFromLocation || '')}', '${escapeHtml(match.myToLocation || '')}')">✉ Email ${theirFirstName}</button>`
+        }
+        const carpoolFirstName = escapeHtml(match.otherUser.name.split(' ')[0])
+        const reported = match._carpoolReported
+        mutualHtml += `<button class="btn-report-carpool${reported ? ' confirmed' : ''}" id="carpool-btn-${match.matchId}" onclick="toggleCarpoolReport(${match.matchId})">${
+          reported
+            ? '🌿 Thank you for Sharing Ride<br>and Cutting Emissions'
+            : `🚗 Already Carpooling with ${carpoolFirstName}?<br>Click to Inform Us`
+        }</button>`
+        return `<div class="actions-cell stacked">${mutualHtml}</div>`
+      }
+
+      let html = ''
+
+      // Yes/No buttons if user hasn't responded yet (also shown when "undoing" a decline)
+      if (!match.myInterest && match.status !== 'failed') {
+        html += `
+          <button class="btn-yes" onclick="updateInterest(${match.matchId}, ${submissionId}, 'yes')">✓ Yes</button>
+          <button class="btn-no" onclick="updateInterest(${match.matchId}, ${submissionId}, 'no')">✗ No</button>
+        `
+      }
+
+      // If both declined — show a dash (no undo available when other also declined)
+      // If only my declined — clickable pill in My Status handles undo
+
+      return `<div class="actions-cell">${html || '<span style="color:var(--text-muted);font-size:13px;">–</span>'}</div>`
+    }
+
+    // ============================================
+    // PAGINATION
+    // ============================================
+    function renderPagination(submissionId, currentPage, totalPages) {
+      let pages = ''
+      for (let i = 1; i <= totalPages; i++) {
+        pages += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${submissionId}, ${i})">${i}</button>`
+      }
+      return `
+        <div class="pagination">
+          <button class="page-btn" onclick="goToPage(${submissionId}, ${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>← Prev</button>
+          ${pages}
+          <button class="page-btn" onclick="goToPage(${submissionId}, ${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next →</button>
+        </div>
+      `
+    }
+
+    function goToPage(submissionId, page) {
+      const journey = journeys.find(j => j.submissionId === submissionId)
+      if (!journey) return
+      const totalPages = Math.ceil(journey.matches.length / PAGE_SIZE)
+      if (page < 1 || page > totalPages) return
+
+      paginationState[submissionId] = page
+      const pageMatches = journey.matches.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+      const tbody = document.getElementById(`tbody-${submissionId}`)
+      if (tbody) {
+        tbody.innerHTML = pageMatches.map((match, i) => 
+          renderMatchRow(match, submissionId, (page - 1) * PAGE_SIZE + i + 1)
+        ).join('')
+      }
+
+      // Update pagination controls
+      const panelIdx = journeys.findIndex(j => j.submissionId === submissionId)
+      renderAllPanels()
+      activateTab(activeJourneyIndex, false)
+    }
+
+    // ============================================
+    // ACTIVATE TAB
+    // ============================================
+    function activateTab(idx, scroll = true) {
+      activeJourneyIndex = idx
+
+      // Update tabs
+      document.querySelectorAll('.tab').forEach((tab, i) => {
+        if (i === idx) tab.classList.add('tab-selected')
+        else tab.classList.remove('tab-selected')
+      })
+
+      // Update panels
+      document.querySelectorAll('.journey-panel').forEach((panel, i) => {
+        if (i === idx) panel.classList.add('active')
+        else panel.classList.remove('active')
+      })
+
+      // Scroll tab into view
+      if (scroll) {
+        const tab = document.getElementById(`tab-${idx}`)
+        if (tab) tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+      }
+    }
+
+    // ============================================
+    // UPDATE INTEREST (YES / NO)
+    // ============================================
+    async function updateInterest(matchId, submissionId, interest) {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/update-match-status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+          body: JSON.stringify({ token, matchId, submissionId, interest })
+        })
+        const data = await res.json()
+
+        if (!data.success) {
+          showToast(data.error || 'Could not update. Please try again.', 'error')
+          return
+        }
+
+        // Update local state
+        for (const journey of journeys) {
+          const match = journey.matches.find(m => m.matchId === matchId)
+          if (match) {
+            match.myInterest = interest
+            if (data.isMutual) {
+              match.isMutual = true
+              match.status = 'contact_revealed'
+              match.theirInterest = 'yes'
+              // Reveal name/email - we need to reload to get actual details
+              await reloadMatchData()
+              return
+            }
+            if (interest === 'no') match.status = 'failed'
+            else match.status = 'interest_expressed'
+          }
+        }
+
+        // Recalculate pending counts
+        recalcPendingCounts()
+        renderAllPanels()
+        activateTab(activeJourneyIndex, false)
+
+        if (interest === 'yes') showToast('Interest expressed! They\'ll be notified in the next batch email.', 'success')
+        else showToast('Match declined.', '')
+
+      } catch (err) {
+        showToast('Error updating. Please try again.', 'error')
+      }
+    }
+
+    // ============================================
+    // TOGGLE JOURNEY (DEACTIVATE / REACTIVATE)
+    // ============================================
+    async function toggleJourney(submissionId, action) {
+      const confirmMsg = action === 'deactivate'
+        ? 'Archive this journey? No new matches will be made, but existing matches remain visible.'
+        : 'Reactivate this journey? We will look for new matches.'
+      if (!confirm(confirmMsg)) return
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/deactivate-journey`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+          body: JSON.stringify({ token, submissionId, action })
+        })
+        const data = await res.json()
+
+        if (!data.success) {
+          showToast(data.error || 'Could not update journey.', 'error')
+          return
+        }
+
+        // Update local state
+        const journey = journeys.find(j => j.submissionId === submissionId)
+        if (journey) journey.journeyStatus = data.newStatus
+
+        renderTabs()
+        renderAllPanels()
+        activateTab(activeJourneyIndex, false)
+        showToast(data.message, 'success')
+
+      } catch (err) {
+        showToast('Error updating journey. Please try again.', 'error')
+      }
+    }
+
+    // ============================================
+    // RELOAD MATCH DATA (after mutual match)
+    // ============================================
+    async function reloadMatchData() {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/get-matches-page?token=${encodeURIComponent(token)}`, {
+          headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+        })
+        const data = await res.json()
+        if (data.success) {
+          journeys = data.journeys
+          recalcPendingCounts()
+          renderTabs()
+          renderAllPanels()
+          activateTab(activeJourneyIndex, false)
+          showToast('🎉 Mutual match! Contact details revealed!', 'success')
+        }
+      } catch (err) {
+        console.error('Reload failed:', err)
+      }
+    }
+
+    // ============================================
+    // HELPERS
+    // ============================================
+    function recalcPendingCounts() {
+      for (const journey of journeys) {
+        journey.pendingCount = journey.matches.filter(m => 
+          !m.myInterest && (m.status === 'notified' || m.status === 'viewed' || m.status === 'interest_expressed')
+        ).length
+      }
+    }
+
+    function getStatusBadge(journey) {
+      const map = {
+        'active': '<span class="status-badge active">● Active</span>',
+        'inactive': '<span class="status-badge inactive">● Archived</span>',
+        'inactive_with_interest': '<span class="status-badge inactive-interest">⚡ Archived – Interest Received</span>',
+        'expired': '<span class="status-badge expired">⏰ Expired</span>'
+      }
+      return map[journey.journeyStatus] || ''
+    }
+
+    function showToast(msg, type = '') {
+      const toast = document.getElementById('toast')
+      toast.textContent = msg
+      toast.className = `toast ${type} show`
+      setTimeout(() => toast.classList.remove('show'), 3500)
+    }
+
+    function showError(title, message) {
+      document.getElementById('mainContent').innerHTML = `
+        <div class="error-screen">
+          <img src="logo_with slogan.png" alt="Community Carpool" style="height:48px;width:auto;">
+          <h2>${title}</h2>
+          <p>${message}</p>
+          <div style="display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; justify-content: center;">
+            <a href="https://communitycarpool.org" style="display: inline-block; background: var(--green); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+              Register a Journey
+            </a>
+            <a href="https://communitycarpool.org/support.html" style="display: inline-block; background: white; color: var(--text); border: 1.5px solid var(--border); padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+              Contact Support
+            </a>
+          </div>
+        </div>
+      `
+    }
+
+    function truncateLocation(str, maxLen = 25) {
+      if (!str) return ''
+      const parts = str.split(',')
+      const short = parts[0].trim()
+      return short.length > maxLen ? short.substring(0, maxLen) + '…' : short
+    }
+
+    // Truncate POI for route display — keep first 28 chars of first segment
+    function truncatePoi(str, maxLen = 28) {
+      if (!str) return ''
+      const first = str.split(',')[0].trim()
+      return first.length > maxLen ? first.substring(0, maxLen) + '…' : first
+    }
+
+    function escapeHtml(str) {
+      if (!str) return ''
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+    }
+
+    // Toggle carpool reported state (undo supported)
+    async function toggleCarpoolReport(matchId) {
+      // Find match object
+      let targetMatch = null
+      for (const journey of journeys) {
+        targetMatch = journey.matches.find(m => m.matchId === matchId)
+        if (targetMatch) break
+      }
+      if (!targetMatch) return
+
+      if (targetMatch._carpoolReported) {
+        // Undo — revert to original button
+        targetMatch._carpoolReported = false
+        showToast('Carpool report undone.', '')
+      } else {
+        // Confirm + report
+        if (!confirm('Are you carpooling with this person? This helps us track successful matches and carbon savings! 🎉')) return
+        targetMatch._carpoolReported = true
+        await trackEvent('carpooling_reported', matchId)
+        showToast('🌿 Thank you! Every shared ride counts.', 'success')
+      }
+      renderAllPanels()
+      activateTab(activeJourneyIndex, false)
+    }
+
+    // Undo a "No" decline — show Yes/No again
+    function undoDecline(matchId, event) {
+      event.stopPropagation()
+      for (const journey of journeys) {
+        const match = journey.matches.find(m => m.matchId === matchId)
+        if (match) {
+          match.myInterest = null   // reset so Yes/No buttons reappear
+          match.status = 'notified' // treat as unresponded
+          break
+        }
+      }
+      renderAllPanels()
+      activateTab(activeJourneyIndex, false)
+      showToast('Reverted — please choose Yes or No.', '')
+    }
+
+    // ============================================
+    // EMAIL MODAL
+    // ============================================
+    let _emailModalState = {}
+
+    function openEmailModal(matchId, toEmail, theirFirstName, theirFullName, myFrom, myTo) {
+      _emailModalState = { matchId, toEmail, theirFirstName, theirFullName }
+
+      document.getElementById('modalTitle').textContent = `Email ${theirFirstName}`
+      document.getElementById('modalMyFrom').value = myFrom || ''
+      document.getElementById('modalMyTo').value = myTo || ''
+      document.getElementById('modalMorning').value = ''
+      document.getElementById('modalEvening').value = ''
+      document.getElementById('modalDays').value = 'Monday – Thursday'
+      document.getElementById('modalPhone').value = ''
+
+      document.getElementById('emailModal').classList.add('open')
+      document.getElementById('modalMyFrom').focus()
+    }
+
+    function closeEmailModal() {
+      document.getElementById('emailModal').classList.remove('open')
+      _emailModalState = {}
+    }
+
+    function sendEmailFromModal() {
+      const { matchId, toEmail, theirFirstName, theirFullName, theirFrom, theirTo } = _emailModalState
+      if (!toEmail) return
+
+      const myFirstName = userData ? userData.name.split(' ')[0] : 'Me'
+      const myFrom = document.getElementById('modalMyFrom').value.trim() || '[Your pickup]'
+      const myTo = document.getElementById('modalMyTo').value.trim() || '[Your drop-off]'
+      const morning = document.getElementById('modalMorning').value.trim() || '[Time]'
+      const evening = document.getElementById('modalEvening').value.trim() || '[Time]'
+      const days = document.getElementById('modalDays').value.trim() || '[Days]'
+      const phone = document.getElementById('modalPhone').value.trim()
+
+      const subject = encodeURIComponent("Community Carpool – Let's Connect!")
+      const body = encodeURIComponent(
+        'Hi ' + theirFirstName + ',\n\n' +
+        'I received your email through Community Carpool — we\'ve been matched on a similar commute route.\n\n' +
+        'My route:\n' +
+        '\u25CF From: ' + myFrom + '\n' +
+        '\u25CF To: ' + myTo + '\n\n' +
+        'My typical schedule:\n' +
+        '  \u2022 Mornings: Depart around ' + morning + '\n' +
+        '  \u2022 Evenings: Return around ' + evening + '\n' +
+        '  \u2022 Days: ' + days + '\n\n' +
+        'Would you be open to a quick chat to see if our schedules align?\n\n' +
+        'Regards,\n' +
+        myFirstName +
+        (phone ? '\n' + phone : '\n[Your Phone Number]')
+      )
+
+      trackEvent('match_email_opened', matchId)
+      closeEmailModal()
+      window.location.href = `mailto:${toEmail}?subject=${subject}&body=${body}`
+    }
+
+    // Close modal on overlay click
+    document.getElementById('emailModal').addEventListener('click', function(e) {
+      if (e.target === this) closeEmailModal()
+    })
+
+    async function trackEvent(eventType, matchId = null) {
+      try {
+        await fetch(`${SUPABASE_URL}/functions/v1/track-event`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+          body: JSON.stringify({ eventType, token, matchId })
+        })
+      } catch(e) { /* silent fail */ }
+    }
+  </script>
+
+</body>
+</html>
