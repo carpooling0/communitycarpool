@@ -520,7 +520,7 @@
     }
     .pill-yes.clickable:hover { background: #bbf7d0; color: var(--green-dark); }
     .btn-report-carpool {
-      padding: 6px 10px;
+      padding: 5px 8px;
       border-radius: 8px;
       border: 1.5px solid #7c3aed;
       background: #ede9fe;
@@ -543,8 +543,24 @@
     }
     .btn-report-carpool.confirmed:hover { background: var(--green); color: white; border-color: var(--green); }
 
+    /* ── STEP LABELS & ACTION GROUPS ── */
+    .step-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      min-width: 50px;
+    }
+    .action-group {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+    }
+
     .btn-email {
-      padding: 6px 10px;
+      padding: 5px 8px;
       border-radius: 8px;
       border: 1.5px solid var(--green);
       background: var(--green);
@@ -1250,19 +1266,28 @@
     }
 
     function getActionsHtml(match, submissionId) {
-      // For mutual matches, stack email + carpool button vertically
+      // For mutual matches, stack email + carpool button vertically with Step labels
       if (match.isMutual) {
         let mutualHtml = ''
         if (match.otherUser.email) {
           const theirFirstName = escapeHtml(match.otherUser.name.split(' ')[0])
-          mutualHtml += `<button class="btn-email" onclick="openEmailModal(${match.matchId}, '${escapeHtml(match.otherUser.email)}', '${theirFirstName}', '${escapeHtml(match.otherUser.name)}', '${escapeHtml(match.myFromLocation || '')}', '${escapeHtml(match.myToLocation || '')}')">✉ Email ${theirFirstName}</button>`
+          const userJourney = journeys.find(j => j.submissionId === submissionId)
+          const userFromLocation = userJourney ? userJourney.fromLocation : ''
+          const userToLocation = userJourney ? userJourney.toLocation : ''
+          mutualHtml += `<div class="action-group">
+            <span class="step-label">Step 1</span>
+            <button class="btn-email" onclick="openEmailModal(${match.matchId}, '${escapeHtml(match.otherUser.email)}', '${theirFirstName}', '${escapeHtml(match.otherUser.name)}', '${escapeHtml(userFromLocation)}', '${escapeHtml(userToLocation)}')">✉ Email ${theirFirstName}</button>
+          </div>`
         }
         const reported = match._carpoolReported
-        mutualHtml += `<button class="btn-report-carpool${reported ? ' confirmed' : ''}" id="carpool-btn-${match.matchId}" onclick="toggleCarpoolReport(${match.matchId})">${
-          reported
-            ? '🌿 Thank you for Sharing Ride<br>and Cutting Emissions'
-            : '🚗 Carpooling already?<br>Click to Notify us'
-        }</button>`
+        mutualHtml += `<div class="action-group">
+          <span class="step-label">Step 2</span>
+          <button class="btn-report-carpool${reported ? ' confirmed' : ''}" id="carpool-btn-${match.matchId}" onclick="toggleCarpoolReport(${match.matchId})">${
+            reported
+              ? '🌿 Thank you for Sharing Ride<br>and Cutting Emissions'
+              : '🚗 Carpooling already?<br>Click to Notify us'
+          }</button>
+        </div>`
         return `<div class="actions-cell stacked">${mutualHtml}</div>`
       }
 
