@@ -25,6 +25,30 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
 }
 
+// Road distance via Mapbox Directions API — returns actual driving distance in km.
+// Falls back to haversine if token missing, method is 'haversine', or API call fails.
+async function roadDistance(
+  lat1: number, lng1: number, lat2: number, lng2: number,
+  method: string, mapboxToken: string
+): Promise<number> {
+  if (method !== 'mapbox' || !mapboxToken) {
+    return haversineDistance(lat1, lng1, lat2, lng2)
+  }
+  try {
+    // Mapbox Directions: coordinates are lng,lat (note order)
+    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${lng1},${lat1};${lng2},${lat2}` +
+      `?access_token=${mapboxToken}&overview=false&steps=false`
+    const res = await fetch(url)
+    if (!res.ok) throw new Error(`Mapbox HTTP ${res.status}`)
+    const json = await res.json()
+    if (!json.routes?.length) throw new Error('No route found')
+    return json.routes[0].distance / 1000  // metres → km
+  } catch (err: any) {
+    console.warn(`Mapbox fallback to haversine: ${err.message}`)
+    return haversineDistance(lat1, lng1, lat2, lng2)
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
@@ -81,7 +105,9 @@ Deno.serve(async (req) => {
     // 6. Calculate distance and expiry
     const distancePrefMap: { [key: string]: number } = { '1': 1, '2': 3, '3': 5, '4': 8 }
     const distancePrefKm = distancePrefMap[distanceValue] || 3
-    const distanceKm = haversineDistance(fromLat, fromLng, toLat, toLng)
+    const distanceMethod = await getConfig('distance_method') || 'haversine'
+    const mapboxToken = Deno.env.get('MAPBOX_TOKEN') || ''
+    const distanceKm = await roadDistance(fromLat, fromLng, toLat, toLng, distanceMethod, mapboxToken)
     const expiryDays = parseInt(await getConfig('journey_expiry_days')) || 90
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + expiryDays)
