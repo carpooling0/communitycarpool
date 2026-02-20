@@ -1204,10 +1204,15 @@
 
       const fromRaw = match.otherUser.fromLocation || ''
       const toRaw = match.otherUser.toLocation || ''
-      // Apple Maps URL — works in browser and all Apple devices natively
-      const fromEnc = encodeURIComponent(fromRaw + ', Dubai, UAE')
-      const toEnc = encodeURIComponent(toRaw + ', Dubai, UAE')
-      const mapUrl = `https://maps.apple.com/?saddr=${fromEnc}&daddr=${toEnc}&dirflg=d`
+      // Apple Maps URL — use precise lat/lng coords to avoid geocoding errors (e.g. DIFC resolving to DIC)
+      // Fall back to text string only if coords are missing
+      const fromParam = (match.otherUser.fromLat && match.otherUser.fromLng)
+        ? `${match.otherUser.fromLat},${match.otherUser.fromLng}`
+        : encodeURIComponent(fromRaw + ', Dubai, UAE')
+      const toParam = (match.otherUser.toLat && match.otherUser.toLng)
+        ? `${match.otherUser.toLat},${match.otherUser.toLng}`
+        : encodeURIComponent(toRaw + ', Dubai, UAE')
+      const mapUrl = `https://maps.apple.com/?saddr=${fromParam}&daddr=${toParam}&dirflg=d`
       const fromDisplay = escapeHtml(truncatePoi(fromRaw))
       const toDisplay = escapeHtml(truncatePoi(toRaw))
       const routeTitle = escapeHtml(fromRaw + ' → ' + toRaw)
