@@ -1276,7 +1276,14 @@
           const userToLocation = userJourney ? userJourney.toLocation : ''
           mutualHtml += `<div class="action-group">
             <span class="step-label">Step 1</span>
-            <button class="btn-email" onclick="openEmailModal(${match.matchId}, '${escapeHtml(match.otherUser.email)}', '${theirFirstName}', '${escapeHtml(match.otherUser.name)}', '${escapeHtml(userFromLocation)}', '${escapeHtml(userToLocation)}')">✉ Email ${theirFirstName}</button>
+            <button class="btn-email"
+              data-match-id="${match.matchId}"
+              data-to-email="${escapeHtml(match.otherUser.email)}"
+              data-their-first="${theirFirstName}"
+              data-their-name="${escapeHtml(match.otherUser.name)}"
+              data-my-from="${escapeHtml(userFromLocation)}"
+              data-my-to="${escapeHtml(userToLocation)}"
+              onclick="openEmailModalFromBtn(this)">✉ Email ${theirFirstName}</button>
           </div>`
         }
         const reported = match._carpoolReported
@@ -1603,6 +1610,18 @@
     // EMAIL MODAL
     // ============================================
     let _emailModalState = {}
+
+    // Read args from data-* attributes to avoid inline string escaping issues
+    function openEmailModalFromBtn(btn) {
+      openEmailModal(
+        parseInt(btn.dataset.matchId),
+        btn.dataset.toEmail,
+        btn.dataset.theirFirst,
+        btn.dataset.theirName,
+        btn.dataset.myFrom,
+        btn.dataset.myTo
+      )
+    }
 
     function openEmailModal(matchId, toEmail, theirFirstName, theirFullName, myFrom, myTo) {
       _emailModalState = { matchId, toEmail, theirFirstName, theirFullName }
