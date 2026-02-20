@@ -8,18 +8,23 @@ function maskName(name: string): string {
 }
 
 // Parse PostGIS EWKB hex string (geography POINT with SRID 4326) → { lat, lng }
-// Format: 01 (little-endian) + 01000020 (type) + E6100000 (SRID 4326) + 8 bytes X (lng) + 8 bytes Y (lat)
+// Hex layout (50 chars total):
+//   [0-1]   01          — byte order (little-endian)
+//   [2-9]   01000020    — geometry type (Point) + SRID flag
+//   [10-17] E6100000    — SRID 4326
+//   [18-33] <8 bytes>   — X = longitude (little-endian float64)
+//   [34-49] <8 bytes>   — Y = latitude  (little-endian float64)
 function wkbToLatLng(wkb: string | null): { lat: number, lng: number } | null {
-  if (!wkb || wkb.length < 42) return null
+  if (!wkb || wkb.length < 50) return null
   try {
     const buf = new ArrayBuffer(8)
     const view = new DataView(buf)
-    // X = longitude: bytes 10–17 (hex chars 20–35)
-    const xHex = wkb.slice(10, 26)
+    // X = longitude: hex chars 18–33
+    const xHex = wkb.slice(18, 34)
     for (let i = 0; i < 8; i++) view.setUint8(i, parseInt(xHex.slice(i * 2, i * 2 + 2), 16))
     const lng = view.getFloat64(0, true)
-    // Y = latitude: bytes 18–25 (hex chars 36–51)
-    const yHex = wkb.slice(26, 42)
+    // Y = latitude: hex chars 34–49
+    const yHex = wkb.slice(34, 50)
     for (let i = 0; i < 8; i++) view.setUint8(i, parseInt(yHex.slice(i * 2, i * 2 + 2), 16))
     const lat = view.getFloat64(0, true)
     if (isNaN(lat) || isNaN(lng)) return null
