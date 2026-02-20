@@ -154,6 +154,25 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ── Instant email notification ─────────────────────────────────────────
+    // When matching_mode = 'instant', fire batch-send-emails immediately after
+    // creating matches so users are notified within seconds, not the next cron cycle.
+    // Fire-and-forget (no await) — email latency must not block this response.
+    // Idempotent: batch-send-emails only processes notification_sent=false matches,
+    // so the daily cron running later will simply find nothing to do.
+    if (matchesFound > 0) {
+      const { data: modeConfig } = await supabase.from('config').select('value').eq('key', 'matching_mode').single()
+      if (modeConfig?.value === 'instant') {
+        fetch(`${Deno.env.get('DB_URL')}/functions/v1/batch-send-emails`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get('DB_SERVICE_KEY')}`
+          }
+        }).catch((e: any) => console.error('batch-send-emails trigger failed:', e.message))
+      }
+    }
+
     return new Response(JSON.stringify({ success: true, matchesFound }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
