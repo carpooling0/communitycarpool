@@ -7,31 +7,6 @@ function maskName(name: string): string {
   return name.trim().split(' ').map(part => part.length > 0 ? part[0] + '*'.repeat(Math.max(part.length - 1, 2)) : '').join(' ')
 }
 
-// Parse PostGIS EWKB hex string (geography POINT with SRID 4326) → { lat, lng }
-// Hex layout (50 chars total):
-//   [0-1]   01          — byte order (little-endian)
-//   [2-9]   01000020    — geometry type (Point) + SRID flag
-//   [10-17] E6100000    — SRID 4326
-//   [18-33] <8 bytes>   — X = longitude (little-endian float64)
-//   [34-49] <8 bytes>   — Y = latitude  (little-endian float64)
-function wkbToLatLng(wkb: string | null): { lat: number, lng: number } | null {
-  if (!wkb || wkb.length < 50) return null
-  try {
-    const buf = new ArrayBuffer(8)
-    const view = new DataView(buf)
-    // X = longitude: hex chars 18–33
-    const xHex = wkb.slice(18, 34)
-    for (let i = 0; i < 8; i++) view.setUint8(i, parseInt(xHex.slice(i * 2, i * 2 + 2), 16))
-    const lng = view.getFloat64(0, true)
-    // Y = latitude: hex chars 34–49
-    const yHex = wkb.slice(34, 50)
-    for (let i = 0; i < 8; i++) view.setUint8(i, parseInt(yHex.slice(i * 2, i * 2 + 2), 16))
-    const lat = view.getFloat64(0, true)
-    if (isNaN(lat) || isNaN(lng)) return null
-    return { lat, lng }
-  } catch { return null }
-}
-
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   try {
@@ -59,13 +34,13 @@ Deno.serve(async (req) => {
 
     const journeys = []
     for (const sub of submissions || []) {
-      // Get matches for this submission — include from_point/to_point for precise map URLs
+      // Get matches — select float lat/lng columns directly (no WKB parsing needed)
       const { data: matches } = await supabase.from('matches')
         .select(`
           match_id, match_strength, created_at, status, sub_a_id, sub_b_id,
           interest_a, interest_b,
-          sub_a:submissions!sub_a_id (submission_id, from_location, to_location, from_point, to_point, users(name, email)),
-          sub_b:submissions!sub_b_id (submission_id, from_location, to_location, from_point, to_point, users(name, email))
+          sub_a:submissions!sub_a_id (submission_id, from_location, to_location, from_lat, from_lng, to_lat, to_lng, users(name, email)),
+          sub_b:submissions!sub_b_id (submission_id, from_location, to_location, from_lat, from_lng, to_lat, to_lng, users(name, email))
         `)
         .or(`sub_a_id.eq.${sub.submission_id},sub_b_id.eq.${sub.submission_id}`)
         .order('created_at', { ascending: false })
@@ -77,10 +52,6 @@ Deno.serve(async (req) => {
         const myInterest = isSubA ? match.interest_a : match.interest_b
         const theirInterest = isSubA ? match.interest_b : match.interest_a
         const isMutual = match.status === 'mutual_confirmed' || match.status === 'contact_revealed'
-
-        // Parse WKB geography → lat/lng floats for precise Apple Maps directions URL
-        const fromCoords = wkbToLatLng(otherSub.from_point)
-        const toCoords = wkbToLatLng(otherSub.to_point)
 
         return {
           matchId: match.match_id,
@@ -95,10 +66,10 @@ Deno.serve(async (req) => {
             email: isMutual ? otherUser.email : null,
             fromLocation: otherSub.from_location,
             toLocation: otherSub.to_location,
-            fromLat: fromCoords?.lat ?? null,
-            fromLng: fromCoords?.lng ?? null,
-            toLat: toCoords?.lat ?? null,
-            toLng: toCoords?.lng ?? null
+            fromLat: otherSub.from_lat ?? null,
+            fromLng: otherSub.from_lng ?? null,
+            toLat: otherSub.to_lat ?? null,
+            toLng: otherSub.to_lng ?? null
           }
         }
       })

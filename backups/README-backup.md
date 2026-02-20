@@ -129,5 +129,6 @@
 9. `insert_225_counterpart_submissions` — test data
 10. `insert_225_matches_varied_states` — test data
 11. `rename_email_sent_to_notification_sent` — column rename
+12. `add_lat_lng_float_columns_to_submissions` — adds from_lat, from_lng, to_lat, to_lng as plain FLOAT columns (backfilled from PostGIS); eliminates WKB parsing in edge functions
 
 All these are reflected in `backup-schema.sql` (the schema is the final result).
