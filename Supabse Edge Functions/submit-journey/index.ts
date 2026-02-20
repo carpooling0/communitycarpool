@@ -1,0 +1,136 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const supabase = createClient(
+  Deno.env.get('DB_URL')!,
+  Deno.env.get('DB_SERVICE_KEY')!
+)
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+async function getConfig(key: string): Promise<string> {
+  const { data } = await supabase.from('config').select('value').eq('key', key).single()
+  return data?.value || ''
+}
+
+function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLon = (lon2 - lon1) * Math.PI / 180
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2)
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+
+  try {
+    const body = await req.json()
+    const { firstName, email, fromLocation, fromLatLng, toLocation, toLatLng, distance, distanceValue, ip, country, orgCode } = body
+
+    // 1. Check blacklist
+    const { data: blacklisted } = await supabase
+      .from('blacklist').select('blacklist_id').eq('email', email.toLowerCase()).single()
+    if (blacklisted) {
+      return new Response(JSON.stringify({ success: false, error: 'This email is not permitted to register.' }), 
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 })
+    }
+
+    // 2. Parse coordinates
+    const [fromLat, fromLng] = fromLatLng.split(',').map(Number)
+    const [toLat, toLng] = toLatLng.split(',').map(Number)
+
+    // 3. Get or create user
+    let userId: number
+    let userJourneyLimit: number | null = null
+    const { data: existingUser } = await supabase
+      .from('users').select('user_id, journey_limit').eq('email', email.toLowerCase()).single()
+
+    if (existingUser) {
+      userId = existingUser.user_id
+      userJourneyLimit = existingUser.journey_limit  // per-user override (null = use global)
+      await supabase.from('users').update({ last_seen_at: new Date().toISOString(), name: firstName }).eq('user_id', userId)
+    } else {
+      const { data: newUser } = await supabase.from('users')
+        .insert({ email: email.toLowerCase(), name: firstName, last_seen_at: new Date().toISOString() })
+        .select('user_id').single()
+      userId = newUser!.user_id
+    }
+
+    // 4. Check journey limit — per-user override takes priority over global config
+    const globalLimit = parseInt(await getConfig('max_journeys_per_user')) || 10
+    const journeyLimit = userJourneyLimit ?? globalLimit  // use per-user if set
+    const { count: activeJourneys } = await supabase.from('submissions')
+      .select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('journey_status', 'active')
+    if ((activeJourneys || 0) >= journeyLimit) {
+      return new Response(JSON.stringify({ success: false, error: `Maximum of ${journeyLimit} active journeys reached. Please archive an existing journey first.` }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 })
+    }
+
+    // 5. Get org_id for this submission (org belongs to submission, not user)
+    let submissionOrgId = null
+    if (orgCode) {
+      const { data: org } = await supabase.from('organisations').select('org_id').eq('org_code', orgCode.toLowerCase()).eq('is_active', true).single()
+      submissionOrgId = org?.org_id || null
+    }
+
+    // 6. Calculate distance and expiry
+    const distancePrefMap: { [key: string]: number } = { '1': 1, '2': 3, '3': 5, '4': 8 }
+    const distancePrefKm = distancePrefMap[distanceValue] || 3
+    const distanceKm = haversineDistance(fromLat, fromLng, toLat, toLng)
+    const expiryDays = parseInt(await getConfig('journey_expiry_days')) || 90
+    const expiresAt = new Date()
+    expiresAt.setDate(expiresAt.getDate() + expiryDays)
+
+    // 7. Get journey number
+    const { count: journeyCount } = await supabase.from('submissions')
+      .select('*', { count: 'exact', head: true }).eq('user_id', userId)
+    const journeyNum = (journeyCount || 0) + 1
+
+    // 8. Insert submission (name/email live in users table, ip/country/org_id belong to submission)
+    const { data: submission, error: subError } = await supabase.from('submissions')
+      .insert({
+        from_location: fromLocation, from_point: `POINT(${fromLng} ${fromLat})`,
+        from_lat: fromLat, from_lng: fromLng,
+        to_location: toLocation, to_point: `POINT(${toLng} ${toLat})`,
+        to_lat: toLat, to_lng: toLng,
+        distance_pref: distancePrefKm, ip, country,
+        user_id: userId, org_id: submissionOrgId,
+        journey_status: 'active', journey_num: journeyNum,
+        distance_km: Math.round(distanceKm * 10) / 10,
+        expires_at: expiresAt.toISOString()
+      }).select('submission_id').single()
+    if (subError) throw subError
+
+    // 9. Track event
+    await supabase.from('events').insert({
+      event_type: 'form_submitted', user_id: userId,
+      submission_id: submission!.submission_id,
+      metadata: { org_code: orgCode, distance_pref: distancePrefKm }
+    })
+
+    // 10. Trigger matching
+    const matchingMode = await getConfig('matching_mode')
+    if (matchingMode === 'hybrid' || matchingMode === 'instant') {
+      await fetch(`${Deno.env.get('DB_URL')}/functions/v1/find-matches`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('DB_SERVICE_KEY')}` },
+        body: JSON.stringify({ submissionId: submission!.submission_id })
+      })
+    }
+
+    return new Response(JSON.stringify({
+      success: true, submissionId: submission!.submission_id,
+      journeyNum, actualDist: Math.round(distanceKm * 10) / 10
+    }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+
+  } catch (err) {
+    console.error('submit-journey error:', err)
+    return new Response(JSON.stringify({ success: false, error: err.message }), 
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 })
+  }
+})
