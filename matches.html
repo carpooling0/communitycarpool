@@ -75,6 +75,7 @@
     .logo img {
       height: 64px;
       width: auto;
+      display: block; /* ensures media query can override height */
     }
     .header-user {
       font-size: 14px;
@@ -866,6 +867,7 @@
         display: flex;
         align-items: flex-start;
         gap: 10px;
+        width: 100%; /* allow flex children to stretch to full card width */
       }
       tbody td::before {
         content: attr(data-label) ":";
@@ -881,7 +883,7 @@
       }
       tbody td:empty { display: none; }
       /* Route — stretch to fill full available td width */
-      .route-combined-link { display: flex; width: 100%; font-size: 14px; }
+      .route-combined-link { display: flex; flex: 1 1 0; min-width: 0; font-size: 14px; }
       .route-text { max-width: 100%; white-space: normal; word-break: break-word; overflow-wrap: break-word; }
       .actions-cell { flex-wrap: wrap; gap: 6px; margin-top: 4px; }
       .actions-cell.stacked { gap: 6px; }
@@ -895,7 +897,7 @@
   <header class="header">
     <div class="header-inner">
       <a href="https://communitycarpool.org" class="logo">
-        <img src="logo_with slogan.png" alt="Community Carpool" style="height:64px;width:auto;">
+        <img src="logo_with slogan.png" alt="Community Carpool">
       </a>
       <div class="header-user" id="headerUser"></div>
     </div>
