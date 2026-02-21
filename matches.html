@@ -831,8 +831,12 @@
     @media (max-width: 640px) {
       .main { padding: 16px 10px 60px; }
       .header { padding: 10px 14px; }
-      .journey-header { flex-direction: row; align-items: flex-start; padding: 14px 16px; gap: 10px; }
+      /* ① Logo smaller on mobile */
+      .logo img { height: 44px; }
+      /* ① Journey header stacks vertically so route gets full width */
+      .journey-header { flex-direction: column; align-items: flex-start; padding: 12px 14px; gap: 8px; }
       .journey-header-content { flex: 1 1 0; min-width: 0; }
+      .journey-actions { align-self: flex-start; }
       .journey-route { font-size: 14px; flex-wrap: wrap; }
       .page-title h1 { font-size: 21px; }
       .tabs-wrapper { gap: 6px; }
@@ -858,30 +862,27 @@
       tbody td {
         padding: 5px 0;
         border: none;
-        font-size: 14px;
+        font-size: 15px; /* ② one notch larger */
         display: flex;
         align-items: flex-start;
         gap: 10px;
       }
       tbody td::before {
         content: attr(data-label) ":";
-        font-size: 11px;
+        font-size: 12px; /* ② one notch larger */
         font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+        text-transform: none; /* ④ InitCap — not UPPERCASE */
+        letter-spacing: 0;    /* ④ remove tracking */
         color: var(--text-muted);
         flex-shrink: 0;
         white-space: nowrap;
-        min-width: 80px;
+        min-width: 105px; /* ③ uniform alignment for all labels incl. "My Next Action" */
         padding-top: 2px;
       }
       tbody td:empty { display: none; }
-      /* Route on mobile — allow wider text */
-      tbody td[data-label="Their Route"]::before { min-width: 80px; }
-      .route-combined-link {
-        font-size: 14px;
-      }
-      .route-text { max-width: 200px; white-space: normal; word-break: break-word; }
+      .route-combined-link { font-size: 14px; }
+      /* ③ Route text — expand to fill available space */
+      .route-text { max-width: calc(100vw - 160px); white-space: normal; word-break: break-word; }
       .actions-cell { flex-wrap: wrap; gap: 6px; margin-top: 4px; }
       .actions-cell.stacked { gap: 6px; }
     }
