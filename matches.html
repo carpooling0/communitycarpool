@@ -880,9 +880,9 @@
         padding-top: 2px;
       }
       tbody td:empty { display: none; }
-      .route-combined-link { font-size: 14px; }
-      /* ③ Route text — expand to fill available space */
-      .route-text { max-width: calc(100vw - 160px); white-space: normal; word-break: break-word; }
+      /* Route — stretch to fill full available td width */
+      .route-combined-link { display: flex; width: 100%; font-size: 14px; }
+      .route-text { max-width: 100%; white-space: normal; word-break: break-word; overflow-wrap: break-word; }
       .actions-cell { flex-wrap: wrap; gap: 6px; margin-top: 4px; }
       .actions-cell.stacked { gap: 6px; }
     }
@@ -1657,20 +1657,21 @@
       const phone = document.getElementById('modalPhone').value.trim()
 
       const subject = encodeURIComponent("Community Carpool – Let's Connect!")
+      const NL = '\r\n' // CRLF → %0D%0A — required for line breaks in mailto: across all email clients
       const body = encodeURIComponent(
-        'Hi ' + theirFirstName + ',\n\n' +
-        'I received your email through Community Carpool — we\'ve been matched on a similar commute route.\n\n' +
-        'My route:\n' +
-        '\u25CF From: ' + myFrom + '\n' +
-        '\u25CF To: ' + myTo + '\n\n' +
-        'My typical schedule:\n' +
-        '  \u2022 Mornings: Depart around ' + morning + '\n' +
-        '  \u2022 Evenings: Return around ' + evening + '\n' +
-        '  \u2022 Days: ' + days + '\n\n' +
-        'Would you be open to a quick chat to see if our schedules align?\n\n' +
-        'Regards,\n' +
+        'Hi ' + theirFirstName + ',' + NL + NL +
+        'I received your email through Community Carpool — we\'ve been matched on a similar commute route.' + NL + NL +
+        'My route:' + NL +
+        '\u25CF From: ' + myFrom + NL +
+        '\u25CF To: ' + myTo + NL + NL +
+        'My typical schedule:' + NL +
+        '  \u2022 Mornings: Depart around ' + morning + NL +
+        '  \u2022 Evenings: Return around ' + evening + NL +
+        '  \u2022 Days: ' + days + NL + NL +
+        'Would you be open to a quick chat to see if our schedules align?' + NL + NL +
+        'Regards,' + NL +
         myFirstName +
-        (phone ? '\n' + phone : '\n[Your Phone Number]')
+        (phone ? NL + phone : NL + '[Your Phone Number]')
       )
 
       trackEvent('match_email_opened', matchId)
