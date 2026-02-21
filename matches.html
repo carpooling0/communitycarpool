@@ -883,8 +883,16 @@
       }
       tbody td:empty { display: none; }
       /* Route — stretch to fill full available td width */
+      td.col-route { width: 100%; min-width: 0; }  /* override desktop 30% */
       .route-combined-link { display: flex; flex: 1 1 0; min-width: 0; font-size: 14px; }
-      .route-text { max-width: 100%; white-space: normal; word-break: break-word; overflow-wrap: break-word; }
+      .route-text {
+        max-width: 100%;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        overflow: visible;        /* override desktop overflow:hidden */
+        text-overflow: clip;      /* override desktop text-overflow:ellipsis */
+      }
       .actions-cell { flex-wrap: wrap; gap: 6px; margin-top: 4px; }
       .actions-cell.stacked { gap: 6px; }
     }
