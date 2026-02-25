@@ -80,11 +80,44 @@ Deno.serve(async (req) => {
     })
 
     // ── Merge, deduplicate, tag reversed candidates ────────────────────────
-    const sameDirIds = new Set((sameDirCandidates || []).map((c: any) => c.submission_id))
-    const taggedReverse = (reverseCandidates || [])
-      .filter((c: any) => !sameDirIds.has(c.submission_id))
-      .map((c: any) => ({ ...c, _reversed: true }))
-    const allCandidates = [...(sameDirCandidates || []), ...taggedReverse]
+    // A candidate can appear in BOTH lists when FROM/TO endpoints are spatially close
+    // (e.g. exact-reverse routes, or same-direction routes within a compact area).
+    // For candidates in only one list → direction is unambiguous.
+    // For candidates in BOTH lists → compute both distance formulas and pick the
+    // classification that gives the SMALLER total distance. This correctly handles:
+    //   - Exact reverse (A→B vs B→A): reversed formula gives ~0 km, same-dir gives large
+    //   - Same-direction in compact area: same-dir formula gives small, reversed gives large
+    const sameDirIds  = new Set((sameDirCandidates  || []).map((c: any) => c.submission_id))
+    const reverseIds  = new Set((reverseCandidates  || []).map((c: any) => c.submission_id))
+
+    const allCandidates: any[] = []
+    const seen = new Set<number>()
+
+    // Candidates only in same-dir list → unambiguously same-direction
+    for (const c of (sameDirCandidates || [])) {
+      if (!reverseIds.has(c.submission_id)) {
+        allCandidates.push({ ...c, _reversed: false })
+        seen.add(c.submission_id)
+      }
+    }
+    // Candidates only in reverse list → unambiguously reversed
+    for (const c of (reverseCandidates || [])) {
+      if (!sameDirIds.has(c.submission_id)) {
+        allCandidates.push({ ...c, _reversed: true })
+        seen.add(c.submission_id)
+      }
+    }
+    // Candidates in BOTH lists → pick direction by comparing haversine distances
+    // (use haversine here for O(1) cost; Mapbox used later only for the winning formula)
+    for (const c of (sameDirCandidates || [])) {
+      if (seen.has(c.submission_id)) continue
+      const sameDirTotal = haversineDistance(fromLat, fromLng, c.from_lat, c.from_lng)
+                         + haversineDistance(toLat,   toLng,   c.to_lat,   c.to_lng)
+      const reversedTotal = haversineDistance(fromLat, fromLng, c.to_lat,   c.to_lng)
+                          + haversineDistance(toLat,   toLng,   c.from_lat, c.from_lng)
+      allCandidates.push({ ...c, _reversed: reversedTotal < sameDirTotal })
+      seen.add(c.submission_id)
+    }
 
     if (allCandidates.length === 0) {
       return new Response(JSON.stringify({ success: true, matchesFound: 0 }), {
