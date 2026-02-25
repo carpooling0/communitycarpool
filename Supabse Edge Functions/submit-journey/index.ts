@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
     }
 
     // 6. Calculate distance and expiry
-    const distancePrefMap: { [key: string]: number } = { '1': 1, '2': 3, '3': 5, '4': 8 }
+    const distancePrefMap: { [key: string]: number } = { '1': 3, '2': 5, '3': 8, '4': 10 }
     const distancePrefKm = distancePrefMap[distanceValue] || 3
     const distanceMethod = await getConfig('distance_method') || 'haversine'
     const mapboxToken = Deno.env.get('MAPBOX_TOKEN') || ''
