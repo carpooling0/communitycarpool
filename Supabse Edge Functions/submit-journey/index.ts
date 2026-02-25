@@ -142,7 +142,8 @@ Deno.serve(async (req) => {
     // 10. Trigger matching
     const matchingMode = await getConfig('matching_mode')
     if (matchingMode === 'hybrid' || matchingMode === 'instant') {
-      await fetch(`${Deno.env.get('DB_URL')}/functions/v1/find-matches`, {
+      // Fire-and-forget — don't block the response waiting for matching to complete
+      fetch(`${Deno.env.get('DB_URL')}/functions/v1/find-matches`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('DB_SERVICE_KEY')}` },
         body: JSON.stringify({ submissionId: submission!.submission_id })
