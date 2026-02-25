@@ -1523,6 +1523,15 @@
 
         journeys = data.journeys
 
+        // Re-sort: active → inactive_with_interest → inactive/expired, then by journey number
+        const sortOrder = { 'active': 0, 'inactive_with_interest': 1, 'inactive': 2, 'expired': 3 }
+        journeys.sort((a, b) => {
+          const ao = sortOrder[a.journeyStatus] ?? 2
+          const bo = sortOrder[b.journeyStatus] ?? 2
+          if (ao !== bo) return ao - bo
+          return a.journeyNum - b.journeyNum
+        })
+
         // Re-apply any pending undo state — prevents poll from snapping back the UI
         // when the user has clicked undo but hasn't yet chosen Yes or No
         if (pendingUndos.size > 0) {
