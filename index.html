@@ -1716,10 +1716,12 @@
                     brandingBlock.appendChild(img);
                 }
 
-                const label = document.createElement('p');
-                label.style.cssText = 'text-align:center;color:#374151;font-size:14px;font-weight:600;margin:0;';
-                label.textContent = orgCustomMessage || `${orgName} Employee Carpooling`;
-                brandingBlock.appendChild(label);
+                if (orgCustomMessage) {
+                    const label = document.createElement('p');
+                    label.style.cssText = 'text-align:center;color:#374151;font-size:14px;font-weight:600;margin:0;';
+                    label.textContent = orgCustomMessage;
+                    brandingBlock.appendChild(label);
+                }
 
                 description.after(brandingBlock);
             }
