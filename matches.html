@@ -1035,9 +1035,6 @@
           setInterval(pollForUpdates, data.pollIntervalSeconds * 1000)
         }
 
-        // Track event
-        trackEvent('matches_page_viewed')
-
       } catch (err) {
         showError('Could not load matches', 'Please try again or contact support.')
         console.error(err)

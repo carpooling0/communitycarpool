@@ -12,6 +12,7 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url)
     const token = url.searchParams.get('token')
+    const isPoll = url.searchParams.get('poll') === 'true'
     if (!token) return new Response(JSON.stringify({ success: false, error: 'Token required' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 })
 
     // Validate token with expiry check
@@ -90,8 +91,10 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Track event
-    await supabase.from('events').insert({ event_type: 'matches_page_viewed', user_id: user.user_id, metadata: { token_used: true } })
+    // Track event — only on initial load, not polls
+    if (!isPoll) {
+      await supabase.from('events').insert({ event_type: 'matches_page_viewed', user_id: user.user_id, metadata: { token_used: true } })
+    }
 
     return new Response(JSON.stringify({ success: true, user: { name: user.name, email: user.email }, journeys }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
