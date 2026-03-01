@@ -1303,7 +1303,7 @@
               onclick="openEmailModalFromBtn(this)">✉ Email ${theirFirstName}</button>
           </div>`
         }
-        const reported = match._carpoolReported
+        const reported = match._carpoolReported || match.successReported
         mutualHtml += `<div class="action-group">
           <span class="step-label">Step 2</span>
           <button class="btn-report-carpool${reported ? ' confirmed' : ''}" id="carpool-btn-${match.matchId}" onclick="toggleCarpoolReport(${match.matchId})">${
