@@ -2,7 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
 const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' }
-const VALID_EVENTS = ['page_visited','form_started','form_submitted','form_resubmitted','matches_page_viewed','match_interest_expressed','match_declined','journey_deactivated','unsubscribed']
+const VALID_EVENTS = ['page_visited','form_started','form_submitted','form_resubmitted','matches_page_viewed','match_interest_expressed','match_declined','journey_deactivated','unsubscribed','carpooling_reported']
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -26,6 +26,13 @@ Deno.serve(async (req) => {
       submission_id: submissionId || null, match_id: matchId || null,
       metadata: metadata || {}, device_type: deviceType
     })
+
+    // If carpooling reported, also persist to matches table
+    if (eventType === 'carpooling_reported' && matchId) {
+      await supabase.from('matches')
+        .update({ success_reported: true, success_reported_at: new Date().toISOString() })
+        .eq('match_id', matchId)
+    }
 
     return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   } catch (err) {
