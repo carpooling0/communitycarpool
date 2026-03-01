@@ -1772,6 +1772,37 @@
 
         // Initial
         updateProgress();
+
+        // ============================================
+        // ANALYTICS TRACKING
+        // ============================================
+        const TRACK_EVENT_URL = SUPABASE_URL.replace('submit-journey', 'track-event');
+
+        function trackPageEvent(eventType, metadata = {}) {
+            fetch(TRACK_EVENT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+                body: JSON.stringify({ eventType, metadata })
+            }).catch(() => {}); // fire-and-forget, silent fail
+        }
+
+        // page_visited: fires once on load
+        trackPageEvent('page_visited', {
+            client: new URLSearchParams(window.location.search).get('client') || null,
+            referrer: document.referrer || null
+        });
+
+        // form_started: fires once on first user interaction with any key form input
+        let formStartedFired = false;
+        function onFormStarted() {
+            if (formStartedFired) return;
+            formStartedFired = true;
+            trackPageEvent('form_started');
+        }
+        ['firstName', 'email', 'fromInput'].forEach(function(id) {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('focus', onFormStarted, { once: true });
+        });
     </script>
 
     <script

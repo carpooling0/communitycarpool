@@ -1664,11 +1664,12 @@
 
     // Toggle carpool reported state (undo supported)
     async function toggleCarpoolReport(matchId) {
-      // Find match object
+      // Find match object + its parent journey (for submissionId)
       let targetMatch = null
+      let submissionId = null
       for (const journey of journeys) {
         targetMatch = journey.matches.find(m => m.matchId === matchId)
-        if (targetMatch) break
+        if (targetMatch) { submissionId = journey.submissionId; break }
       }
       if (!targetMatch) return
 
@@ -1679,7 +1680,7 @@
         carpoolPending.set(matchId, 'undone')         // protect from poll snap-back during await
         renderAllPanels()
         activateTab(activeJourneyIndex, false)
-        await trackEvent('carpooling_undo', matchId)
+        await trackEvent('carpooling_undo', matchId, submissionId)
         carpoolPending.delete(matchId)                 // release: DB is now updated
         showToast('Carpool report undone.', '')
       } else {
@@ -1689,7 +1690,7 @@
         carpoolPending.set(matchId, 'reported')        // protect from poll snap-back during await
         renderAllPanels()
         activateTab(activeJourneyIndex, false)
-        await trackEvent('carpooling_reported', matchId)
+        await trackEvent('carpooling_reported', matchId, submissionId)
         carpoolPending.delete(matchId)                 // release: DB is now updated
         showToast('🌿 Thank you! Every shared ride counts.', 'success')
       }
@@ -1822,12 +1823,12 @@
       if (e.target === this) closeEmailModal()
     })
 
-    async function trackEvent(eventType, matchId = null) {
+    async function trackEvent(eventType, matchId = null, submissionId = null) {
       try {
         await fetch(`${SUPABASE_URL}/functions/v1/track-event`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-          body: JSON.stringify({ eventType, token, matchId })
+          body: JSON.stringify({ eventType, token, matchId, submissionId })
         })
       } catch(e) { /* silent fail */ }
     }
