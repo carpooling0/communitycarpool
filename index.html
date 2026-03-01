@@ -1548,10 +1548,15 @@
                         actualDist: result.actualDist
                     });
                 } else {
-                    throw new Error(result.error || 'Unknown error');
+                    // Show the API's error message directly (e.g. max journeys exceeded)
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                    alert(result.error || 'Sorry, something went wrong. Please try again.');
+                    return;
                 }
 
             } catch (err) {
+                // Network / parse errors only — not API logic errors
                 console.error('Submit error:', err);
                 submitBtn.classList.remove('loading');
                 submitBtn.disabled = false;

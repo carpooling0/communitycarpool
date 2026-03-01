@@ -834,19 +834,27 @@
       .header { padding: 10px 14px; }
       /* ① Logo smaller on mobile */
       .logo img { height: 44px; }
+      /* General body text one notch up */
+      body { font-size: 16px; }
       /* ① Journey header stacks vertically so route gets full width */
       .journey-header { flex-direction: column; align-items: flex-start; padding: 12px 14px; gap: 8px; }
       .journey-header-content { flex: 1 1 0; min-width: 0; }
       .journey-actions { align-self: flex-start; }
-      .journey-route { font-size: 14px; flex-wrap: wrap; }
-      .page-title h1 { font-size: 21px; }
+      .journey-route { font-size: 16px; flex-wrap: wrap; }
+      .journey-meta { font-size: 15px; }
+      .page-title h1 { font-size: 22px; }
+      .page-title p { font-size: 15px; }
       .tabs-wrapper { gap: 6px; }
-      .tab { font-size: 13px; padding: 7px 12px; }
+      .tab { font-size: 15px; padding: 7px 12px; }
+      .match-strength { font-size: 15px; }
+      .status-badge { font-size: 13px; }
       .mutual-banner { padding: 12px 14px; gap: 10px; }
       .mutual-banner .banner-icon { font-size: 22px; }
-      .mutual-banner h3 { font-size: 15px; }
+      .mutual-banner h3 { font-size: 16px; }
+      .mutual-banner p { font-size: 15px; }
+      .header-user { font-size: 15px; }
       /* Toast fix: don't overflow screen */
-      .toast { white-space: normal; text-align: center; max-width: 85vw; font-size: 13px; padding: 10px 16px; }
+      .toast { white-space: normal; text-align: center; max-width: 85vw; font-size: 15px; padding: 10px 16px; }
       /* Table → card layout on mobile */
       .table-wrap { overflow-x: visible; }
       table, thead, tbody, th, td, tr { display: block; }
@@ -863,7 +871,7 @@
       tbody td {
         padding: 5px 0;
         border: none;
-        font-size: 15px; /* ② one notch larger */
+        font-size: 16px;
         display: flex;
         align-items: flex-start;
         gap: 10px;
@@ -871,7 +879,7 @@
       }
       tbody td::before {
         content: attr(data-label) ":";
-        font-size: 12px; /* ② one notch larger */
+        font-size: 13px;
         font-weight: 700;
         text-transform: none; /* ④ InitCap — not UPPERCASE */
         letter-spacing: 0;    /* ④ remove tracking */
@@ -1051,9 +1059,10 @@
       // Sort journeys by business rules
       sortJourneys()
 
-      // Find default tab index
-      if (defaultJourneyId) {
-        const idx = journeys.findIndex(j => j.submissionId == defaultJourneyId)
+      // Find default tab: URL param → sessionStorage → first journey
+      const resolvedId = defaultJourneyId || sessionStorage.getItem('ccp_active_journey')
+      if (resolvedId) {
+        const idx = journeys.findIndex(j => j.submissionId == resolvedId)
         if (idx > -1) activeJourneyIndex = idx
       }
 
@@ -1367,6 +1376,10 @@
     // ============================================
     function activateTab(idx, scroll = true) {
       activeJourneyIndex = idx
+
+      // Persist active journey by submissionId so F5 refresh restores the same tab
+      const activeJourney = journeys[idx]
+      if (activeJourney) sessionStorage.setItem('ccp_active_journey', String(activeJourney.submissionId))
 
       // Update tabs
       document.querySelectorAll('.tab').forEach((tab, i) => {
