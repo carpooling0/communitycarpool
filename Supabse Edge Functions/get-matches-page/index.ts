@@ -15,9 +15,12 @@ Deno.serve(async (req) => {
     const isPoll = url.searchParams.get('poll') === 'true'
     if (!token) return new Response(JSON.stringify({ success: false, error: 'Token required' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 })
 
-    // Validate token with expiry check
-    const { data: config } = await supabase.from('config').select('value').eq('key', 'match_token_expiry_days').single()
-    const tokenExpiryDays = parseInt(config?.value || '60')
+    // Fetch config values in one query (no extra round-trip)
+    const { data: configs } = await supabase.from('config').select('key, value')
+      .in('key', ['match_token_expiry_days', 'match_poll_interval_seconds'])
+    const configMap = Object.fromEntries((configs || []).map((c: any) => [c.key, c.value]))
+    const tokenExpiryDays = parseInt(configMap['match_token_expiry_days'] || '60')
+    const pollIntervalSeconds = parseInt(configMap['match_poll_interval_seconds'] || '10')
     const tokenExpiry = new Date()
     tokenExpiry.setDate(tokenExpiry.getDate() - tokenExpiryDays)
 
@@ -96,7 +99,7 @@ Deno.serve(async (req) => {
       await supabase.from('events').insert({ event_type: 'matches_page_viewed', user_id: user.user_id, metadata: { token_used: true } })
     }
 
-    return new Response(JSON.stringify({ success: true, user: { name: user.name, email: user.email }, journeys, pollIntervalSeconds: 10 }),
+    return new Response(JSON.stringify({ success: true, user: { name: user.name, email: user.email }, journeys, pollIntervalSeconds }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   } catch (err) {
     return new Response(JSON.stringify({ success: false, error: err.message }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 })
