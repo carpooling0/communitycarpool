@@ -421,7 +421,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0ZY200s7rjktsFWshKCRIMu3GA8jPTMUk6CPX4k6UrrPr6yBo0x3NAZE_iv6wMQk/exec';
+        const SCRIPT_URL = 'https://tbkjealpnoriwdosvmju.supabase.co/functions/v1/submit-support-ticket';
 
         const form = document.getElementById('supportForm');
         const requestType = document.getElementById('requestType');
@@ -545,10 +545,9 @@
             data.ip = userIP || 'unknown'; // Use 'ip' to match main project pattern
 
             try {
-                // Apps Script quirk: use text/plain to avoid CORS preflight (OPTIONS request)
-                const response = await fetch(SCRIPT_URL + '?ip=' + encodeURIComponent(userIP || 'unknown'), {
+                const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
 
