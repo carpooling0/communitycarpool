@@ -468,10 +468,10 @@
       font-size: 11px;
       color: var(--text-secondary);
       margin-top: 4px;
-      opacity: 0;
-      transition: opacity 0.2s ease;
     }
-    .interest-date.show { display: block; opacity: 1; }
+    .interest-pill:hover + .interest-date,
+    .interest-date:hover,
+    .interest-date.show { display: block; }
 
     @keyframes pulse-orange {
       0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
@@ -1289,9 +1289,9 @@
       const ago = timeAgo(match.theirInterestAt)
       const tap = ago ? `onclick="showInterestDate(event, this)"` : ''
       const dateSpan = ago ? `<span class="interest-date">${ago}</span>` : ''
-      if (match.isMutual) return `<span class="interest-pill pill-mutual" ${ago ? `title="${ago}"` : ''} ${tap}>✓ Interested</span>${dateSpan}`
-      if (match.theirInterest === 'yes') return `<span class="interest-pill pill-yes" ${ago ? `title="${ago}"` : ''} ${tap}>✓ Interested</span>${dateSpan}`
-      if (match.theirInterest === 'no') return `<span class="interest-pill pill-no" ${ago ? `title="${ago}"` : ''} ${tap}>✗ Declined</span>${dateSpan}`
+      if (match.isMutual) return `<span class="interest-pill pill-mutual" ${tap}>✓ Interested</span>${dateSpan}`
+      if (match.theirInterest === 'yes') return `<span class="interest-pill pill-yes" ${tap}>✓ Interested</span>${dateSpan}`
+      if (match.theirInterest === 'no') return `<span class="interest-pill pill-no" ${tap}>✗ Declined</span>${dateSpan}`
       if (match.myInterest === 'yes') return `<span class="interest-pill pill-waiting">◷ Waiting...</span>`
       return `<span class="interest-pill pill-pending">○ Pending</span>`
     }
