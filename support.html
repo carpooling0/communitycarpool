@@ -96,9 +96,7 @@
 
         /* Radio cards */
         .radio-group {
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
+            display: block;
             margin-top: 4px;
         }
 
@@ -114,7 +112,10 @@
             transition: border-color 0.2s ease, background 0.2s ease;
             user-select: none;
             width: 100%;
+            margin-bottom: 7px;
         }
+
+        .radio-option:last-of-type { margin-bottom: 0; }
 
         .radio-option:hover { border-color: #10b981; background: #f0fdf4; }
 
