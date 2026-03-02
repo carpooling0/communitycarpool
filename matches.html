@@ -462,8 +462,16 @@
     .pill-mutual { background: var(--green); color: white; }
     .pill-waiting { background: var(--blue-light); color: var(--blue); }
     .pill-respond { background: #fef3c7; color: #92400e; animation: pulse-orange 2s infinite; }
-    /* Interest timestamp — hidden on desktop (tooltip only), shown inline on mobile */
-    .interest-date { display: none; font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+    /* Interest timestamp — hidden by default, revealed on hover (desktop) or tap (mobile) */
+    .interest-date {
+      display: none;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .interest-date.show { display: block; opacity: 1; }
 
     @keyframes pulse-orange {
       0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
@@ -905,8 +913,6 @@
       }
       .actions-cell { flex-wrap: wrap; gap: 6px; margin-top: 4px; }
       .actions-cell.stacked { gap: 6px; }
-      /* Show interest timestamp inline under the pill on mobile */
-      .interest-date { display: block; }
     }
 
   </style>
@@ -1281,10 +1287,11 @@
 
     function getTheirStatusPill(match) {
       const ago = timeAgo(match.theirInterestAt)
+      const tap = ago ? `onclick="showInterestDate(event, this)"` : ''
       const dateSpan = ago ? `<span class="interest-date">${ago}</span>` : ''
-      if (match.isMutual) return `<span class="interest-pill pill-mutual" ${ago ? `title="${ago}"` : ''}>✓ Interested</span>${dateSpan}`
-      if (match.theirInterest === 'yes') return `<span class="interest-pill pill-yes" ${ago ? `title="${ago}"` : ''}>✓ Interested</span>${dateSpan}`
-      if (match.theirInterest === 'no') return `<span class="interest-pill pill-no" ${ago ? `title="${ago}"` : ''}>✗ Declined</span>${dateSpan}`
+      if (match.isMutual) return `<span class="interest-pill pill-mutual" ${ago ? `title="${ago}"` : ''} ${tap}>✓ Interested</span>${dateSpan}`
+      if (match.theirInterest === 'yes') return `<span class="interest-pill pill-yes" ${ago ? `title="${ago}"` : ''} ${tap}>✓ Interested</span>${dateSpan}`
+      if (match.theirInterest === 'no') return `<span class="interest-pill pill-no" ${ago ? `title="${ago}"` : ''} ${tap}>✗ Declined</span>${dateSpan}`
       if (match.myInterest === 'yes') return `<span class="interest-pill pill-waiting">◷ Waiting...</span>`
       return `<span class="interest-pill pill-pending">○ Pending</span>`
     }
@@ -1698,6 +1705,18 @@
       if (days < 30)      return `${Math.floor(days / 7)} weeks ago`
       if (days < 60)      return '1 month ago'
       return `${Math.floor(days / 30)} months ago`
+    }
+
+    // Tap-to-reveal interest timestamp — shows for 2s then fades
+    // Works on both mobile (tap) and desktop (click). Desktop also gets title hover.
+    let _interestDateTimer = null
+    function showInterestDate(e, pill) {
+      e.stopPropagation()
+      const span = pill.nextElementSibling
+      if (!span || !span.classList.contains('interest-date')) return
+      clearTimeout(_interestDateTimer)
+      span.classList.add('show')
+      _interestDateTimer = setTimeout(() => span.classList.remove('show'), 2000)
     }
 
     // Truncate POI for route display — keep first 44 chars of first segment
