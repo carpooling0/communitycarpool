@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
       font-family: 'DM Sans', system-ui, sans-serif;
       background: #f9fafb;
@@ -21,6 +22,7 @@
       justify-content: center;
       padding: 24px;
     }
+
     .card {
       background: white;
       border-radius: 16px;
@@ -28,111 +30,275 @@
       padding: 40px 36px;
       max-width: 480px;
       width: 100%;
-      text-align: center;
     }
-    .logo { margin-bottom: 28px; }
-    .logo img { height: 60px; width: auto; }
-    h1 { font-size: 22px; font-weight: 700; color: #111827; margin-bottom: 8px; }
+
+    .logo { text-align: center; margin-bottom: 28px; }
+    .logo img { height: 56px; width: auto; }
+
+    h1 { font-size: 21px; font-weight: 700; color: #111827; margin-bottom: 6px; }
     .subtitle { font-size: 14px; color: #6b7280; margin-bottom: 28px; line-height: 1.5; }
-    .btn {
-      display: inline-block;
-      padding: 12px 28px;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      font-family: 'DM Sans', sans-serif;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.15s;
-      border: none;
-      width: 100%;
-      margin-bottom: 10px;
+
+    /* Preference rows */
+    .pref-list {
+      display: flex; flex-direction: column;
+      border: 1.5px solid #e5e7eb; border-radius: 12px;
+      overflow: hidden; margin-bottom: 24px;
     }
-    .btn-unsubscribe {
-      background: #fee2e2;
-      color: #dc2626;
+
+    .pref-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; padding: 18px 20px;
+      border-bottom: 1px solid #e5e7eb;
+      background: white;
+    }
+    .pref-row:last-child { border-bottom: none; }
+
+    .pref-text { flex: 1; }
+    .pref-label { font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 2px; }
+    .pref-desc  { font-size: 13px; color: #6b7280; line-height: 1.4; }
+
+    /* Toggle switch */
+    .toggle { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
+    .toggle input { display: none; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: #d1d5db;
+      border-radius: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      left: 3px; top: 3px;
+      background: white; border-radius: 50%;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .toggle input:checked + .toggle-track { background: #16a34a; }
+    .toggle input:checked + .toggle-track::after { transform: translateX(20px); }
+
+    /* Buttons */
+    .btn {
+      display: block; width: 100%;
+      padding: 13px 20px; border-radius: 10px;
+      font-size: 15px; font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer; border: none;
+      transition: all 0.15s; text-align: center;
+    }
+    .btn-save { background: #16a34a; color: white; margin-bottom: 12px; }
+    .btn-save:hover { background: #15803d; }
+    .btn-save:disabled { background: #9ca3af; cursor: not-allowed; }
+
+    .btn-unsub-all {
+      background: none; color: #dc2626;
       border: 1.5px solid #fca5a5;
     }
-    .btn-unsubscribe:hover { background: #dc2626; color: white; }
-    .btn-keep {
-      background: #16a34a;
-      color: white;
-      border: 1.5px solid #16a34a;
-    }
-    .btn-keep:hover { background: #15803d; }
+    .btn-unsub-all:hover { background: #fef2f2; }
+    .btn-unsub-all:disabled { opacity: 0.5; cursor: not-allowed; }
+
     .divider { border: none; border-top: 1px solid #e5e7eb; margin: 20px 0; }
-    .footer-links { font-size: 13px; color: #9ca3af; }
-    .footer-links a { color: #6b7280; text-decoration: none; }
-    .footer-links a:hover { color: #16a34a; }
-    .success-state { display: none; }
-    .success-icon { font-size: 48px; margin-bottom: 16px; }
+
+    .btn-back {
+      display: block; text-align: center;
+      font-size: 14px; color: #6b7280; text-decoration: none; padding: 8px;
+    }
+    .btn-back:hover { color: #16a34a; }
+
+    /* Status messages */
+    .status-msg {
+      display: none; padding: 12px 16px; border-radius: 8px;
+      font-size: 14px; font-weight: 500; margin-bottom: 16px; text-align: center;
+    }
+    .status-msg.success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+    .status-msg.error   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .status-msg.show    { display: block; }
+
+    /* Loading spinner */
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid #e5e7eb; border-top-color: #16a34a;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 8px auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .hidden { display: none; }
+
+    @media (max-width: 480px) {
+      .card { padding: 28px 20px; }
+    }
   </style>
 </head>
 <body>
-  <div class="card" id="mainCard">
+
+  <div class="card">
     <div class="logo">
       <a href="https://communitycarpool.org">
         <img src="logo_with_slogan.png" alt="Community Carpool" />
       </a>
     </div>
 
-    <div id="defaultState">
-      <h1>Email Preferences</h1>
-      <p class="subtitle">You're currently receiving match notification emails from Community Carpool. Would you like to unsubscribe?</p>
-
-      <button class="btn btn-unsubscribe" id="unsubBtn">Unsubscribe from emails</button>
-      <a href="https://communitycarpool.org/matches.html" id="dashboardLink" class="btn btn-keep">↩ Back to My Matches</a>
-
-      <hr class="divider" />
-      <div class="footer-links">
-        <a href="https://communitycarpool.org">communitycarpool.org</a>
-        &nbsp;·&nbsp;
-        <a href="https://communitycarpool.org/support.html">Support</a>
-      </div>
+    <!-- Loading -->
+    <div id="stateLoading" style="text-align:center;padding:16px 0;">
+      <div class="spinner"></div>
+      <p style="font-size:14px;color:#6b7280;">Loading your preferences…</p>
     </div>
 
-    <div id="successState" class="success-state">
-      <div class="success-icon">✉️</div>
-      <h1>You've been unsubscribed</h1>
-      <p class="subtitle" style="margin-bottom:24px;">You won't receive match notification emails from Community Carpool. Your journey registrations remain active.</p>
-      <a href="https://communitycarpool.org" class="btn btn-keep">Go to Homepage</a>
+    <!-- No token -->
+    <div id="stateNoToken" class="hidden" style="text-align:center;">
+      <h1>Email Preferences</h1>
+      <p style="font-size:14px;color:#6b7280;margin-top:12px;margin-bottom:24px;line-height:1.6;">
+        This page requires an unsubscribe link from one of our emails.<br>
+        If you'd like to update your preferences, please contact us.
+      </p>
+      <a href="support.html" style="display:block;padding:13px;background:#16a34a;color:white;border-radius:10px;text-decoration:none;font-weight:600;font-size:15px;">Contact Support</a>
+    </div>
+
+    <!-- Main state -->
+    <div id="stateMain" class="hidden">
+      <h1>Email Preferences</h1>
+      <p class="subtitle">Choose what you'd like to receive from Community Carpool.</p>
+
+      <div id="statusMsg" class="status-msg"></div>
+
+      <div class="pref-list">
+        <div class="pref-row">
+          <div class="pref-text">
+            <div class="pref-label">Match notifications</div>
+            <div class="pref-desc">Get notified when new carpool matches are found for your journeys</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="toggleMatches" checked>
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+
+        <div class="pref-row">
+          <div class="pref-text">
+            <div class="pref-label">Match reminders</div>
+            <div class="pref-desc">Follow-up reminders for matches awaiting your response</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="toggleReminders" checked>
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+
+        <div class="pref-row">
+          <div class="pref-text">
+            <div class="pref-label">Product updates</div>
+            <div class="pref-desc">Platform news and improvements</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="toggleMarketing" checked>
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+      </div>
+
+      <button class="btn btn-save" id="saveBtn" onclick="savePrefs()">Save Preferences</button>
+      <button class="btn btn-unsub-all" id="unsubAllBtn" onclick="unsubscribeAll()">Unsubscribe from all emails</button>
+
       <hr class="divider" />
-      <div class="footer-links">Changed your mind? <a href="https://communitycarpool.org/support.html">Contact us</a> to re-subscribe.</div>
+      <a href="#" id="backLink" class="btn-back">↩ Back to My Matches</a>
     </div>
   </div>
 
   <script>
-    const SUPABASE_URL = 'https://tbkjealpnoriwdosvmju.supabase.co'
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRia2plYWxwbm9yaXdkb3N2bWp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk3NjI0NTQsImV4cCI6MjA1NTMzODQ1NH0.K0iS87GLgAZhYwFIQNphVFrarMzFxECkFYFvxpeVcsA'
+    const SUPABASE_URL  = 'https://tbkjealpnoriwdosvmju.supabase.co'
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRia2plYWxwbm9yaXdkb3N2bWp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk3NjI0NTQsImV4cCI6MjA1NTMzODQ1NH0.K0iS87GLgAZhYwFIQNphVFrarMzFxECkFYFvxpeVcsA'
 
     const params = new URLSearchParams(window.location.search)
-    const token = params.get('token')
+    const token  = params.get('token')
 
-    // Set the "Back to Matches" link with token if available
-    if (token) {
-      document.getElementById('dashboardLink').href = `https://communitycarpool.org/matches.html?token=${token}`
+    const $ = id => document.getElementById(id)
+
+    function showStatus(msg, type) {
+      const el = $('statusMsg')
+      el.textContent = msg
+      el.className = 'status-msg ' + type + ' show'
+      setTimeout(() => el.classList.remove('show'), 4000)
     }
 
-    document.getElementById('unsubBtn').addEventListener('click', async () => {
-      const btn = document.getElementById('unsubBtn')
-      btn.textContent = 'Unsubscribing...'
-      btn.disabled = true
+    function show(stateId) {
+      ['stateLoading','stateNoToken','stateMain'].forEach(id => {
+        $(id).classList.toggle('hidden', id !== stateId)
+      })
+    }
+
+    async function init() {
+      if (!token) { show('stateNoToken'); return }
+
+      $('backLink').href = `https://communitycarpool.org/matches.html?token=${token}`
 
       try {
-        if (token) {
-          // Track unsubscribe event via track-event edge function
-          await fetch(`${SUPABASE_URL}/functions/v1/track-event`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-            body: JSON.stringify({ eventType: 'unsubscribed', token })
-          })
-        }
-      } catch (e) { /* silent fail — still show success */ }
+        const res  = await fetch(`${SUPABASE_URL}/functions/v1/update-email-prefs?token=${encodeURIComponent(token)}`, {
+          headers: { 'Authorization': `Bearer ${SUPABASE_ANON}` }
+        })
+        const data = await res.json()
 
-      // Show success state
-      document.getElementById('defaultState').style.display = 'none'
-      document.getElementById('successState').style.display = 'block'
-    })
+        if (data.success && data.prefs) {
+          // Toggle ON (checked = green) means subscribed = unsubscribed_* is false
+          $('toggleMatches').checked   = !data.prefs.unsubscribed_matches
+          $('toggleReminders').checked = !data.prefs.unsubscribed_reminders
+          $('toggleMarketing').checked = !data.prefs.unsubscribed_marketing
+        }
+      } catch(e) {
+        // Default all ON — safe fallback if fetch fails
+      }
+
+      show('stateMain')
+    }
+
+    async function savePrefs() {
+      const btn = $('saveBtn')
+      btn.disabled = true; btn.textContent = 'Saving…'
+      try {
+        const res  = await fetch(`${SUPABASE_URL}/functions/v1/update-email-prefs`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON}` },
+          body:    JSON.stringify({
+            token,
+            unsubscribedMatches:   !$('toggleMatches').checked,
+            unsubscribedReminders: !$('toggleReminders').checked,
+            unsubscribedMarketing: !$('toggleMarketing').checked
+          })
+        })
+        const data = await res.json()
+        showStatus(data.success ? '✓ Preferences saved' : 'Something went wrong. Please try again.', data.success ? 'success' : 'error')
+      } catch(e) {
+        showStatus('Unable to save. Please try again.', 'error')
+      }
+      btn.disabled = false; btn.textContent = 'Save Preferences'
+    }
+
+    async function unsubscribeAll() {
+      const btn = $('unsubAllBtn')
+      btn.disabled = true; btn.textContent = 'Unsubscribing…'
+
+      $('toggleMatches').checked   = false
+      $('toggleReminders').checked = false
+      $('toggleMarketing').checked = false
+
+      try {
+        const res  = await fetch(`${SUPABASE_URL}/functions/v1/update-email-prefs`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON}` },
+          body:    JSON.stringify({ token, unsubscribedMatches: true, unsubscribedReminders: true, unsubscribedMarketing: true })
+        })
+        const data = await res.json()
+        showStatus(data.success ? "✓ You've been unsubscribed from all emails" : 'Something went wrong. Please try again.', data.success ? 'success' : 'error')
+      } catch(e) {
+        showStatus('Unable to save. Please try again.', 'error')
+      }
+      btn.disabled = false; btn.textContent = 'Unsubscribe from all emails'
+    }
+
+    init()
   </script>
 </body>
 </html>

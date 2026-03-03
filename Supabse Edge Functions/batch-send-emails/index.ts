@@ -69,8 +69,8 @@ Deno.serve(async (req) => {
     const { data: unsentMatches, error } = await supabase.from('matches')
       .select(`
         match_id, sub_a_id, sub_b_id, match_strength,
-        sub_a:submissions!sub_a_id (submission_id, from_location, to_location, journey_num, user_id, users(name, email, match_page_token, email_whitelist)),
-        sub_b:submissions!sub_b_id (submission_id, from_location, to_location, journey_num, user_id, users(name, email, match_page_token, email_whitelist))
+        sub_a:submissions!sub_a_id (submission_id, from_location, to_location, journey_num, user_id, users(name, email, match_page_token, email_whitelist, unsubscribed_matches, deletion_requested_at)),
+        sub_b:submissions!sub_b_id (submission_id, from_location, to_location, journey_num, user_id, users(name, email, match_page_token, email_whitelist, unsubscribed_matches, deletion_requested_at))
       `).eq('notification_sent', false).eq('status', 'new')
     if (error) throw error
     if (!unsentMatches || unsentMatches.length === 0) {
@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
     for (const match of unsentMatches) {
       for (const sub of [match.sub_a, match.sub_b]) {
         const userEmail = sub.users.email
-        if (!userMatches[userEmail]) userMatches[userEmail] = { name: sub.users.name, token: sub.users.match_page_token, userId: sub.user_id, emailWhitelist: sub.users.email_whitelist === true, newJourneys: {} }
+        if (!userMatches[userEmail]) userMatches[userEmail] = { name: sub.users.name, token: sub.users.match_page_token, userId: sub.user_id, emailWhitelist: sub.users.email_whitelist === true, unsubscribedMatches: sub.users.unsubscribed_matches === true, deletionRequested: !!sub.users.deletion_requested_at, newJourneys: {} }
         if (!userMatches[userEmail].newJourneys[sub.submission_id]) {
           userMatches[userEmail].newJourneys[sub.submission_id] = { journeyNum: sub.journey_num, fromLocation: sub.from_location, toLocation: sub.to_location, newMatchCount: 0 }
         }
@@ -97,6 +97,13 @@ Deno.serve(async (req) => {
     const successfullyEmailedMatchIds = new Set<number>()
 
     for (const [email, userData] of Object.entries(userMatches) as any) {
+      // ── HARD SKIP: unsubscribed or deletion requested — never email these users ──
+      if (userData.unsubscribedMatches || userData.deletionRequested) {
+        emailsSkipped++
+        console.log(`[SKIP] ${email} — unsubscribed: ${userData.unsubscribedMatches}, deletion pending: ${userData.deletionRequested}`)
+        continue
+      }
+
       // ── TESTING WHITELIST: skip non-whitelisted emails in testing mode ──
       // Whitelist is controlled per-user via users.email_whitelist = true
       if (testingMode && !userData.emailWhitelist) {

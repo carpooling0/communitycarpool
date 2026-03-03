@@ -13,21 +13,26 @@ async function getConfig(key: string): Promise<string> {
 
 async function sendAdminEmail(ticket: any): Promise<void> {
   const notifyEmail = await getConfig('support_notify_email')
-  if (!notifyEmail) return // no admin email configured — skip silently
+  if (!notifyEmail) return
 
   const resendKey = Deno.env.get('RESEND_API_KEY')
   if (!resendKey) return
 
   const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || ''
   const typeLabel: Record<string, string> = {
-    deletion: '🗑️ Data Deletion',
-    feedback: '⭐ Feedback',
-    success:  '🎉 Successful Match',
-    issue:    '⚠️ Issue Report'
+    deletion:    '🗑️ Data Deletion',
+    report_user: '⚠️ Report a User',
+    technical:   '🔧 Technical Issue'
   }
 
-  const rows = Object.entries(ticket.data)
-    .filter(([, v]) => v)
+  const fields: Record<string, string> = {}
+  if (ticket.email)                       fields['Submitted By']       = ticket.email
+  if (ticket.issue_against_subject_email) fields['Issue Against']      = ticket.issue_against_subject_email
+  if (ticket.issue_reported_type)         fields['Issue Type']         = ticket.issue_reported_type
+  if (ticket.details_note)                fields['Details']            = ticket.details_note
+  if (ticket.ip_address)                  fields['IP Address']         = ticket.ip_address
+
+  const rows = Object.entries(fields)
     .map(([k, v]) => `<tr><td style="padding:6px 12px;color:#6b7280;font-size:13px;">${k}</td><td style="padding:6px 12px;font-size:13px;">${v}</td></tr>`)
     .join('')
 
@@ -40,7 +45,6 @@ async function sendAdminEmail(ticket: any): Promise<void> {
           <tr style="background:#f9fafb;"><th style="padding:8px 12px;text-align:left;font-size:12px;color:#9ca3af;">FIELD</th><th style="padding:8px 12px;text-align:left;font-size:12px;color:#9ca3af;">VALUE</th></tr>
           ${rows}
         </table>
-        ${ticket.ip_address ? `<p style="margin-top:16px;font-size:12px;color:#9ca3af;">IP: ${ticket.ip_address}</p>` : ''}
       </div>
     </div></body></html>`
 
@@ -50,7 +54,7 @@ async function sendAdminEmail(ticket: any): Promise<void> {
     body: JSON.stringify({
       from: `Community Carpool Support <${fromEmail}>`,
       to: [notifyEmail],
-      subject: `[Support #${ticket.ticket_id}] ${typeLabel[ticket.request_type] || ticket.request_type}${ ticket.email ? ' — ' + ticket.email : '' }`,
+      subject: `[Support #${ticket.ticket_id}] ${typeLabel[ticket.request_type] || ticket.request_type}${ticket.email ? ' — ' + ticket.email : ''}`,
       html
     })
   })
@@ -69,25 +73,21 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Extract well-known fields for indexed columns; rest goes into data jsonb
-    const email = fields.email || null
-    const subjectEmail = fields.subjectEmail || null
-
     const { data: ticket, error } = await supabase
       .from('support_tickets')
       .insert({
-        request_type: requestType,
-        email,
-        subject_email: subjectEmail,
-        data: fields,
-        ip_address: ip || null
+        request_type:                requestType,
+        email:                       fields.email                || null,
+        issue_against_subject_email: fields.subjectEmail         || null,
+        issue_reported_type:         fields.issueDescription     || null,
+        details_note:                fields.details              || null,
+        ip_address:                  ip                          || null
       })
       .select()
       .single()
 
     if (error) throw error
 
-    // Fire admin notification — non-blocking (don't fail the response if email fails)
     sendAdminEmail(ticket).catch(e => console.error('Admin notify failed:', e))
 
     return new Response(JSON.stringify({ success: true, ticketId: ticket.ticket_id }), {
