@@ -325,6 +325,13 @@
                     </div>
                 </div>
 
+                <!-- Deletion warning (shown only when deletion radio is selected) -->
+                <div id="deletionWarning" class="hidden" style="background:#fef2f2; border:1.5px solid #fca5a5; border-radius:10px; padding:14px 16px; margin-bottom:18px;">
+                    <p style="color:#991b1b; font-size:13px; line-height:1.6; margin:0;">
+                        ⚠️ <strong>Permanent deletion.</strong> All your journeys, matches and account data will be removed after a retention period. A verification email will be sent to confirm your identity before anything is deleted.
+                    </p>
+                </div>
+
                 <!-- Shared details -->
                 <div class="form-group">
                     <label for="details">Details <span class="required">*</span></label>
@@ -369,6 +376,28 @@
         <a href="#" onclick="openFeedbackModal(); return false;">Feedback</a>
     </footer>
 
+    <!-- Deletion Confirmation Popup -->
+    <div id="deletionPopupOverlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;">
+        <div style="background:white;border-radius:16px;padding:32px 28px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+            <div style="font-size:40px;margin-bottom:16px;text-align:center;">🔐</div>
+            <h3 style="font-size:18px;font-weight:700;color:#1e293b;margin-bottom:14px;text-align:center;">Email Verification Required</h3>
+            <p style="font-size:14px;color:#374151;line-height:1.7;margin-bottom:14px;">
+                We've sent a confirmation link to <strong id="deletionEmailDisplay"></strong>. The link expires in 24 hours.
+            </p>
+            <p style="font-size:14px;color:#374151;line-height:1.7;margin-bottom:14px;">
+                Once confirmed, your account data, journeys and matches are retained for up to 30 days before being permanently deleted. You can contact us any time within that window to cancel.
+            </p>
+            <hr style="border:none;border-top:1px solid #e2e8f0;margin:16px 0;">
+            <p style="font-size:13px;color:#64748b;line-height:1.6;margin-bottom:20px;">
+                If you changed your mind and want to remain, simply ignore the email sent to you. Your data will <strong>not</strong> be deleted.
+            </p>
+            <button onclick="document.getElementById('deletionPopupOverlay').classList.add('hidden')"
+                style="width:100%;padding:13px;background:#10b981;color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
+                Close
+            </button>
+        </div>
+    </div>
+
     <!-- Feedback Modal -->
     <div id="feedbackOverlay" class="feedback-overlay hidden">
         <div class="feedback-modal">
@@ -410,8 +439,11 @@
         const reportUserFields = document.getElementById('reportUserFields');
         const detailsInput     = document.getElementById('details');
 
+        const SUPABASE_URL  = 'https://tbkjealpnoriwdosvmju.supabase.co';
+        const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRia2plYWxwbm9yaXdkb3N2bWp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk3NjI0NTQsImV4cCI6MjA1NTMzODQ1NH0.K0iS87GLgAZhYwFIQNphVFrarMzFxECkFYFvxpeVcsA';
+
         const detailsPlaceholders = {
-            deletion:    'e.g. Delete Journey #5 only, or delete all my journeys...',
+            deletion:    'Tell us why you\'re leaving (optional)...',
             report_user: 'Please explain the issue in detail...',
             technical:   'Please describe what is not working...'
         };
@@ -444,8 +476,11 @@
                 this.closest('.radio-option').classList.add('selected');
                 clearValidation();
 
+                const isDeletion = this.value === 'deletion';
                 reportUserFields.classList.toggle('hidden', this.value !== 'report_user');
+                document.getElementById('deletionWarning').classList.toggle('hidden', !isDeletion);
                 detailsInput.placeholder = detailsPlaceholders[this.value] || 'Please provide any details...';
+                submitBtn.textContent = isDeletion ? 'Send Verification Email →' : 'Submit';
             });
         });
 
@@ -454,6 +489,39 @@
             e.preventDefault();
             if (!validateForm()) return;
 
+            const requestType = document.querySelector('input[name="requestType"]:checked')?.value;
+
+            // ── DATA DELETION: send verification email, show popup ──
+            if (requestType === 'deletion') {
+                const email = document.getElementById('email').value.trim();
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Sending…';
+
+                try {
+                    // Create support ticket for record-keeping (non-blocking)
+                    fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ requestType: 'deletion', email, details: detailsInput.value.trim(), ip: userIP || 'unknown' })
+                    }).catch(() => {});
+
+                    // Trigger deletion verification email
+                    await fetch(`${SUPABASE_URL}/functions/v1/manage-deletion`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON}` },
+                        body: JSON.stringify({ email })
+                    });
+                } catch(err) { /* silent — still show popup */ }
+
+                // Show confirmation popup
+                document.getElementById('deletionEmailDisplay').textContent = email;
+                document.getElementById('deletionPopupOverlay').classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send Verification Email →';
+                return;
+            }
+
+            // ── ALL OTHER TYPES: standard flow ──
             submitBtn.disabled = true;
             submitBtn.textContent = 'Submitting...';
 
@@ -510,7 +578,8 @@
                 }
             }
 
-            if (!document.getElementById('details').value) {
+            // Details optional for deletion (reason is voluntary), required for everything else
+            if (type.value !== 'deletion' && !document.getElementById('details').value) {
                 showMessage('Please provide details.', 'error');
                 return false;
             }
