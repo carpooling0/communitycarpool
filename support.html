@@ -377,7 +377,7 @@
     </footer>
 
     <!-- Deletion Confirmation Popup -->
-    <div id="deletionPopupOverlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;">
+    <div id="deletionPopupOverlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:1000;padding:20px;display:none;">
         <div style="background:white;border-radius:16px;padding:32px 28px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
             <div style="font-size:40px;margin-bottom:16px;text-align:center;">🔐</div>
             <h3 style="font-size:18px;font-weight:700;color:#1e293b;margin-bottom:14px;text-align:center;">Email Verification Required</h3>
@@ -391,7 +391,7 @@
             <p style="font-size:13px;color:#64748b;line-height:1.6;margin-bottom:20px;">
                 If you changed your mind and want to remain, simply ignore the email sent to you. Your data will <strong>not</strong> be deleted.
             </p>
-            <button onclick="document.getElementById('deletionPopupOverlay').classList.add('hidden')"
+            <button onclick="const p=document.getElementById('deletionPopupOverlay');p.style.display='none';p.classList.add('hidden');"
                 style="width:100%;padding:13px;background:#10b981;color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
                 Close
             </button>
@@ -515,7 +515,9 @@
 
                 // Show confirmation popup
                 document.getElementById('deletionEmailDisplay').textContent = email;
-                document.getElementById('deletionPopupOverlay').classList.remove('hidden');
+                const popup = document.getElementById('deletionPopupOverlay');
+                popup.classList.remove('hidden');
+                popup.style.display = 'flex';
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Send Verification Email →';
                 return;
