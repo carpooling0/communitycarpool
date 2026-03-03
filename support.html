@@ -226,6 +226,44 @@
             .thank-you-icon { font-size: 60px; }
             .thank-you h2 { font-size: 24px; }
         }
+
+        /* Footer */
+        .footer { text-align: center; padding: 20px; font-size: 13px; color: #94a3b8; }
+        .footer a { color: #94a3b8; text-decoration: none; }
+        .footer a:hover { color: #10b981; }
+
+        /* Feedback Modal */
+        .feedback-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000; padding: 20px;
+        }
+        .feedback-overlay.hidden { display: none; }
+        .feedback-modal {
+            background: white; border-radius: 16px; padding: 28px 24px;
+            width: 100%; max-width: 440px; position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .feedback-modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0;
+        }
+        .feedback-modal-header span { font-size: 14px; font-weight: 600; color: #64748b; }
+        .feedback-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #64748b; }
+        .feedback-title { font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+        .feedback-subtitle { font-size: 14px; color: #64748b; margin-bottom: 22px; }
+        .star-row { display: flex; align-items: center; gap: 8px; margin-bottom: 22px; }
+        .star-row .stars { display: flex; gap: 6px; }
+        .star-btn { background: none; border: none; font-size: 30px; cursor: pointer; color: #d1d5db; transition: color 0.15s; padding: 0; line-height: 1; }
+        .star-btn.active { color: #f59e0b; }
+        .star-count { font-size: 15px; color: #64748b; font-weight: 600; min-width: 32px; }
+        .feedback-label { font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 8px; }
+        .feedback-textarea { width: 100%; border: 2px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; font-size: 14px; font-family: inherit; resize: vertical; min-height: 90px; color: #1e293b; }
+        .feedback-textarea:focus { outline: none; border-color: #10b981; }
+        .feedback-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-submit-feedback { flex: 1; background: #10b981; color: white; border: none; border-radius: 10px; padding: 13px; font-size: 15px; font-weight: 600; cursor: pointer; }
+        .btn-submit-feedback:disabled { background: #9ca3af; cursor: not-allowed; }
+        .btn-skip-feedback { background: none; border: 2px solid #e2e8f0; border-radius: 10px; padding: 13px 18px; font-size: 15px; font-weight: 500; color: #64748b; cursor: pointer; }
     </style>
 </head>
 
@@ -301,6 +339,42 @@
             <div class="thank-you-icon">✅</div>
             <h2>Thank You!</h2>
             <p>Your request has been submitted successfully.<br>We will review it and get back to you if needed.</p>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <a href="https://communitycarpool.org/support.html">Support</a> &nbsp;·&nbsp;
+        <a href="https://communitycarpool.org/terms.html">Terms</a> &nbsp;·&nbsp;
+        <a href="#" onclick="openFeedbackModal(); return false;">Feedback</a>
+    </footer>
+
+    <!-- Feedback Modal -->
+    <div id="feedbackOverlay" class="feedback-overlay hidden">
+        <div class="feedback-modal">
+            <div class="feedback-modal-header">
+                <span>Rate your experience</span>
+                <button class="feedback-close" onclick="closeFeedbackModal()">✕</button>
+            </div>
+            <div class="feedback-title">How was your CommunityCarpool experience?</div>
+            <div class="feedback-subtitle">Your honest feedback helps us improve for everyone.</div>
+            <div class="star-row">
+                <div class="stars">
+                    <button class="star-btn" data-val="1" onclick="setRating(1)">★</button>
+                    <button class="star-btn" data-val="2" onclick="setRating(2)">★</button>
+                    <button class="star-btn" data-val="3" onclick="setRating(3)">★</button>
+                    <button class="star-btn" data-val="4" onclick="setRating(4)">★</button>
+                    <button class="star-btn" data-val="5" onclick="setRating(5)">★</button>
+                </div>
+                <span class="star-count" id="starCount">0 / 5</span>
+            </div>
+            <div class="feedback-label">Your feedback <span style="font-weight:400;color:#64748b">(optional)</span></div>
+            <textarea class="feedback-textarea" id="feedbackComment" placeholder="Where did you struggle? What could be improved?"></textarea>
+            <!-- Honeypot -->
+            <input type="text" id="feedbackHoneypot" style="display:none" tabindex="-1" autocomplete="off">
+            <div class="feedback-actions">
+                <button class="btn-submit-feedback" id="feedbackSubmitBtn" onclick="submitFeedback()" disabled>Submit Rating</button>
+                <button class="btn-skip-feedback" onclick="closeFeedbackModal()">Skip</button>
+            </div>
         </div>
     </div>
 
@@ -429,6 +503,66 @@
             message.className = 'message ' + type + ' show';
             message.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
+    </script>
+
+    <script>
+        const FEEDBACK_URL = 'https://tbkjealpnoriwdosvmju.supabase.co/functions/v1/submit-feedback';
+        let _fbRating = 0, _fbOpenedAt = null;
+
+        function openFeedbackModal() {
+            if (localStorage.getItem('fb_shown_support')) return;
+            _fbRating = 0; _fbOpenedAt = Date.now();
+            document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('starCount').textContent = '0 / 5';
+            document.getElementById('feedbackComment').value = '';
+            document.getElementById('feedbackHoneypot').value = '';
+            document.getElementById('feedbackSubmitBtn').disabled = true;
+            document.getElementById('feedbackOverlay').classList.remove('hidden');
+        }
+
+        function closeFeedbackModal() {
+            document.getElementById('feedbackOverlay').classList.add('hidden');
+        }
+
+        function setRating(val) {
+            _fbRating = val;
+            document.querySelectorAll('.star-btn').forEach(b => {
+                b.classList.toggle('active', parseInt(b.dataset.val) <= val);
+            });
+            document.getElementById('starCount').textContent = val + ' / 5';
+            document.getElementById('feedbackSubmitBtn').disabled = false;
+        }
+
+        async function submitFeedback() {
+            if (_fbRating < 1) return;
+            const btn = document.getElementById('feedbackSubmitBtn');
+            btn.disabled = true; btn.textContent = 'Submitting…';
+            try {
+                const res = await fetch(FEEDBACK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        rating: _fbRating,
+                        comment: document.getElementById('feedbackComment').value.trim() || null,
+                        source: 'footer_link',
+                        pageContext: 'support',
+                        formOpenedAt: _fbOpenedAt,
+                        honeypot: document.getElementById('feedbackHoneypot').value || null
+                    })
+                });
+                const data = await res.json();
+                if (data.success || data.error === 'Already submitted') {
+                    localStorage.setItem('fb_shown_support', '1');
+                    closeFeedbackModal();
+                }
+            } catch(e) {
+                btn.disabled = false; btn.textContent = 'Submit Rating';
+            }
+        }
+
+        document.getElementById('feedbackOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeFeedbackModal();
+        });
     </script>
 </body>
 
