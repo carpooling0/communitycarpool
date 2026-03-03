@@ -920,6 +920,59 @@
       .actions-cell.stacked { gap: 6px; }
     }
 
+    /* ── FEEDBACK MODAL ── */
+    .feedback-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; padding: 20px;
+    }
+    .feedback-overlay.hidden { display: none; }
+    .feedback-modal {
+      background: white; border-radius: 16px; padding: 28px 24px;
+      width: 100%; max-width: 440px; position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .feedback-modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
+    }
+    .feedback-modal-header span { font-size: 14px; font-weight: 600; color: var(--text-secondary); }
+    .feedback-close {
+      background: none; border: none; font-size: 20px; cursor: pointer;
+      color: var(--text-secondary); line-height: 1; padding: 0;
+    }
+    .feedback-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .feedback-subtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 22px; }
+    .star-row { display: flex; align-items: center; gap: 8px; margin-bottom: 22px; }
+    .star-row .stars { display: flex; gap: 6px; }
+    .star-btn {
+      background: none; border: none; font-size: 30px; cursor: pointer;
+      color: #d1d5db; transition: color 0.15s; padding: 0; line-height: 1;
+    }
+    .star-btn.active { color: #f59e0b; }
+    .star-count { font-size: 15px; color: var(--text-secondary); font-weight: 600; min-width: 32px; }
+    .feedback-label { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+    .feedback-textarea {
+      width: 100%; border: 2px solid var(--border); border-radius: 10px;
+      padding: 12px 14px; font-size: 14px; font-family: inherit;
+      resize: vertical; min-height: 90px; color: var(--text);
+      transition: border-color 0.2s;
+    }
+    .feedback-textarea:focus { outline: none; border-color: var(--green); }
+    .feedback-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-submit-feedback {
+      flex: 1; background: var(--green); color: white; border: none;
+      border-radius: 10px; padding: 13px; font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-submit-feedback:hover { background: var(--green-dark); }
+    .btn-submit-feedback:disabled { background: #9ca3af; cursor: not-allowed; }
+    .btn-skip-feedback {
+      background: none; border: 2px solid var(--border); border-radius: 10px;
+      padding: 13px 18px; font-size: 15px; font-weight: 500; color: var(--text-secondary);
+      cursor: pointer; transition: border-color 0.2s;
+    }
+    .btn-skip-feedback:hover { border-color: #9ca3af; }
   </style>
 </head>
 <body>
@@ -995,7 +1048,8 @@
   <footer class="footer">
     <a href="https://communitycarpool.org/support.html">Support</a> &nbsp;·&nbsp;
     <a href="https://communitycarpool.org/terms.html">Terms</a> &nbsp;·&nbsp;
-    <a href="#" id="unsubscribeLink">Unsubscribe</a>
+    <a href="#" id="unsubscribeLink">Unsubscribe</a> &nbsp;·&nbsp;
+    <a href="#" onclick="openFeedbackModal('footer_link', null); return false;">Feedback</a>
   </footer>
 
   <script>
@@ -1767,6 +1821,8 @@
         await trackEvent('carpooling_reported', matchId, submissionId)
         carpoolPending.delete(matchId)                 // release: DB is now updated
         showToast('🌿 Thank you! Every shared ride counts.', 'success')
+        // Show feedback modal 0.5s after carpool confirmed
+        setTimeout(() => openFeedbackModal('carpool_confirm', matchId), 500)
       }
       renderAllPanels()
       activateTab(activeJourneyIndex, false)
@@ -1906,6 +1962,124 @@
         })
       } catch(e) { /* silent fail */ }
     }
+  </script>
+
+  <!-- ── FEEDBACK MODAL ── -->
+  <div id="feedbackOverlay" class="feedback-overlay hidden">
+    <div class="feedback-modal">
+      <div class="feedback-modal-header">
+        <span>Rate your experience</span>
+        <button class="feedback-close" onclick="closeFeedbackModal()">✕</button>
+      </div>
+      <div class="feedback-title">How was your CommunityCarpool experience?</div>
+      <div class="feedback-subtitle">Your honest feedback helps us improve for everyone.</div>
+
+      <div class="star-row">
+        <div class="stars" id="starRow">
+          <button class="star-btn" data-val="1" onclick="setRating(1)">★</button>
+          <button class="star-btn" data-val="2" onclick="setRating(2)">★</button>
+          <button class="star-btn" data-val="3" onclick="setRating(3)">★</button>
+          <button class="star-btn" data-val="4" onclick="setRating(4)">★</button>
+          <button class="star-btn" data-val="5" onclick="setRating(5)">★</button>
+        </div>
+        <span class="star-count" id="starCount">0 / 5</span>
+      </div>
+
+      <div class="feedback-label">Your feedback <span style="font-weight:400;color:var(--text-secondary)">(optional)</span></div>
+      <textarea class="feedback-textarea" id="feedbackComment" placeholder="Where did you struggle? What could be improved?"></textarea>
+
+      <!-- Honeypot — hidden from humans, filled by bots -->
+      <input type="text" id="feedbackHoneypot" style="display:none" tabindex="-1" autocomplete="off">
+
+      <div class="feedback-actions">
+        <button class="btn-submit-feedback" id="feedbackSubmitBtn" onclick="submitFeedback()" disabled>Submit Rating</button>
+        <button class="btn-skip-feedback" onclick="closeFeedbackModal()">Skip</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── FEEDBACK MODAL STATE ──
+    let _feedbackRating    = 0
+    let _feedbackSource    = null
+    let _feedbackMatchId   = null
+    let _feedbackOpenedAt  = null
+
+    function openFeedbackModal(source, matchId) {
+      // localStorage guard — don't re-show for same match
+      const key = `fb_shown_${matchId || source}`
+      if (localStorage.getItem(key)) return
+
+      _feedbackRating   = 0
+      _feedbackSource   = source
+      _feedbackMatchId  = matchId
+      _feedbackOpenedAt = Date.now()
+
+      // Reset UI
+      document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'))
+      document.getElementById('starCount').textContent = '0 / 5'
+      document.getElementById('feedbackComment').value = ''
+      document.getElementById('feedbackHoneypot').value = ''
+      document.getElementById('feedbackSubmitBtn').disabled = true
+
+      document.getElementById('feedbackOverlay').classList.remove('hidden')
+    }
+
+    function closeFeedbackModal() {
+      document.getElementById('feedbackOverlay').classList.add('hidden')
+    }
+
+    function setRating(val) {
+      _feedbackRating = val
+      document.querySelectorAll('.star-btn').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.val) <= val)
+      })
+      document.getElementById('starCount').textContent = `${val} / 5`
+      document.getElementById('feedbackSubmitBtn').disabled = false
+    }
+
+    async function submitFeedback() {
+      if (_feedbackRating < 1) return
+      const btn = document.getElementById('feedbackSubmitBtn')
+      btn.disabled = true
+      btn.textContent = 'Submitting…'
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/submit-feedback`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            rating:       _feedbackRating,
+            comment:      document.getElementById('feedbackComment').value.trim() || null,
+            source:       _feedbackSource,
+            pageContext:  'matches',
+            token:        token || null,
+            matchId:      _feedbackMatchId,
+            formOpenedAt: _feedbackOpenedAt,
+            honeypot:     document.getElementById('feedbackHoneypot').value || null
+          })
+        })
+        const data = await res.json()
+        if (data.success || data.error === 'Already submitted') {
+          // Mark as shown so modal doesn't reappear
+          const key = `fb_shown_${_feedbackMatchId || _feedbackSource}`
+          localStorage.setItem(key, '1')
+          closeFeedbackModal()
+          showToast('Thank you for your feedback! 🙏', 'success')
+        } else {
+          btn.disabled = false
+          btn.textContent = 'Submit Rating'
+        }
+      } catch(e) {
+        btn.disabled = false
+        btn.textContent = 'Submit Rating'
+      }
+    }
+
+    // Close modal on overlay click
+    document.getElementById('feedbackOverlay').addEventListener('click', function(e) {
+      if (e.target === this) closeFeedbackModal()
+    })
   </script>
 
 </body>
