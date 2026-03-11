@@ -145,6 +145,11 @@
     .table-wrap { background: white; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; }
     table { width: 100%; border-collapse: collapse; }
     th { text-align: left; padding: 10px 14px; font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; background: #f9fafb; border-bottom: 1px solid var(--border); }
+    th.sortable { cursor: pointer; user-select: none; white-space: nowrap; transition: color 0.15s, background 0.15s; }
+    th.sortable:hover { color: var(--green-dark); background: #f0fdf4; }
+    th.sortable.sort-active { color: var(--green-dark); }
+    .sort-icon { display: inline-block; margin-left: 4px; font-style: normal; font-size: 12px; opacity: 0.3; vertical-align: middle; }
+    th.sortable.sort-active .sort-icon { opacity: 1; }
     td { padding: 11px 14px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
     tr.clickable { cursor: pointer; }
@@ -501,6 +506,11 @@ let ticketStatusFilter = 'all'
 let ticketPage = 1
 let ticketExpandedId = null
 let cachedTicketsData = null
+let ticketSortCol = 'created_at'
+let ticketSortDir = 'desc'
+let cachedDeletions = null
+let delSortCol = 'deletion_requested_at'
+let delSortDir = 'asc'
 let auditPage = 1
 let allAuditEntries = []
 let deletePendingUserId = null
@@ -937,6 +947,24 @@ async function setGrowthPeriod(period) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// SORT HELPERS
+// ═══════════════════════════════════════════════════════════════
+function sortCompare(a, b, col, dir) {
+  let va = a[col] ?? '', vb = b[col] ?? ''
+  if (typeof va === 'number' && typeof vb === 'number') return dir === 'asc' ? va - vb : vb - va
+  if (va && String(va).match(/^\d{4}-/)) { va = new Date(va); vb = new Date(vb) }
+  if (va instanceof Date) return dir === 'asc' ? va - vb : vb - va
+  va = String(va).toLowerCase(); vb = String(vb).toLowerCase()
+  return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va)
+}
+
+function thSort(label, col, sortCol, sortDir, fn) {
+  const active = sortCol === col
+  const icon = active ? (sortDir === 'asc' ? '↑' : '↓') : '↕'
+  return `<th class="sortable${active ? ' sort-active' : ''}" onclick="${fn}('${col}')">${label}<span class="sort-icon">${icon}</span></th>`
+}
+
+// ═══════════════════════════════════════════════════════════════
 // TICKETS
 // ═══════════════════════════════════════════════════════════════
 const loadTicketsDebounced = debounce(() => { ticketPage = 1; loadTickets() }, 350)
@@ -958,14 +986,27 @@ async function loadTickets() {
   renderTicketsFromCache()
 }
 
+function sortTickets(col) {
+  if (ticketSortCol === col) ticketSortDir = ticketSortDir === 'asc' ? 'desc' : 'asc'
+  else { ticketSortCol = col; ticketSortDir = 'asc' }
+  renderTicketsFromCache()
+}
+
 function renderTicketsFromCache() {
   if (!cachedTicketsData) return
   const data = cachedTicketsData
-  const tickets = data.tickets || []
-  if (!tickets.length) { document.getElementById('ticketsContent').innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>No tickets found</p></div>'; return }
+  const allTickets = data.tickets || []
+  if (!allTickets.length) { document.getElementById('ticketsContent').innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>No tickets found</p></div>'; return }
+
+  const tickets = [...allTickets].sort((a, b) => sortCompare(a, b, ticketSortCol, ticketSortDir))
 
   let html = `<div class="table-wrap"><table><thead><tr>
-    <th>#</th><th>Type</th><th>Submitted by</th><th>Created</th><th>Status</th><th style="width:32px"></th>
+    ${thSort('#', 'ticket_id', ticketSortCol, ticketSortDir, 'sortTickets')}
+    ${thSort('Type', 'request_type', ticketSortCol, ticketSortDir, 'sortTickets')}
+    ${thSort('Submitted by', 'email', ticketSortCol, ticketSortDir, 'sortTickets')}
+    ${thSort('Created', 'created_at', ticketSortCol, ticketSortDir, 'sortTickets')}
+    ${thSort('Status', 'status', ticketSortCol, ticketSortDir, 'sortTickets')}
+    <th style="width:32px"></th>
   </tr></thead><tbody>`
 
   for (const t of tickets) {
@@ -1078,16 +1119,37 @@ async function loadDeletions() {
   document.getElementById('deletionsContent').innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>'
   const data = await apiPost('deletions.list')
   if (!data.success) { document.getElementById('deletionsContent').innerHTML = `<div class="empty-state"><p>${esc(data.error)}</p></div>`; return }
+  cachedDeletions = data.deletions || []
+  renderDeletionsFromCache()
+}
 
-  const items = data.deletions || []
-  if (!items.length) { document.getElementById('deletionsContent').innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>No pending deletion requests</p></div>'; return }
+function sortDeletions(col) {
+  if (delSortCol === col) delSortDir = delSortDir === 'asc' ? 'desc' : 'asc'
+  else { delSortCol = col; delSortDir = 'asc' }
+  renderDeletionsFromCache()
+}
+
+function renderDeletionsFromCache() {
+  if (!cachedDeletions) return
+  const allItems = cachedDeletions
+  if (!allItems.length) { document.getElementById('deletionsContent').innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>No pending deletion requests</p></div>'; return }
+
+  // For "days left" sorting, attach a numeric value to each item
+  const items = allItems.map(it => ({ ...it, _days: daysLeft(it.deletion_token_expires_at) ?? 9999 }))
+  const sortCol = delSortCol === 'days_left' ? '_days' : delSortCol
+  const sorted = [...items].sort((a, b) => sortCompare(a, b, sortCol, delSortDir))
 
   let html = `<div class="table-wrap"><table><thead><tr>
-    <th>Name</th><th>Email</th><th>Requested</th><th>Scheduled Deletion</th><th>Days Left</th><th>Actions</th>
+    ${thSort('Name', 'name', delSortCol, delSortDir, 'sortDeletions')}
+    ${thSort('Email', 'email', delSortCol, delSortDir, 'sortDeletions')}
+    ${thSort('Requested', 'deletion_requested_at', delSortCol, delSortDir, 'sortDeletions')}
+    ${thSort('Scheduled Deletion', 'deletion_token_expires_at', delSortCol, delSortDir, 'sortDeletions')}
+    ${thSort('Days Left', 'days_left', delSortCol, delSortDir, 'sortDeletions')}
+    <th>Actions</th>
   </tr></thead><tbody>`
 
-  for (const it of items) {
-    const days = daysLeft(it.deletion_token_expires_at)
+  for (const it of sorted) {
+    const days = it._days === 9999 ? null : it._days
     const chipCls = days != null ? (days <= 3 ? 'chip-red' : days <= 7 ? 'chip-amber' : 'chip-green') : 'chip-green'
     html += `<tr>
       <td>${esc(it.name)}</td><td>${esc(it.email)}</td>
