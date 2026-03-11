@@ -42,6 +42,41 @@ function json(data: unknown, status = 200) {
   })
 }
 
+// ── Email helper ───────────────────────────────────────────────────────────────
+async function sendEmail(to: string, subject: string, html: string): Promise<void> {
+  const resendKey = Deno.env.get('RESEND_API_KEY')
+  const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || ''
+  if (!resendKey || !fromEmail) { console.warn('[admin-auth] Resend not configured — email not sent'); return }
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from: fromEmail, to, subject, html })
+  })
+}
+
+function passwordResetEmail(name: string, resetUrl: string): string {
+  return `
+    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#1a1a1a">
+      <div style="background:#15803d;padding:20px 32px;border-radius:8px 8px 0 0">
+        <h2 style="color:#fff;margin:0;font-size:20px">Community Carpool Admin</h2>
+      </div>
+      <div style="padding:32px;background:#fff;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
+        <p>Dear ${name},</p>
+        <p>We received a request to reset your admin password${name ? '' : ' and/or deletion PIN'}. Click the button below to proceed:</p>
+        <div style="text-align:center;margin:32px 0">
+          <a href="${resetUrl}" style="background:#15803d;color:#fff;text-decoration:none;padding:12px 28px;border-radius:6px;font-weight:bold;font-size:15px">
+            Reset Password &amp; PIN
+          </a>
+        </div>
+        <p style="font-size:13px;color:#6b7280">This link expires in <strong>1 hour</strong>. If you did not request a reset, you can safely ignore this email.</p>
+        <p style="font-size:13px;color:#6b7280">For security, do not share this link with anyone.</p>
+        <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0">
+        <p style="margin:0">Regards,</p>
+        <p style="margin:4px 0 0"><strong>Community Carpool</strong></p>
+      </div>
+    </div>`
+}
+
 // ── Main handler ───────────────────────────────────────────────────────────────
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -122,7 +157,7 @@ Deno.serve(async (req) => {
         return json({ error: 'Session expired or invalid' }, 401)
 
       const { data: admin } = await supabase.from('admin_users')
-        .select('admin_id, name, role, is_active, role_expires_at').eq('admin_id', session.admin_id).single()
+        .select('admin_id, name, role, is_active, role_expires_at, deletion_pin_hash').eq('admin_id', session.admin_id).single()
 
       if (!admin || !admin.is_active) return json({ error: 'Account deactivated' }, 401)
 
@@ -134,7 +169,8 @@ Deno.serve(async (req) => {
         adminId: admin.admin_id,
         name: admin.name,
         role: admin.role,
-        expiresAt: session.expires_at
+        expiresAt: session.expires_at,
+        hasPin: !!admin.deletion_pin_hash
       })
     }
 
@@ -143,6 +179,75 @@ Deno.serve(async (req) => {
       const { token } = body
       if (token) await supabase.from('admin_sessions').delete().eq('session_token', token)
       return json({ success: true })
+    }
+
+    // ── FORGOT PASSWORD — send reset link to admin email ──────────────────────
+    if (action === 'forgot_password') {
+      const { email } = body
+      if (!email) return json({ error: 'Email required' }, 400)
+
+      const { data: admin } = await supabase.from('admin_users')
+        .select('admin_id, name, is_active')
+        .eq('email', email.toLowerCase().trim()).single()
+
+      // Always return success — don't reveal whether the email exists
+      if (!admin || !admin.is_active) return json({ success: true })
+
+      // Generate 16-byte reset token (32 hex chars)
+      const resetToken = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+        .map(b => b.toString(16).padStart(2, '0')).join('')
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1 hour
+
+      await supabase.from('admin_users').update({
+        reset_token: resetToken,
+        reset_token_expires_at: expiresAt
+      }).eq('admin_id', admin.admin_id)
+
+      const adminUrl = Deno.env.get('ADMIN_URL') || 'https://communitycarpool.org/admin.html'
+      const resetUrl = `${adminUrl}?reset_token=${resetToken}`
+
+      await sendEmail(
+        email.toLowerCase().trim(),
+        'Reset your Community Carpool admin password',
+        passwordResetEmail(admin.name, resetUrl)
+      )
+
+      return json({ success: true })
+    }
+
+    // ── RESET PASSWORD — consume reset token, set new password (+ optional PIN) ─
+    if (action === 'reset_password') {
+      const { reset_token, new_password, new_pin } = body
+      if (!reset_token || !new_password) return json({ error: 'reset_token and new_password required' }, 400)
+      if (new_password.length < 8) return json({ error: 'Password must be at least 8 characters' }, 400)
+      if (new_pin !== undefined && new_pin !== null && new_pin !== '') {
+        if (!/^\d{6}$/.test(String(new_pin))) return json({ error: 'PIN must be exactly 6 digits' }, 400)
+      }
+
+      const { data: admin } = await supabase.from('admin_users')
+        .select('admin_id, name, reset_token_expires_at, is_active')
+        .eq('reset_token', reset_token).single()
+
+      if (!admin) return json({ error: 'Invalid or expired reset link.' }, 400)
+      if (!admin.is_active) return json({ error: 'Account deactivated.' }, 403)
+      if (new Date(admin.reset_token_expires_at) < new Date())
+        return json({ error: 'Reset link has expired. Please request a new one.' }, 400)
+
+      const updates: Record<string, unknown> = {
+        password_hash: await hashSecret(new_password),
+        reset_token: null,
+        reset_token_expires_at: null
+      }
+      if (new_pin !== undefined && new_pin !== null && new_pin !== '') {
+        updates.deletion_pin_hash = await hashSecret(String(new_pin))
+      }
+
+      await supabase.from('admin_users').update(updates).eq('admin_id', admin.admin_id)
+
+      // Invalidate all existing sessions so they must log in fresh
+      await supabase.from('admin_sessions').delete().eq('admin_id', admin.admin_id)
+
+      return json({ success: true, message: 'Password updated. Please log in.' })
     }
 
     return json({ error: 'Unknown action' }, 400)

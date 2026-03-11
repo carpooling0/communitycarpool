@@ -342,6 +342,24 @@ Deno.serve(async (req) => {
       return json({ success: true })
     }
 
+    // ── SELF-SERVICE: Change own deletion PIN (any role) ──────────────────────
+    if (action === 'admins.change_pin') {
+      const { currentPassword, newPin } = body
+      if (!currentPassword || !newPin) return json({ error: 'currentPassword and newPin required' }, 400)
+      if (!/^\d{6}$/.test(String(newPin))) return json({ error: 'PIN must be exactly 6 digits' }, 400)
+      const { data: adminRow } = await supabase.from('admin_users')
+        .select('admin_id, email, password_hash').eq('admin_id', admin.admin_id).single()
+      if (!adminRow) return json({ error: 'Account not found' }, 404)
+      const valid = await verifySecret(currentPassword, adminRow.password_hash)
+      if (!valid) return json({ error: 'Current password is incorrect' }, 403)
+      const pinHash = await hashSecret(String(newPin))
+      const { error } = await supabase.from('admin_users')
+        .update({ deletion_pin_hash: pinHash }).eq('admin_id', admin.admin_id)
+      if (error) throw error
+      await logAction(admin, 'admins.change_pin', adminRow.email, {}, clientIP)
+      return json({ success: true })
+    }
+
     // ── TEAM MANAGEMENT (super_admin only) ────────────────────────────────────
     if (action.startsWith('admins.') && !requireRole(admin, 'super_admin'))
       return json({ error: 'Insufficient permissions' }, 403)
