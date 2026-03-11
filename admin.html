@@ -153,6 +153,12 @@
     .note-text { font-size: 13px; color: var(--text); line-height: 1.55; white-space: pre-wrap; }
     .note-compose select { width: 100%; padding: 7px 10px; border-radius: 7px; border: 1px solid var(--border); font-size: 13px; font-family: inherit; color: var(--text); background: white; margin-bottom: 7px; cursor: pointer; }
     .note-compose select:focus { outline: none; border-color: var(--green); }
+    .email-frame { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 8px; }
+    .email-frame-header { background: #f9fafb; border-bottom: 1px solid var(--border); padding: 8px 12px; font-size: 12px; color: var(--text-secondary); }
+    .email-frame-body { padding: 12px; background: white; }
+    .email-frame-line { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; font-style: italic; }
+    .email-frame-footer { font-size: 13px; color: var(--text-secondary); margin-top: 6px; font-style: italic; }
+    .email-frame textarea { width: 100%; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px 10px; font-size: 13px; font-family: inherit; resize: vertical; background: white; }
     .note-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
     .note-divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 
@@ -886,7 +892,14 @@ async function loadTickets() {
                  <option value="">— pick a template —</option>
                  ${TICKET_TEMPLATES.map((tp,i) => `<option value="${i}">${esc(tp.label)}</option>`).join('')}
                </select>
-               <textarea id="note-${t.ticket_id}" rows="3" placeholder="Add a note or reply…" style="width:100%;resize:vertical"></textarea>
+               <div class="email-frame">
+                 <div class="email-frame-header">To: ${esc(t.email)}</div>
+                 <div class="email-frame-body">
+                   <div class="email-frame-line">Dear [Name],</div>
+                   <textarea id="note-${t.ticket_id}" rows="4" placeholder="Write your message here…"></textarea>
+                   <div class="email-frame-footer">Thank you.<br>Regards,<br><strong>Community Carpool Team</strong></div>
+                 </div>
+               </div>
              </div>
              <div class="note-actions">
                <button class="btn btn-ghost btn-sm" onclick="saveNote(${t.ticket_id},'internal',event)">🔒 Save Internal</button>
