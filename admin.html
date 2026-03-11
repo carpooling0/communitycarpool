@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin | Community Carpool</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="config.js"></script>
+  <style>
+    :root {
+      --green: #16a34a; --green-dark: #15803d; --green-light: #dcfce7;
+      --amber: #d97706; --amber-light: #fef3c7;
+      --red: #dc2626; --red-light: #fee2e2;
+      --blue: #2563eb; --blue-light: #dbeafe;
+      --bg: #f3f4f6; --card: #fff; --border: #e5e7eb;
+      --text: #111827; --text-secondary: #6b7280; --text-muted: #9ca3af;
+      --sidebar-w: 56px; --nav-w: 200px; --topbar-h: 56px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08); --radius: 10px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+    .hidden { display: none !important; }
+
+    /* LOGIN */
+    #loginScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); }
+    .login-card { background: var(--card); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.1); padding: 40px 36px; width: 360px; max-width: 100%; }
+    .login-logo { text-align: center; margin-bottom: 24px; }
+    .login-logo img { height: 52px; }
+    .login-title { font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 4px; }
+    .login-sub { font-size: 13px; color: var(--text-secondary); text-align: center; margin-bottom: 28px; }
+
+    /* FORMS */
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 9px 12px; border: 1.5px solid var(--border);
+      border-radius: 8px; font-size: 14px; font-family: inherit; background: white; outline: none; transition: border-color 0.15s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--green); }
+    .form-group textarea { resize: vertical; min-height: 68px; }
+    .error-msg { color: var(--red); font-size: 13px; margin-top: 6px; min-height: 16px; }
+
+    /* BUTTONS */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; border: none; transition: opacity 0.15s, background 0.15s; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--green); color: white; }
+    .btn-primary:hover:not(:disabled) { background: var(--green-dark); }
+    .btn-danger { background: var(--red); color: white; }
+    .btn-danger:hover:not(:disabled) { background: #b91c1c; }
+    .btn-ghost { background: transparent; color: var(--text-secondary); border: 1.5px solid var(--border); }
+    .btn-ghost:hover:not(:disabled) { background: var(--bg); }
+    .btn-ghost-red { background: transparent; color: var(--red); border: 1.5px solid var(--red); }
+    .btn-ghost-red:hover:not(:disabled) { background: var(--red-light); }
+    .btn-sm { padding: 6px 12px; font-size: 13px; }
+    .btn-full { width: 100%; justify-content: center; }
+
+    /* APP SHELL */
+    #app { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ICON STRIP */
+    .icon-strip { width: var(--sidebar-w); background: var(--green-dark); display: flex; flex-direction: column; align-items: center; padding: 10px 0; gap: 2px; flex-shrink: 0; z-index: 20; }
+    .icon-strip-logo { padding: 4px 0 10px; }
+    .icon-strip-logo img { height: 30px; width: 30px; object-fit: contain; border-radius: 6px; }
+    .nav-icon { position: relative; width: 40px; height: 40px; border: none; background: transparent; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.6); transition: background 0.15s, color 0.15s; }
+    .nav-icon:hover { background: rgba(255,255,255,0.12); color: white; }
+    .nav-icon.active { background: rgba(255,255,255,0.22); color: white; }
+    .nav-icon svg { width: 20px; height: 20px; }
+    .nav-icon .nav-tip { position: absolute; left: calc(100% + 10px); background: #1f2937; color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 100; }
+    .nav-icon:hover .nav-tip { opacity: 1; }
+    .icon-strip-spacer { flex: 1; }
+    .icon-strip-toggle { width: 36px; height: 36px; border: none; background: transparent; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.45); transition: color 0.15s; margin-bottom: 4px; }
+    .icon-strip-toggle:hover { color: white; }
+    .icon-strip-toggle svg { width: 16px; height: 16px; transition: transform 0.2s; }
+    #sidebar.collapsed .icon-strip-toggle svg { transform: rotate(180deg); }
+
+    /* NAV PANEL */
+    .nav-panel { width: var(--nav-w); background: white; border-right: 1px solid var(--border); padding: 14px 10px; overflow-y: auto; transition: width 0.2s, opacity 0.2s, padding 0.2s; flex-shrink: 0; }
+    #sidebar.collapsed .nav-panel { width: 0; opacity: 0; overflow: hidden; padding: 0; }
+    .nav-section-label { font-size: 10.5px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; padding: 12px 8px 4px; }
+    .nav-item { display: flex; align-items: center; width: 100%; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-secondary); transition: background 0.15s, color 0.15s; border: none; background: none; text-align: left; font-family: inherit; }
+    .nav-item:hover { background: #f9fafb; color: var(--text); }
+    .nav-item.active { background: var(--green-light); color: var(--green-dark); font-weight: 600; }
+
+    /* MAIN */
+    #mainContent { flex: 1; overflow-y: auto; display: flex; flex-direction: column; min-width: 0; }
+    .topbar { height: var(--topbar-h); background: white; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; position: sticky; top: 0; z-index: 10; }
+    .topbar-title { font-size: 16px; font-weight: 700; }
+    .topbar-user { font-size: 13px; color: var(--text-secondary); }
+    .topbar-user strong { color: var(--text); }
+    .panel { padding: 24px; }
+
+    /* KPI CARDS */
+    .kpi-grid { display: grid; gap: 14px; margin-bottom: 22px; }
+    .kpi-5 { grid-template-columns: repeat(5, 1fr); }
+    .kpi-4 { grid-template-columns: repeat(4, 1fr); }
+    .kpi-card { background: white; border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; }
+    .kpi-label { font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+    .kpi-value { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+    .kpi-sub { font-size: 12px; color: var(--text-secondary); }
+    .kpi-trend { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 6px; border-radius: 20px; margin-left: 4px; }
+    .kpi-trend.up { background: var(--green-light); color: #166534; }
+    .kpi-trend.dn { background: var(--red-light); color: #991b1b; }
+    .kpi-tip { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; background: var(--bg); color: var(--text-muted); font-size: 10px; font-weight: 700; cursor: default; position: relative; }
+    .kpi-tip:hover .kpi-tooltip { display: block; }
+    .kpi-tooltip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: #1f2937; color: white; font-size: 12px; font-weight: 400; padding: 6px 10px; border-radius: 6px; white-space: nowrap; z-index: 50; }
+
+    /* SECTION HEADERS */
+    .section-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .section-title { font-size: 15px; font-weight: 700; }
+    .section-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .divider { margin: 22px 0; border: none; border-top: 1px solid var(--border); }
+
+    /* CHART CARDS */
+    .chart-card { background: white; border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 0; }
+    .chart-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 14px; }
+    .chart-toggle { display: flex; gap: 3px; background: var(--bg); border-radius: 6px; padding: 2px; }
+    .chart-toggle button { border: none; background: transparent; padding: 5px 12px; border-radius: 5px; font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; font-family: inherit; transition: background 0.15s; }
+    .chart-toggle button.active { background: white; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .chart-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 22px; }
+    .chart-grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 14px; margin-bottom: 22px; }
+
+    /* LOCATION LIST */
+    .loc-list { list-style: none; }
+    .loc-list li { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .loc-list li:last-child { border-bottom: none; }
+    .loc-bar-wrap { display: flex; align-items: center; flex: 1; margin: 0 10px; }
+    .loc-bar { height: 6px; border-radius: 3px; background: var(--green-light); flex: 1; }
+    .loc-bar-inner { height: 100%; border-radius: 3px; background: var(--green); }
+    .loc-count { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+
+    /* TABLES */
+    .table-wrap { background: white; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 10px 14px; font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; background: #f9fafb; border-bottom: 1px solid var(--border); }
+    td { padding: 11px 14px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr.clickable { cursor: pointer; }
+    tr.clickable:hover td { background: #f9fafb; }
+    tr.row-expanded td { background: #f0fdf4 !important; }
+    .expand-row td { padding: 0; background: white !important; }
+    .expand-inner { padding: 14px 20px; border-top: 2px solid var(--green-light); }
+
+    /* BADGES */
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+    .bg-green { background: var(--green-light); color: #166534; }
+    .bg-amber { background: var(--amber-light); color: #92400e; }
+    .bg-gray { background: #f3f4f6; color: #374151; }
+    .bg-red { background: var(--red-light); color: #991b1b; }
+    .bg-blue { background: var(--blue-light); color: #1e40af; }
+    .bg-purple { background: #ede9fe; color: #6d28d9; }
+    .days-chip { padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .chip-red { background: var(--red-light); color: #991b1b; }
+    .chip-amber { background: var(--amber-light); color: #92400e; }
+    .chip-green { background: var(--green-light); color: #166534; }
+
+    /* FILTER BAR */
+    .filter-bar { display: flex; gap: 10px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
+    .filter-bar input { padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; outline: none; background: white; transition: border-color 0.15s; }
+    .filter-bar input:focus { border-color: var(--green); }
+    .pill-tabs { display: flex; gap: 3px; background: var(--bg); border-radius: 8px; padding: 3px; }
+    .pill-tab { border: none; padding: 5px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; color: var(--text-secondary); background: transparent; transition: background 0.15s; }
+    .pill-tab.active { background: white; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+    /* MODALS */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: flex; align-items: center; justify-content: center; }
+    .modal-card { background: white; border-radius: 16px; padding: 28px 30px; max-width: 480px; width: 90%; box-shadow: 0 8px 40px rgba(0,0,0,0.15); }
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+    .modal-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+    /* PIN INPUT */
+    .pin-row { display: flex; gap: 8px; justify-content: center; margin: 18px 0; }
+    .pin-row input { width: 44px; height: 52px; text-align: center; font-size: 22px; font-weight: 700; border: 2px solid var(--border); border-radius: 8px; outline: none; font-family: 'Inter', monospace; transition: border-color 0.15s; }
+    .pin-row input:focus { border-color: var(--green); }
+    .pin-row.shake input { border-color: var(--red); animation: shake 0.3s; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+
+    /* EMPTY STATE */
+    .empty-state { text-align: center; padding: 52px 24px; color: var(--text-secondary); }
+    .empty-icon { font-size: 36px; margin-bottom: 12px; }
+
+    /* INLINE FORM */
+    .inline-form { background: #f9fafb; border-radius: 10px; padding: 18px 20px; margin-bottom: 16px; border: 1.5px solid var(--border); }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* TOGGLE */
+    .toggle-wrap { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+    .toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: #d1d5db; border-radius: 20px; cursor: pointer; transition: background 0.2s; }
+    .toggle-slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 2px; bottom: 2px; background: white; border-radius: 50%; transition: transform 0.2s; }
+    .toggle input:checked + .toggle-slider { background: var(--green); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+    /* PAGINATION */
+    .pagination { display: flex; align-items: center; gap: 8px; padding: 14px 16px; border-top: 1px solid var(--border); }
+    .pagination-info { font-size: 13px; color: var(--text-secondary); flex: 1; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 24px; right: 24px; z-index: 1000; background: #1f2937; color: white; padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 500; transform: translateY(100px); opacity: 0; transition: transform 0.25s, opacity 0.25s; pointer-events: none; max-width: 340px; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: var(--green); }
+    .toast.error { background: var(--red); }
+
+    /* LOADING */
+    .loading { text-align: center; padding: 40px; color: var(--text-secondary); }
+    .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 8px; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* USER CARD */
+    .user-card { background: white; border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 16px; }
+    .user-card-hd { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .sub-accordion-hd { background: var(--bg); border-radius: 8px; padding: 10px 14px; margin: 8px 0 2px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+    .sub-accordion-hd:hover { background: #e5e7eb; }
+    .sub-accordion-body { display: none; padding: 4px 0 8px; }
+    .sub-accordion-body.open { display: block; }
+
+    /* RESPONSIVE */
+    @media (max-width: 1200px) { .kpi-5 { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 900px) { .kpi-5, .kpi-4 { grid-template-columns: repeat(2, 1fr); } .chart-grid-3 { grid-template-columns: 1fr; } .chart-grid-1-2 { grid-template-columns: 1fr; } .form-grid-2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN SCREEN ══════════════ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo"><img src="logo.png" alt="Community Carpool" /></div>
+    <div class="login-title">Admin Dashboard</div>
+    <div class="login-sub">Sign in to manage Community Carpool</div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="admin@example.com" />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" />
+    </div>
+    <div class="error-msg" id="loginError"></div>
+    <button class="btn btn-primary btn-full" id="loginBtn" style="margin-top:6px" onclick="doLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- ══════════════ APP SHELL ══════════════ -->
+<div id="app" class="hidden">
+
+  <!-- Sidebar -->
+  <aside id="sidebar">
+    <!-- Icon strip -->
+    <div class="icon-strip">
+      <div class="icon-strip-logo"><img src="logo.png" alt="CCP" /></div>
+
+      <button class="nav-icon active" data-panel="dashboard" onclick="switchPanel('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span class="nav-tip">Dashboard</span>
+      </button>
+
+      <button class="nav-icon" data-panel="tickets" onclick="switchPanel('tickets')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span class="nav-tip">Tickets</span>
+      </button>
+
+      <button class="nav-icon admin-only" data-panel="deletions" onclick="switchPanel('deletions')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        <span class="nav-tip">Deletions</span>
+      </button>
+
+      <button class="nav-icon admin-only" data-panel="users" onclick="switchPanel('users')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="nav-tip">Users</span>
+      </button>
+
+      <button class="nav-icon superadmin-only" data-panel="audit" onclick="switchPanel('audit')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.5"/><circle cx="3.5" cy="12" r="1.5"/><circle cx="3.5" cy="18" r="1.5"/></svg>
+        <span class="nav-tip">Audit Log</span>
+      </button>
+
+      <button class="nav-icon superadmin-only" data-panel="team" onclick="switchPanel('team')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="nav-tip">Team</span>
+      </button>
+
+      <div class="icon-strip-spacer"></div>
+
+      <button class="nav-icon" onclick="doLogout()" style="margin-bottom:2px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span class="nav-tip">Log Out</span>
+      </button>
+
+      <button class="icon-strip-toggle" onclick="toggleSidebar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+    </div>
+
+    <!-- Nav panel -->
+    <div class="nav-panel" id="navPanel">
+      <div class="nav-section-label">Overview</div>
+      <button class="nav-item active" data-panel="dashboard" onclick="switchPanel('dashboard')">Dashboard</button>
+
+      <div class="nav-section-label">Support</div>
+      <button class="nav-item" data-panel="tickets" onclick="switchPanel('tickets')">Tickets</button>
+
+      <div class="nav-section-label admin-only">Admin</div>
+      <button class="nav-item admin-only" data-panel="deletions" onclick="switchPanel('deletions')">Deletions</button>
+      <button class="nav-item admin-only" data-panel="users" onclick="switchPanel('users')">Users</button>
+
+      <div class="nav-section-label superadmin-only">System</div>
+      <button class="nav-item superadmin-only" data-panel="audit" onclick="switchPanel('audit')">Audit Log</button>
+      <button class="nav-item superadmin-only" data-panel="team" onclick="switchPanel('team')">Team</button>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main id="mainContent">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-user">Signed in as <strong id="topbarUser">—</strong></div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="panel-dashboard" class="panel">
+      <div class="section-hd">
+        <div><div class="section-title">Platform Overview</div><div class="section-sub">Manual refresh only — click to reload</div></div>
+        <button class="btn btn-ghost btn-sm" onclick="loadDashboard()">↻ Refresh</button>
+      </div>
+      <div id="dashboardContent"><div class="loading"><span class="spinner"></span>Loading metrics…</div></div>
+    </div>
+
+    <!-- TICKETS -->
+    <div id="panel-tickets" class="panel hidden">
+      <div class="section-hd"><div class="section-title">Support Tickets</div></div>
+      <div class="filter-bar">
+        <div class="pill-tabs" id="ticketTabs">
+          <button class="pill-tab active" data-s="all" onclick="setTicketFilter('all')">All</button>
+          <button class="pill-tab" data-s="open" onclick="setTicketFilter('open')">Open</button>
+          <button class="pill-tab" data-s="closed" onclick="setTicketFilter('closed')">Closed</button>
+        </div>
+        <input type="text" id="ticketSearch" placeholder="Search by email or #ID…" style="min-width:220px" />
+      </div>
+      <div id="ticketsContent"><div class="loading"><span class="spinner"></span>Loading…</div></div>
+    </div>
+
+    <!-- DELETIONS -->
+    <div id="panel-deletions" class="panel hidden">
+      <div class="section-hd">
+        <div class="section-title">Pending Deletion Requests</div>
+        <button class="btn btn-ghost btn-sm" onclick="loadDeletions()">↻ Refresh</button>
+      </div>
+      <div id="deletionsContent"><div class="loading"><span class="spinner"></span>Loading…</div></div>
+    </div>
+
+    <!-- USERS -->
+    <div id="panel-users" class="panel hidden">
+      <div class="section-hd"><div class="section-title">User Lookup</div></div>
+      <div class="filter-bar">
+        <input type="email" id="userSearchInput" placeholder="Search by email…" style="min-width:280px" />
+        <button class="btn btn-primary btn-sm" onclick="searchUser()">Search</button>
+      </div>
+      <div id="usersContent"></div>
+    </div>
+
+    <!-- AUDIT LOG -->
+    <div id="panel-audit" class="panel hidden">
+      <div class="section-hd">
+        <div class="section-title">Audit Log</div>
+        <button class="btn btn-ghost btn-sm" onclick="exportAuditCSV()">⬇ Export CSV</button>
+      </div>
+      <div class="filter-bar">
+        <input type="text" id="auditAdminFilter" placeholder="Filter by admin…" style="min-width:180px" />
+        <input type="text" id="auditActionFilter" placeholder="Filter by action…" style="min-width:180px" />
+        <button class="btn btn-ghost btn-sm" onclick="auditPage=1;loadAudit()">Apply</button>
+      </div>
+      <div id="auditContent"><div class="loading"><span class="spinner"></span>Loading…</div></div>
+    </div>
+
+    <!-- TEAM -->
+    <div id="panel-team" class="panel hidden">
+      <div class="section-hd">
+        <div class="section-title">Team Management</div>
+        <button class="btn btn-primary btn-sm" onclick="toggleAddAdminForm()">+ Add Admin</button>
+      </div>
+      <div id="addAdminFormWrap" class="hidden">
+        <div class="inline-form">
+          <div style="font-size:15px;font-weight:700;margin-bottom:14px">Add New Admin</div>
+          <div class="form-grid-2">
+            <div class="form-group"><label>Full Name</label><input type="text" id="newName" placeholder="Jane Smith" /></div>
+            <div class="form-group"><label>Email</label><input type="email" id="newEmail" placeholder="jane@example.com" /></div>
+            <div class="form-group"><label>Role</label>
+              <select id="newRole"><option value="support">Support</option><option value="admin">Admin</option><option value="super_admin">Super Admin</option></select>
+            </div>
+            <div class="form-group"><label>Temporary Password</label><input type="password" id="newPassword" /></div>
+            <div class="form-group"><label>Deletion PIN (6 digits, optional)</label><input type="text" id="newPin" maxlength="6" placeholder="123456" /></div>
+            <div class="form-group"><label>Role Expiry (optional)</label><input type="date" id="newRoleExpiry" /></div>
+          </div>
+          <div class="error-msg" id="addAdminError"></div>
+          <div style="display:flex;gap:10px;margin-top:10px">
+            <button class="btn btn-primary btn-sm" onclick="submitAddAdmin()">Create Admin</button>
+            <button class="btn btn-ghost btn-sm" onclick="toggleAddAdminForm()">Cancel</button>
+          </div>
+        </div>
+      </div>
+      <div id="teamContent"><div class="loading"><span class="spinner"></span>Loading…</div></div>
+    </div>
+
+  </main>
+</div><!-- end #app -->
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-overlay hidden" id="deleteModal">
+  <div class="modal-card">
+    <div class="modal-title">⚠️ Permanently Delete User?</div>
+    <div class="modal-sub" id="deleteModalSub">This action cannot be undone.</div>
+    <div style="font-size:13px;font-weight:600;color:var(--red);margin-bottom:4px">Enter your 6-digit deletion PIN:</div>
+    <div class="pin-row" id="pinRow">
+      <input type="text" maxlength="1" class="pin-d" /><input type="text" maxlength="1" class="pin-d" />
+      <input type="text" maxlength="1" class="pin-d" /><input type="text" maxlength="1" class="pin-d" />
+      <input type="text" maxlength="1" class="pin-d" /><input type="text" maxlength="1" class="pin-d" />
+    </div>
+    <div class="error-msg" id="pinError" style="text-align:center"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn btn-danger" id="deleteConfirmBtn" onclick="confirmDelete()">Delete Permanently</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT ADMIN MODAL -->
+<div class="modal-overlay hidden" id="editAdminModal">
+  <div class="modal-card" style="max-width:540px">
+    <div class="modal-title" id="editAdminTitle">Edit Admin</div>
+    <div class="form-grid-2">
+      <div class="form-group"><label>Name</label><input type="text" id="editName" /></div>
+      <div class="form-group"><label>Role</label>
+        <select id="editRole"><option value="support">Support</option><option value="admin">Admin</option><option value="super_admin">Super Admin</option></select>
+      </div>
+      <div class="form-group"><label>Role Expiry (optional)</label><input type="date" id="editExpiry" /></div>
+      <div class="form-group"><label>Allowed IPs (comma-sep, blank = any)</label><input type="text" id="editIPs" placeholder="1.2.3.4, 5.6.7.8" /></div>
+      <div class="form-group"><label>New Password (blank = unchanged)</label><input type="password" id="editPassword" placeholder="Leave blank to keep" /></div>
+      <div class="form-group"><label>New Deletion PIN (blank = unchanged)</label><input type="text" id="editPin" maxlength="6" placeholder="6 digits" /></div>
+    </div>
+    <div class="toggle-wrap"><label class="toggle"><input type="checkbox" id="editActive" checked /><span class="toggle-slider"></span></label><span>Account Active</span></div>
+    <div class="error-msg" id="editAdminError"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeEditAdmin()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditAdmin()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG & STATE
+// ═══════════════════════════════════════════════════════════════
+const AUTH_URL = `${SUPABASE_URL}/functions/v1/admin-auth`
+const API_URL  = `${SUPABASE_URL}/functions/v1/admin-api`
+const TOKEN_KEY = 'ccp_admin_token'
+
+let currentAdmin = null
+let currentPanel = 'dashboard'
+let ticketStatusFilter = 'all'
+let ticketPage = 1
+let ticketExpandedId = null
+let auditPage = 1
+let allAuditEntries = []
+let deletePendingUserId = null
+let editingAdminId = null
+let teamAdminsCache = []
+let growthPeriod = 'weeks'
+let addAdminFormOpen = false
+let charts = {}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════
+function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+function fmtDate(iso) {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
+}
+function fmtDateTime(iso) {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })
+}
+function daysLeft(iso) {
+  if (!iso) return null
+  return Math.ceil((new Date(iso) - Date.now()) / 86400000)
+}
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast')
+  t.textContent = msg; t.className = `toast ${type} show`
+  setTimeout(() => t.classList.remove('show'), 3500)
+}
+
+function roleBadge(role) {
+  const cls = { super_admin:'bg-green', admin:'bg-blue', support:'bg-purple' }
+  const lbl = { super_admin:'Super-Admin', admin:'Admin', support:'Support' }
+  return `<span class="badge ${cls[role]||'bg-gray'}">${lbl[role]||esc(role)}</span>`
+}
+function statusBadge(status) {
+  const cls = { open:'bg-green', active:'bg-green', mutual_confirmed:'bg-green', contact_revealed:'bg-green',
+    notified:'bg-amber', viewed:'bg-amber', interest_expressed:'bg-amber', pending:'bg-amber',
+    closed:'bg-gray', expired:'bg-gray', failed:'bg-gray', inactive:'bg-gray', archived:'bg-gray', new:'bg-blue',
+    deletion_pending:'bg-red', error:'bg-red', user_deleted:'bg-red' }
+  return `<span class="badge ${cls[status]||'bg-gray'}">${esc((status||'').replace(/_/g,' '))}</span>`
+}
+function typeBadge(type) {
+  if (type === 'report_user') return `<span class="badge bg-amber">⚠ Report User</span>`
+  if (type === 'technical')   return `<span class="badge bg-blue">🔧 Technical</span>`
+  return `<span class="badge bg-gray">${esc(type)}</span>`
+}
+
+function debounce(fn, ms) {
+  let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms) }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// API
+// ═══════════════════════════════════════════════════════════════
+async function authPost(action, body = {}) {
+  const r = await fetch(AUTH_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action,...body}) })
+  const data = await r.json()
+  data._status = r.status
+  return data
+}
+async function apiPost(action, body = {}) {
+  const tok = localStorage.getItem(TOKEN_KEY)
+  const r = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${tok}`}, body: JSON.stringify({action,...body}) })
+  const data = await r.json()
+  if (r.status === 401) { localStorage.removeItem(TOKEN_KEY); showLogin(); return data }
+  return data
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════════
+async function checkAuth() {
+  const tok = localStorage.getItem(TOKEN_KEY)
+  if (!tok) { showLogin(); return }
+  try {
+    const data = await authPost('me', { token: tok })
+    if (data.success) { currentAdmin = data; showApp() }
+    else if (data._status === 401 || data._status === 403) {
+      // Explicit auth rejection — session expired or invalid
+      localStorage.removeItem(TOKEN_KEY); showLogin()
+    } else {
+      // Server/network error — keep token so next refresh retries automatically
+      showLogin()
+    }
+  } catch (e) {
+    // Network error — keep token for retry
+    showLogin()
+  }
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim()
+  const password = document.getElementById('loginPassword').value
+  const errEl = document.getElementById('loginError')
+  const btn = document.getElementById('loginBtn')
+  errEl.textContent = ''
+  if (!email || !password) { errEl.textContent = 'Email and password required'; return }
+  btn.disabled = true; btn.textContent = 'Signing in…'
+  try {
+    const data = await authPost('login', { email, password })
+    if (data.success) {
+      localStorage.setItem(TOKEN_KEY, data.token)
+      currentAdmin = { name: data.name, role: data.role }
+      showApp()
+    } else {
+      errEl.textContent = data.error || 'Login failed'
+    }
+  } catch (e) { errEl.textContent = 'Network error — please try again' }
+  finally { btn.disabled = false; btn.textContent = 'Sign In' }
+}
+
+async function doLogout() {
+  const tok = localStorage.getItem(TOKEN_KEY)
+  if (tok) await authPost('logout', { token: tok })
+  localStorage.removeItem(TOKEN_KEY); currentAdmin = null; showLogin()
+}
+
+document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin() })
+
+function showLogin() {
+  document.getElementById('loginScreen').classList.remove('hidden')
+  document.getElementById('app').classList.add('hidden')
+}
+function showApp() {
+  document.getElementById('loginScreen').classList.add('hidden')
+  document.getElementById('app').classList.remove('hidden')
+  document.getElementById('topbarUser').textContent = currentAdmin?.name || ''
+  const isAdmin = ['admin','super_admin'].includes(currentAdmin?.role)
+  const isSA = currentAdmin?.role === 'super_admin'
+  document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !isAdmin))
+  document.querySelectorAll('.superadmin-only').forEach(el => el.classList.toggle('hidden', !isSA))
+  switchPanel('dashboard')
+  loadDashboard()
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+const PANEL_TITLES = { dashboard:'Dashboard', tickets:'Support Tickets', deletions:'Deletion Requests', users:'User Lookup', audit:'Audit Log', team:'Team Management' }
+
+function switchPanel(panel) {
+  currentPanel = panel
+  document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'))
+  document.getElementById(`panel-${panel}`)?.classList.remove('hidden')
+  document.querySelectorAll('.nav-icon[data-panel]').forEach(b => b.classList.toggle('active', b.dataset.panel === panel))
+  document.querySelectorAll('.nav-item[data-panel]').forEach(b => b.classList.toggle('active', b.dataset.panel === panel))
+  document.getElementById('topbarTitle').textContent = PANEL_TITLES[panel] || panel
+  if (panel === 'tickets')   loadTickets()
+  if (panel === 'deletions') loadDeletions()
+  if (panel === 'audit')     loadAudit()
+  if (panel === 'team')      loadTeam()
+}
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed') }
+
+// ═══════════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════════
+async function loadDashboard() {
+  document.getElementById('dashboardContent').innerHTML = '<div class="loading"><span class="spinner"></span>Loading metrics…</div>'
+  try {
+    const data = await apiPost('metrics', { period: growthPeriod })
+    if (!data.success) throw new Error(data.error || 'Failed')
+    renderDashboard(data)
+  } catch (e) {
+    document.getElementById('dashboardContent').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>${esc(e.message)}</p></div>`
+  }
+}
+
+function kpiCard(label, value, sub, tip, trend) {
+  const trendHtml = trend ? `<span class="kpi-trend ${trend.startsWith('+')?'up':'dn'}">${esc(trend)}</span>` : ''
+  const tipHtml = tip ? `<span class="kpi-tip">ⓘ<span class="kpi-tooltip">${esc(tip)}</span></span>` : ''
+  return `<div class="kpi-card">
+    <div class="kpi-label">${esc(label)} ${tipHtml}</div>
+    <div class="kpi-value">${esc(String(value ?? '—'))}</div>
+    <div class="kpi-sub">${sub || ''} ${trendHtml}</div>
+  </div>`
+}
+
+// ISO 3166-1 alpha-2 → display name (UAE context: most common nationalities)
+const COUNTRY_NAMES = {
+  AE:'UAE', IN:'India', PK:'Pakistan', PH:'Philippines', GB:'UK', US:'USA',
+  AU:'Australia', SG:'Singapore', EG:'Egypt', DE:'Germany', LB:'Lebanon',
+  JO:'Jordan', NG:'Nigeria', LK:'Sri Lanka', BD:'Bangladesh', NP:'Nepal',
+  CN:'China', FR:'France', CA:'Canada', SA:'Saudi Arabia', KE:'Kenya'
+}
+
+function renderLocationList(items, key, labelFn) {
+  if (!items?.length) return '<p style="color:var(--text-muted);font-size:13px;padding:12px 0;text-align:center">No data</p>'
+  const max = items[0]?.count || 1
+  return `<ul class="loc-list">${items.slice(0,8).map(it => {
+    const raw = it[key] || '—'
+    const label = labelFn ? labelFn(raw) : raw
+    return `<li><span style="min-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(label)}</span>
+     <div class="loc-bar-wrap"><div class="loc-bar"><div class="loc-bar-inner" style="width:${Math.round(it.count/max*100)}%"></div></div></div>
+     <span class="loc-count">${it.count} (${it.pct}%)</span></li>`
+  }).join('')}</ul>`
+}
+
+function renderDashboard(data) {
+  const { kpi, charts, emailMetrics } = data
+  const u = kpi.users, s = kpi.submissions, m = kpi.matches, mt = kpi.matching, op = kpi.operational
+  const em = emailMetrics || {}
+  let html = ''
+
+  // Row 1 – Main KPIs
+  html += `<div class="kpi-grid kpi-5">
+    ${kpiCard('Total Users', u.total, `${u.newThisWeek} new this week`, 'Total registered users including inactive', u.weeklyTrend)}
+    ${kpiCard('Active Journeys', s.active, `${s.total} total all-time`, 'Submissions with journey_status = active', null)}
+    ${kpiCard('Total Matches', m.total, `${m.mutual} mutual confirmed`, 'All-time matches found by the algorithm', m.weeklyTrend)}
+    ${kpiCard('Match Rate', m.matchRate||'—', 'Active subs with ≥1 match', '% of active journeys that have found at least one match', null)}
+    ${kpiCard('Pending Actions', (op.pendingDeletions||0)+(op.openTickets||0), `${op.pendingDeletions||0} deletions · ${op.openTickets||0} tickets`, 'Pending deletion requests plus open support tickets', null)}
+  </div>`
+
+  // Row 2 – Growth chart
+  html += `<div class="chart-card" style="margin-bottom:22px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <h3 style="margin:0">Growth</h3>
+      <div class="chart-toggle" id="growthToggle">
+        <button class="${growthPeriod==='weeks'?'active':''}" onclick="setGrowthPeriod('weeks')">Weeks</button>
+        <button class="${growthPeriod==='months'?'active':''}" onclick="setGrowthPeriod('months')">Months</button>
+        <button class="${growthPeriod==='years'?'active':''}" onclick="setGrowthPeriod('years')">Years</button>
+      </div>
+    </div>
+    <div style="position:relative;height:240px"><canvas id="growthChart"></canvas></div>
+  </div>`
+
+  // Row 3 – Journey Quality
+  html += `<div style="margin-bottom:10px"><div class="section-title">Journey & Matching Quality</div></div>
+  <div class="kpi-grid kpi-4">
+    ${kpiCard('Zero-Match Subs', s.withZeroMatches, 'Active with no match yet', 'Active submissions that have not been matched with anyone', null)}
+    ${kpiCard('Notification Backlog', s.notificationBacklog||0, 'Matched, email not sent', 'Matches found but notification email not yet sent. If unexpectedly high, check the batch-send-emails cron job and email delivery config.', null)}
+    ${kpiCard('Avg per Submission', m.avgPerSubmission||'—', 'Matches per active journey', 'Pool quality — higher means more matching opportunities', null)}
+    ${kpiCard('Expiry Rate', s.expiryRate||'—', 'Journeys expired vs total', '% of all submissions that expired without a mutual match', null)}
+  </div>`
+
+  // Row 4 – User Engagement
+  html += `<div style="margin-bottom:10px"><div class="section-title">User Engagement</div></div>
+  <div class="kpi-grid kpi-4">
+    ${kpiCard('Active Users', u.activeWithJourney, `of ${u.total} registered`, 'Users with at least one active submission', null)}
+    ${kpiCard('Inactive 30+ Days', u.inactiveLast30Days, 'Churn signal', 'Users with no activity in the last 30 days', null)}
+    ${kpiCard('Return Users', u.returnUsers, 'Submitted more than once', 'Users who have submitted more than one journey — retention signal', null)}
+    ${kpiCard('One-Way Interest', m.oneWayInterestRate||'—', 'A says Yes, B never responds', 'Rate of matches where one side expressed interest but the other never responded', null)}
+  </div>`
+
+  // Row 5 – Matching Performance
+  html += `<div style="margin-bottom:10px"><div class="section-title">Matching Performance</div></div>
+  <div class="kpi-grid kpi-4">
+    ${kpiCard('Time to 1st Match', mt.medianTimeToFirstMatchDays!=null?mt.medianTimeToFirstMatchDays+'d':'—', 'Median days from submission', 'Median days from submission to first match. Median is used (not mean) because a small number of early users who waited long before a match partner joined skew the mean significantly.', null)}
+    ${kpiCard('Time to 2nd Match', mt.medianTimeToSecondMatchDays!=null?mt.medianTimeToSecondMatchDays+'d':'—', 'Median days to second match', 'Median days from submission to second match found', null)}
+    ${kpiCard('Conversion Rate', mt.conversionRate||'—', 'Mutual matches ÷ total', '% of all matches that resulted in mutual interest', null)}
+    ${kpiCard('Avg Response Time', mt.avgResponseTimeDays!=null?mt.avgResponseTimeDays+'d':'—', 'Between A & B interest', 'Average days between user A and user B both expressing interest', null)}
+  </div>`
+
+  // Row 6 – Strength + Locations
+  html += `<div style="margin-bottom:10px"><div class="section-title">Match Strength & Geography</div></div>
+  <div class="chart-grid-3" style="align-items:start">
+    <div class="chart-card">
+      <h3>Match Strength</h3>
+      <div style="position:relative;height:160px"><canvas id="strengthChart"></canvas></div>
+      <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;font-size:12px">
+        <span>🟢 High ≥80: <strong>${m.strengthHigh}</strong></span>
+        <span>🟡 Mid 60-79: <strong>${m.strengthMid}</strong></span>
+        <span>🔴 Low &lt;60: <strong>${m.strengthLow}</strong></span>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Top Countries</h3>
+      ${renderLocationList(charts.topCountries||[], 'country', c => COUNTRY_NAMES[c] || c)}
+    </div>
+    <div class="chart-card">
+      <h3>Top Cities</h3>
+      ${renderLocationList(charts.topCities||[], 'city')}
+    </div>
+  </div>`
+
+  // Row 7 – Behavioural Patterns
+  html += `<div style="margin-bottom:10px"><div class="section-title">Behavioural Patterns</div></div>
+  <div class="chart-grid-3">
+    <div class="chart-card"><h3>By Day of Week</h3><div style="position:relative;height:160px"><canvas id="dayChart"></canvas></div></div>
+    <div class="chart-card"><h3>By Hour of Day</h3><div style="position:relative;height:160px"><canvas id="hourChart"></canvas></div></div>
+    <div class="chart-card"><h3>Distance Preference</h3><div style="position:relative;height:160px"><canvas id="distChart"></canvas></div></div>
+  </div>`
+
+  // Row 8 – Operational Health
+  html += `<div style="margin-bottom:10px"><div class="section-title">Operational Health</div></div>
+  <div class="kpi-grid kpi-4">
+    ${kpiCard('Avg Ticket Resolution', op.avgTicketResolutionHours!=null?op.avgTicketResolutionHours+'h':'—', 'Hours to close a ticket', 'Average hours from ticket submission to closure', null)}
+    ${kpiCard('Blacklist Count', op.blacklistCount||0, 'Blocked emails', 'Total emails currently on the blacklist', null)}
+    ${kpiCard('Expired (uncleaned)', op.expiredUncleaned||0, 'Old inactive submissions', 'Submissions that expired but have not been cleaned up yet', null)}
+    ${em.hasData
+      ? kpiCard('Email Delivery', em.deliveryRate!=null?em.deliveryRate+'%':'—',
+          `Open ${em.openRate??'—'}% · Bounce ${em.bounceRate??'—'}%`,
+          `${em.totalSent||0} sent · ${em.totalDelivered||0} delivered · ${em.totalBounced||0} bounced · ${em.totalOpened||0} unique opens · ${em.totalClicked||0} unique clicks`,
+          null)
+      : kpiCard('Email Delivery', '—', 'Deploy resend-webhook to enable',
+          'Set up the resend-webhook edge function and register its URL as a Resend webhook endpoint to track delivery, opens, bounces and clicks',
+          null)
+    }
+  </div>`
+
+  document.getElementById('dashboardContent').innerHTML = html
+
+  // Render charts after injection
+  renderGrowthChart(charts.growthSeries || [])
+  renderStrengthChart(m)
+  renderBarChart('dayChart',  (charts.submissionsByDayOfWeek||[]).map(d=>d.day),   (charts.submissionsByDayOfWeek||[]).map(d=>d.count),   '#16a34a')
+  renderBarChart('hourChart', (charts.submissionsByHour||[]).map(h=>String(h.hour)), (charts.submissionsByHour||[]).map(h=>h.count),         '#2563eb')
+  renderBarChart('distChart', (charts.distancePrefBreakdown||[]).map(d=>d.label),   (charts.distancePrefBreakdown||[]).map(d=>d.count),      '#d97706')
+}
+
+function destroyChart(key) { if (charts[key]) { charts[key].destroy(); charts[key] = null } }
+
+function renderGrowthChart(series) {
+  destroyChart('growth')
+  const canvas = document.getElementById('growthChart'); if (!canvas) return
+  charts.growth = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: series.map(p => p.label),
+      datasets: [
+        { label:'New Users',       data: series.map(p=>p.users),       backgroundColor:'#16a34a', borderRadius:3 },
+        { label:'New Submissions', data: series.map(p=>p.submissions), backgroundColor:'#86efac', borderRadius:3 }
+      ]
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top',labels:{font:{size:12}}}}, scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'#f3f4f6'}}} }
+  })
+}
+
+function renderStrengthChart(m) {
+  destroyChart('strength')
+  const canvas = document.getElementById('strengthChart'); if (!canvas) return
+  charts.strength = new Chart(canvas, {
+    type: 'doughnut',
+    data: { labels:['High ≥80','Mid 60-79','Low <60'], datasets:[{data:[m.strengthHigh,m.strengthMid,m.strengthLow],backgroundColor:['#16a34a','#ca8a04','#dc2626'],borderWidth:0}] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} }
+  })
+}
+
+function renderBarChart(id, labels, values, color) {
+  destroyChart(id)
+  const canvas = document.getElementById(id); if (!canvas) return
+  charts[id] = new Chart(canvas, {
+    type: 'bar',
+    data: { labels, datasets:[{data:values,backgroundColor:color+'bb',borderColor:color,borderWidth:1,borderRadius:3}] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{beginAtZero:true,grid:{color:'#f3f4f6'},ticks:{font:{size:11}}}} }
+  })
+}
+
+async function setGrowthPeriod(period) {
+  growthPeriod = period
+  document.querySelectorAll('#growthToggle button').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase() === period))
+  try {
+    const data = await apiPost('metrics', { period })
+    if (data.success) renderGrowthChart(data.charts?.growthSeries || [])
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TICKETS
+// ═══════════════════════════════════════════════════════════════
+const loadTicketsDebounced = debounce(() => { ticketPage = 1; loadTickets() }, 350)
+
+document.getElementById('ticketSearch').addEventListener('input', loadTicketsDebounced)
+
+function setTicketFilter(s) {
+  ticketStatusFilter = s; ticketPage = 1
+  document.querySelectorAll('#ticketTabs .pill-tab').forEach(b => b.classList.toggle('active', b.dataset.s === s))
+  loadTickets()
+}
+
+async function loadTickets() {
+  document.getElementById('ticketsContent').innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>'
+  const search = document.getElementById('ticketSearch')?.value.trim() || ''
+  const data = await apiPost('tickets.list', { status: ticketStatusFilter, search, page: ticketPage })
+  if (!data.success) { document.getElementById('ticketsContent').innerHTML = `<div class="empty-state"><p>${esc(data.error)}</p></div>`; return }
+
+  const tickets = data.tickets || []
+  if (!tickets.length) { document.getElementById('ticketsContent').innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>No tickets found</p></div>'; return }
+
+  let html = `<div class="table-wrap"><table><thead><tr>
+    <th>#</th><th>Type</th><th>Submitted by</th><th>Created</th><th>Status</th><th style="width:32px"></th>
+  </tr></thead><tbody>`
+
+  for (const t of tickets) {
+    const expanded = ticketExpandedId === t.ticket_id
+    html += `<tr class="clickable ${expanded?'row-expanded':''}" onclick="toggleTicket(${t.ticket_id})">
+      <td>#${t.ticket_id}</td><td>${typeBadge(t.request_type)}</td>
+      <td>${esc(t.email)}</td><td>${fmtDate(t.created_at)}</td>
+      <td>${statusBadge(t.status)}</td>
+      <td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:rotate(${expanded?180:0}deg);transition:transform 0.2s;display:block"><polyline points="6 9 12 15 18 9"/></svg></td>
+    </tr>`
+    if (expanded) {
+      html += `<tr class="expand-row"><td colspan="6"><div class="expand-inner">
+        ${t.details_note ? `<p style="margin-bottom:10px;font-size:13px"><strong>Details:</strong> ${esc(t.details_note)}</p>` : ''}
+        ${t.issue_against_subject_email ? `<p style="margin-bottom:10px;font-size:13px"><strong>Reported against:</strong> ${esc(t.issue_against_subject_email)}</p>` : ''}
+        ${t.issue_reported_type ? `<p style="margin-bottom:10px;font-size:13px"><strong>Issue type:</strong> ${esc(t.issue_reported_type)}</p>` : ''}
+        ${t.admin_notes ? `<div style="background:#f8fafc;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;white-space:pre-wrap;font-family:monospace;max-height:180px;overflow-y:auto;border:1px solid var(--border)">${esc(t.admin_notes)}</div>` : ''}
+        ${t.status === 'closed'
+          ? `<p style="font-size:12px;color:var(--text-muted)">Closed ${fmtDateTime(t.resolved_at)}</p>`
+          : `<div class="form-group" style="margin-bottom:10px"><label>Admin Note</label><textarea id="note-${t.ticket_id}" rows="2" placeholder="Add a note (saved to ticket history)…"></textarea></div>
+             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+               <button class="btn btn-ghost btn-sm" onclick="saveNote(${t.ticket_id},event)">Save Note</button>
+               <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="notify-${t.ticket_id}" /> Notify user by email</label>
+               <button class="btn btn-danger btn-sm" onclick="closeTicket(${t.ticket_id},event)">Close Ticket</button>
+             </div>`}
+      </div></td></tr>`
+    }
+  }
+  html += '</tbody></table>'
+
+  if (data.total > data.pageSize) {
+    const pages = Math.ceil(data.total / data.pageSize)
+    html += `<div class="pagination">
+      <span class="pagination-info">Showing ${((ticketPage-1)*data.pageSize)+1}–${Math.min(ticketPage*data.pageSize,data.total)} of ${data.total}</span>
+      <button class="btn btn-ghost btn-sm" onclick="ticketPage--;loadTickets()" ${ticketPage<=1?'disabled':''}>← Prev</button>
+      <button class="btn btn-ghost btn-sm" onclick="ticketPage++;loadTickets()" ${ticketPage>=pages?'disabled':''}>Next →</button>
+    </div>`
+  }
+  html += '</div>'
+  document.getElementById('ticketsContent').innerHTML = html
+}
+
+function toggleTicket(id) { ticketExpandedId = ticketExpandedId === id ? null : id; loadTickets() }
+
+async function saveNote(id, e) {
+  e.stopPropagation()
+  const note = document.getElementById(`note-${id}`)?.value.trim()
+  if (!note) { showToast('Note is empty', 'error'); return }
+  const data = await apiPost('tickets.save_note', { ticketId: id, note })
+  if (data.success) { showToast('Note saved ✓', 'success'); loadTickets() }
+  else showToast(data.error || 'Error saving note', 'error')
+}
+
+async function closeTicket(id, e) {
+  e.stopPropagation()
+  const note = document.getElementById(`note-${id}`)?.value.trim() || ''
+  const notify = document.getElementById(`notify-${id}`)?.checked || false
+  const data = await apiPost('tickets.close', { ticketId: id, notifyUser: notify, adminNote: note })
+  if (data.success) { showToast('Ticket closed ✓', 'success'); loadTickets() }
+  else showToast(data.error || 'Error closing ticket', 'error')
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DELETIONS
+// ═══════════════════════════════════════════════════════════════
+async function loadDeletions() {
+  document.getElementById('deletionsContent').innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>'
+  const data = await apiPost('deletions.list')
+  if (!data.success) { document.getElementById('deletionsContent').innerHTML = `<div class="empty-state"><p>${esc(data.error)}</p></div>`; return }
+
+  const items = data.deletions || []
+  if (!items.length) { document.getElementById('deletionsContent').innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>No pending deletion requests</p></div>'; return }
+
+  let html = `<div class="table-wrap"><table><thead><tr>
+    <th>Name</th><th>Email</th><th>Requested</th><th>Scheduled Deletion</th><th>Days Left</th><th>Actions</th>
+  </tr></thead><tbody>`
+
+  for (const it of items) {
+    const days = daysLeft(it.deletion_token_expires_at)
+    const chipCls = days != null ? (days <= 3 ? 'chip-red' : days <= 7 ? 'chip-amber' : 'chip-green') : 'chip-green'
+    html += `<tr>
+      <td>${esc(it.name)}</td><td>${esc(it.email)}</td>
+      <td>${fmtDate(it.deletion_requested_at)}</td><td>${fmtDate(it.deletion_token_expires_at)}</td>
+      <td><span class="days-chip ${chipCls}">${days != null ? days+'d' : '—'}</span></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" style="margin-right:6px" onclick="cancelDeletion(${it.user_id},'${esc(it.email)}')">Cancel</button>
+        <button class="btn btn-danger btn-sm" onclick="openDeleteModal(${it.user_id},'${esc(it.email)}')">Delete Now</button>
+      </td>
+    </tr>`
+  }
+  html += '</tbody></table></div>'
+  document.getElementById('deletionsContent').innerHTML = html
+}
+
+async function cancelDeletion(userId, email) {
+  if (!confirm(`Cancel deletion for ${email}? Their account and journeys will be restored.`)) return
+  const data = await apiPost('deletions.cancel', { userId })
+  if (data.success) { showToast('Deletion cancelled ✓', 'success'); loadDeletions() }
+  else showToast(data.error || 'Error', 'error')
+}
+
+function openDeleteModal(userId, email) {
+  deletePendingUserId = userId
+  document.getElementById('deleteModalSub').textContent = `This will permanently delete ${email}, all their journeys and matches. This cannot be undone.`
+  document.getElementById('pinError').textContent = ''
+  document.getElementById('pinRow').classList.remove('shake')
+  document.querySelectorAll('.pin-d').forEach(i => i.value = '')
+  document.getElementById('deleteModal').classList.remove('hidden')
+  document.querySelector('.pin-d').focus()
+}
+function closeDeleteModal() { document.getElementById('deleteModal').classList.add('hidden'); deletePendingUserId = null }
+
+async function confirmDelete() {
+  const pin = Array.from(document.querySelectorAll('.pin-d')).map(i => i.value).join('')
+  if (pin.length !== 6) { document.getElementById('pinError').textContent = 'Enter all 6 digits'; return }
+  const btn = document.getElementById('deleteConfirmBtn')
+  btn.disabled = true; btn.textContent = 'Deleting…'
+  const data = await apiPost('deletions.process', { userId: deletePendingUserId, deletionPin: pin })
+  btn.disabled = false; btn.textContent = 'Delete Permanently'
+  if (data.success) {
+    showToast(`✓ ${data.email} deleted (${data.submissionsDeleted} subs, ${data.matchesDeleted} matches)`, 'success')
+    closeDeleteModal(); loadDeletions()
+  } else {
+    document.getElementById('pinError').textContent = data.error || 'Delete failed'
+    const row = document.getElementById('pinRow'); row.classList.add('shake')
+    setTimeout(() => row.classList.remove('shake'), 350)
+  }
+}
+
+// PIN auto-advance
+document.addEventListener('input', e => {
+  if (!e.target.classList.contains('pin-d')) return
+  const pins = Array.from(document.querySelectorAll('.pin-d'))
+  const idx = pins.indexOf(e.target)
+  if (e.target.value.length === 1 && idx < pins.length - 1) pins[idx+1].focus()
+})
+document.addEventListener('keydown', e => {
+  if (!e.target.classList.contains('pin-d')) return
+  if (e.key === 'Enter') confirmDelete()
+  if (e.key === 'Backspace' && !e.target.value) {
+    const pins = Array.from(document.querySelectorAll('.pin-d'))
+    const idx = pins.indexOf(e.target); if (idx > 0) pins[idx-1].focus()
+  }
+})
+document.getElementById('deleteModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeDeleteModal() })
+
+// ═══════════════════════════════════════════════════════════════
+// USERS
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('userSearchInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchUser() })
+
+async function searchUser() {
+  const email = document.getElementById('userSearchInput').value.trim()
+  if (!email) return
+  document.getElementById('usersContent').innerHTML = '<div class="loading"><span class="spinner"></span>Searching…</div>'
+  const data = await apiPost('users.search', { email })
+  if (!data.success) { document.getElementById('usersContent').innerHTML = `<div class="empty-state"><p>${esc(data.error)}</p></div>`; return }
+
+  const u = data.user, subs = data.submissions || []
+  let html = `<div class="user-card">
+    <div class="user-card-hd">
+      <div>
+        <div style="font-size:16px;font-weight:700">${esc(u.name)}</div>
+        <div style="color:var(--text-secondary);margin-top:2px">${esc(u.email)}</div>
+        <div style="color:var(--text-muted);font-size:12px;margin-top:4px">Joined ${fmtDate(u.first_seen_at)} · Last seen ${fmtDate(u.last_seen_at)}</div>
+        ${u.deletion_requested_at ? `<div style="margin-top:6px">${statusBadge('deletion_pending')} Requested ${fmtDate(u.deletion_requested_at)}</div>` : ''}
+      </div>
+      <button class="btn btn-ghost-red btn-sm" onclick="addToBlacklist('${esc(u.email)}')">+ Blacklist</button>
+    </div>`
+
+  if (!subs.length) {
+    html += '<p style="color:var(--text-secondary);font-size:13px">No submissions</p>'
+  } else {
+    for (let i = 0; i < subs.length; i++) {
+      const sub = subs[i]
+      html += `<div class="sub-accordion-hd" onclick="this.nextElementSibling.classList.toggle('open')">
+        <span><strong>${esc(sub.from_location)}</strong> → ${esc(sub.to_location)}</span>
+        <span>${statusBadge(sub.journey_status)} ${fmtDate(sub.created_at)}</span>
+      </div>
+      <div class="sub-accordion-body">
+        ${!(sub.matches||[]).length ? '<p style="font-size:12px;color:var(--text-muted);padding:6px 4px">No matches</p>' : `
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr>
+            <th style="text-align:left;padding:5px 8px;color:var(--text-muted);font-weight:600">Match</th>
+            <th style="text-align:left;padding:5px 8px;color:var(--text-muted);font-weight:600">Other Party</th>
+            <th style="text-align:left;padding:5px 8px;color:var(--text-muted);font-weight:600">Strength</th>
+            <th style="text-align:left;padding:5px 8px;color:var(--text-muted);font-weight:600">Status</th>
+            <th style="text-align:left;padding:5px 8px;color:var(--text-muted);font-weight:600">Created</th>
+          </tr></thead><tbody>
+          ${(sub.matches||[]).map(mx => `<tr style="border-top:1px solid var(--border)">
+            <td style="padding:5px 8px">#${mx.match_id}</td>
+            <td style="padding:5px 8px">${esc(mx.otherParty)}</td>
+            <td style="padding:5px 8px">${mx.match_strength}%</td>
+            <td style="padding:5px 8px">${statusBadge(mx.status)}</td>
+            <td style="padding:5px 8px">${fmtDate(mx.created_at)}</td>
+          </tr>`).join('')}
+          </tbody>
+        </table>`}
+      </div>`
+    }
+  }
+  html += '</div>'
+  document.getElementById('usersContent').innerHTML = html
+}
+
+async function addToBlacklist(email) {
+  const reason = prompt(`Add ${email} to blacklist?\nEnter reason (or leave blank):`, '')
+  if (reason === null) return
+  const data = await apiPost('blacklist.add', { email, reason: reason || undefined })
+  if (data.success) showToast('Added to blacklist ✓', 'success')
+  else showToast(data.error || 'Error', 'error')
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AUDIT LOG
+// ═══════════════════════════════════════════════════════════════
+async function loadAudit() {
+  document.getElementById('auditContent').innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>'
+  const adminFilter  = document.getElementById('auditAdminFilter')?.value.trim() || ''
+  const actionFilter = document.getElementById('auditActionFilter')?.value.trim() || ''
+  const data = await apiPost('audit.list', { page: auditPage, adminFilter, actionFilter })
+  if (!data.success) { document.getElementById('auditContent').innerHTML = `<div class="empty-state"><p>${esc(data.error)}</p></div>`; return }
+
+  allAuditEntries = data.entries || []
+  if (!allAuditEntries.length) { document.getElementById('auditContent').innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>No audit entries yet</p></div>'; return }
+
+  let html = `<div class="table-wrap"><table><thead><tr>
+    <th>Timestamp</th><th>Admin</th><th>Action</th><th>Entity Email</th><th>Details</th>
+  </tr></thead><tbody>`
+  for (const e of allAuditEntries) {
+    html += `<tr>
+      <td style="white-space:nowrap">${fmtDateTime(e.created_at)}</td>
+      <td>${esc(e.admin_name||'—')}</td>
+      <td><code style="font-size:12px;background:#f3f4f6;padding:2px 6px;border-radius:4px">${esc(e.action)}</code></td>
+      <td>${esc(e.entity_email||'—')}</td>
+      <td style="font-size:12px;color:var(--text-secondary);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.details ? esc(JSON.stringify(e.details)) : '—'}</td>
+    </tr>`
+  }
+  html += '</tbody></table>'
+  if (data.total > data.pageSize) {
+    const pages = Math.ceil(data.total / data.pageSize)
+    html += `<div class="pagination">
+      <span class="pagination-info">${data.total} entries total</span>
+      <button class="btn btn-ghost btn-sm" onclick="auditPage--;loadAudit()" ${auditPage<=1?'disabled':''}>← Prev</button>
+      <span style="font-size:13px">Page ${auditPage} of ${pages}</span>
+      <button class="btn btn-ghost btn-sm" onclick="auditPage++;loadAudit()" ${auditPage>=pages?'disabled':''}>Next →</button>
+    </div>`
+  }
+  html += '</div>'
+  document.getElementById('auditContent').innerHTML = html
+}
+
+function exportAuditCSV() {
+  if (!allAuditEntries.length) { showToast('Load the audit log first', 'error'); return }
+  const rows = [['Timestamp','Admin','Action','Entity Email','Details']]
+  for (const e of allAuditEntries) rows.push([e.created_at, e.admin_name||'', e.action, e.entity_email||'', e.details ? JSON.stringify(e.details) : ''])
+  const csv = rows.map(r => r.map(f => `"${String(f).replace(/"/g,'""')}"`).join(',')).join('\n')
+  const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv)
+  a.download = `audit-${new Date().toISOString().slice(0,10)}.csv`; a.click()
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TEAM
+// ═══════════════════════════════════════════════════════════════
+async function loadTeam() {
+  document.getElementById('teamContent').innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>'
+  const data = await apiPost('admins.list')
+  if (!data.success) { document.getElementById('teamContent').innerHTML = `<div class="empty-state"><p>${esc(data.error)}</p></div>`; return }
+
+  teamAdminsCache = data.admins || []
+  let html = `<div class="table-wrap"><table><thead><tr>
+    <th>Name</th><th>Email</th><th>Role</th><th>Role Expiry</th><th>Last Login</th><th>Active</th><th></th>
+  </tr></thead><tbody>`
+  for (const a of teamAdminsCache) {
+    const expired = a.role_expires_at && new Date(a.role_expires_at) < new Date()
+    html += `<tr>
+      <td>${esc(a.name)}</td><td>${esc(a.email)}</td>
+      <td>${roleBadge(a.role)}</td>
+      <td style="${expired?'color:var(--red)':''}">${fmtDate(a.role_expires_at)}</td>
+      <td>${fmtDateTime(a.last_login_at)}</td>
+      <td><span class="badge ${a.is_active?'bg-green':'bg-gray'}">${a.is_active?'Active':'Inactive'}</span></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="openEditAdmin(${a.admin_id})">Edit</button></td>
+    </tr>`
+  }
+  html += '</tbody></table></div>'
+  document.getElementById('teamContent').innerHTML = html
+}
+
+function toggleAddAdminForm() {
+  addAdminFormOpen = !addAdminFormOpen
+  document.getElementById('addAdminFormWrap').classList.toggle('hidden', !addAdminFormOpen)
+  if (addAdminFormOpen) { document.getElementById('addAdminError').textContent = ''; document.getElementById('newName').focus() }
+}
+
+async function submitAddAdmin() {
+  const name     = document.getElementById('newName').value.trim()
+  const email    = document.getElementById('newEmail').value.trim()
+  const role     = document.getElementById('newRole').value
+  const password = document.getElementById('newPassword').value
+  const pin      = document.getElementById('newPin').value
+  const expiry   = document.getElementById('newRoleExpiry').value
+  const errEl    = document.getElementById('addAdminError')
+  errEl.textContent = ''
+  if (!name || !email || !role || !password) { errEl.textContent = 'Name, email, role and password are required'; return }
+  if (pin && !/^\d{6}$/.test(pin)) { errEl.textContent = 'Deletion PIN must be exactly 6 digits'; return }
+  const data = await apiPost('admins.create', { name, email, role, password, deletionPin: pin || undefined, roleExpiresAt: expiry || undefined })
+  if (data.success) { showToast('Admin created ✓', 'success'); toggleAddAdminForm(); loadTeam() }
+  else errEl.textContent = data.error || 'Error creating admin'
+}
+
+function openEditAdmin(adminId) {
+  const a = teamAdminsCache.find(x => x.admin_id === adminId); if (!a) return
+  editingAdminId = adminId
+  document.getElementById('editAdminTitle').textContent = `Edit Admin — ${a.name}`
+  document.getElementById('editName').value    = a.name || ''
+  document.getElementById('editRole').value    = a.role || 'support'
+  document.getElementById('editExpiry').value  = a.role_expires_at ? a.role_expires_at.slice(0,10) : ''
+  document.getElementById('editIPs').value     = (a.allowed_ips || []).join(', ')
+  document.getElementById('editPassword').value = ''
+  document.getElementById('editPin').value      = ''
+  document.getElementById('editActive').checked = a.is_active !== false
+  document.getElementById('editAdminError').textContent = ''
+  document.getElementById('editAdminModal').classList.remove('hidden')
+}
+function closeEditAdmin() { document.getElementById('editAdminModal').classList.add('hidden'); editingAdminId = null }
+document.getElementById('editAdminModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeEditAdmin() })
+
+async function saveEditAdmin() {
+  const name     = document.getElementById('editName').value.trim()
+  const role     = document.getElementById('editRole').value
+  const expiry   = document.getElementById('editExpiry').value
+  const ips      = document.getElementById('editIPs').value.trim()
+  const password = document.getElementById('editPassword').value
+  const pin      = document.getElementById('editPin').value
+  const isActive = document.getElementById('editActive').checked
+  const errEl    = document.getElementById('editAdminError')
+  errEl.textContent = ''
+  if (pin && !/^\d{6}$/.test(pin)) { errEl.textContent = 'PIN must be exactly 6 digits'; return }
+  const allowedIps = ips ? ips.split(',').map(s => s.trim()).filter(Boolean) : []
+  const payload = { targetAdminId: editingAdminId, name, role, roleExpiresAt: expiry || null, allowedIps, isActive }
+  if (password) payload.newPassword = password
+  if (pin) payload.newDeletionPin = pin
+  const data = await apiPost('admins.update', payload)
+  if (data.success) { showToast('Admin updated ✓', 'success'); closeEditAdmin(); loadTeam() }
+  else errEl.textContent = data.error || 'Error updating admin'
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+checkAuth()
+</script>
+</body>
+</html>
