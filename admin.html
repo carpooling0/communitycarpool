@@ -945,6 +945,10 @@ function switchPanel(panel) {
   if (panel === 'deletions') loadDeletions()
   if (panel === 'audit')     loadAudit()
   if (panel === 'team')      loadTeam()
+  if (panel === 'users') {
+    document.getElementById('userSearchInput').value = ''
+    document.getElementById('usersContent').innerHTML = ''
+  }
 }
 
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed') }
@@ -1427,8 +1431,11 @@ document.getElementById('deleteModal').addEventListener('click', e => { if (e.ta
 // USERS
 // ═══════════════════════════════════════════════════════════════
 document.getElementById('userSearchInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchUser() })
-document.getElementById('userSearchInput').addEventListener('input', function() { if (!this.value.trim()) document.getElementById('usersContent').innerHTML = '' })
-document.getElementById('userSearchInput').addEventListener('change', function() { if (!this.value.trim()) document.getElementById('usersContent').innerHTML = '' })
+  ;['input','change','keyup','cut','paste'].forEach(ev =>
+  document.getElementById('userSearchInput').addEventListener(ev, function() {
+    setTimeout(() => { if (!this.value.trim()) document.getElementById('usersContent').innerHTML = '' }, 0)
+  })
+)
 
 async function searchUser() {
   const email = document.getElementById('userSearchInput').value.trim()
