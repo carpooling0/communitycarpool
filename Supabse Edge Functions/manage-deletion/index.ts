@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
-const SITE_URL = 'https://communitycarpool.org'
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://communitycarpool.org'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
@@ -52,6 +52,27 @@ function confirmRequestEmail(name: string, confirmUrl: string): string {
         </div>
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:0 0 20px;">
         <p style="color:#6b7280;font-size:13px;margin:0;line-height:1.6;">Didn't request this? Ignore this email — your data will <strong>not</strong> be deleted. For help, visit <a href="${SITE_URL}/support.html" style="color:#16a34a;">Support</a>.</p>
+      </div>
+      <div style="text-align:center;margin-top:24px;color:#9ca3af;font-size:13px;">Community Carpool &middot; communitycarpool.org</div>
+    </div>
+  </body></html>`
+}
+
+function deletionAlreadyScheduledEmail(name: string, deletionDate: Date): string {
+  const dateStr = formatDate(deletionDate)
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+  <body style="margin:0;padding:0;background:#f9fafb;font-family:Inter,system-ui,sans-serif;">
+    <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
+      <div style="text-align:center;margin-bottom:32px;">
+        <a href="${SITE_URL}"><img src="${SITE_URL}/logo_with_slogan.png" alt="Community Carpool" style="height:60px;width:auto;"></a>
+      </div>
+      <div style="background:white;border-radius:16px;padding:36px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+        <p style="color:#374151;font-size:15px;margin:0 0 16px;">Dear ${name},</p>
+        <p style="color:#374151;font-size:15px;margin:0 0 16px;line-height:1.7;">We received another deletion request for your account. Your data deletion was already confirmed and is scheduled to be processed on <strong>${dateStr}</strong>. No further action is needed.</p>
+        <p style="color:#374151;font-size:15px;margin:0 0 16px;line-height:1.7;">If you have changed your mind and would like to cancel the deletion, please contact us via <a href="${SITE_URL}/support.html" style="color:#16a34a;text-decoration:none;">Support</a> before that date.</p>
+        <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">
+        <p style="color:#374151;font-size:15px;margin:0 0 4px;">Regards,</p>
+        <p style="color:#374151;font-size:15px;font-weight:600;margin:0;">Community Carpool</p>
       </div>
       <div style="text-align:center;margin-top:24px;color:#9ca3af;font-size:13px;">Community Carpool &middot; communitycarpool.org</div>
     </div>
@@ -128,8 +149,13 @@ Deno.serve(async (req) => {
       // Always return success — prevent email enumeration
       if (!user) return json({ success: true })
 
-      // If already confirmed, inform (without leaking that it was confirmed)
-      if (user.deletion_requested_at) return json({ success: true })
+      // Already confirmed — send a reminder with the scheduled date, do NOT reset timer
+      if (user.deletion_requested_at) {
+        const retentionDays = parseInt(await getConfig('data_retention_days') || '30', 10)
+        const deletionDate = new Date(new Date(user.deletion_requested_at).getTime() + retentionDays * 24 * 60 * 60 * 1000)
+        sendEmail(cleanEmail, 'Your data deletion is already scheduled — Community Carpool', deletionAlreadyScheduledEmail(user.name, deletionDate)).catch(() => {})
+        return json({ success: true })
+      }
 
       const deletionToken = crypto.randomUUID()
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
