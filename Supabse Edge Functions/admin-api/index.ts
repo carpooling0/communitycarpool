@@ -288,6 +288,8 @@ Deno.serve(async (req) => {
       if (!email) return json({ error: 'email required' }, 400)
       const { data: user } = await supabase.from('users').select('user_id, name, email, first_seen_at, last_seen_at, deletion_requested_at').ilike('email', `%${email.trim()}%`).limit(1).single()
       if (!user) return json({ error: 'User not found' }, 404)
+      const { data: blRow } = await supabase.from('blacklist').select('id, reason, blacklisted_by, created_at').eq('email', user.email.toLowerCase()).maybeSingle()
+      const isBlacklisted = !!blRow
       const { data: subs } = await supabase.from('submissions').select('submission_id, from_location, to_location, distance_km, journey_status, created_at, expires_at').eq('user_id', user.user_id).order('created_at', { ascending: false })
       const subsWithMatches = await Promise.all((subs || []).map(async (sub: any) => {
         const { data: matches } = await supabase.from('matches').select('match_id, match_strength, status, interest_a, interest_b, interest_a_at, interest_b_at, created_at, notification_sent, sub_a_id, sub_b_id').or(`sub_a_id.eq.${sub.submission_id},sub_b_id.eq.${sub.submission_id}`).order('created_at', { ascending: false })
@@ -303,7 +305,7 @@ Deno.serve(async (req) => {
         }))
         return { ...sub, matches: enriched }
       }))
-      return json({ success: true, user, submissions: subsWithMatches })
+      return json({ success: true, user, submissions: subsWithMatches, isBlacklisted, blacklistInfo: blRow || null })
     }
 
     // ── BLACKLIST (admin + super_admin) ────────────────────────────────────────
@@ -319,6 +321,16 @@ Deno.serve(async (req) => {
       if (error && error.code === '23505') return json({ error: 'Email already blacklisted' }, 409)
       if (error) throw error
       await logAction(admin, 'blacklist.add', email, { reason }, clientIP)
+      return json({ success: true })
+    }
+
+    if (action === 'blacklist.remove') {
+      if (!requireRole(admin, 'admin')) return json({ error: 'Insufficient permissions' }, 403)
+      const { email } = body
+      if (!email) return json({ error: 'email required' }, 400)
+      const { error } = await supabase.from('blacklist').delete().eq('email', email.toLowerCase().trim())
+      if (error) throw error
+      await logAction(admin, 'blacklist.remove', email, {}, clientIP)
       return json({ success: true })
     }
 
