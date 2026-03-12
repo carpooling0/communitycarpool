@@ -500,7 +500,7 @@
           <!-- Base URL (both modes) -->
           <div class="form-group" style="margin-bottom:14px">
             <label>Destination</label>
-            <select id="lgBase" onchange="lgBuild()">
+            <select id="lgBase">
               <option value="https://communitycarpool.org">communitycarpool.org (Production)</option>
               <option value="https://dev.communitycarpool.org">dev.communitycarpool.org (Dev)</option>
             </select>
@@ -510,7 +510,7 @@
           <div id="lgModeIndividual">
             <div class="form-group">
               <label>Person's name <span style="color:var(--text-muted);font-weight:400">(internal only — never appears in the link)</span></label>
-              <input type="text" id="lgIndivName" placeholder="e.g. Ahmed Al Farsi, Sarah from HR…" oninput="lgBuild()" />
+              <input type="text" id="lgIndivName" placeholder="e.g. Ahmed Al Farsi, Sarah from HR…" />
             </div>
             <div style="margin-top:4px;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:var(--green-dark)">
               Generates a short serial link e.g. <strong>?ref=042</strong>. The number is opaque — only this panel knows who it belongs to.
@@ -522,27 +522,30 @@
             <div class="form-grid-2">
               <div class="form-group">
                 <label>Source <span style="color:var(--text-muted);font-weight:400">(required)</span></label>
-                <input type="text" id="lgSource" placeholder="instagram, whatsapp, email, flyer…" oninput="lgBuild()" />
+                <input type="text" id="lgSource" placeholder="instagram, whatsapp, email, flyer…" />
               </div>
               <div class="form-group">
                 <label>Medium <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
-                <input type="text" id="lgMedium" placeholder="social, paid, print, email…" oninput="lgBuild()" />
+                <input type="text" id="lgMedium" placeholder="social, paid, print, email…" />
               </div>
               <div class="form-group" style="grid-column:1/-1">
                 <label>Campaign <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
-                <input type="text" id="lgCampaign" placeholder="ramadan_2026, jvc_launch…" oninput="lgBuild()" />
+                <input type="text" id="lgCampaign" placeholder="ramadan_2026, jvc_launch…" />
               </div>
             </div>
           </div>
 
-          <!-- Output -->
-          <div style="margin-top:16px">
-            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Generated Link</label>
-            <div style="display:flex;gap:8px;align-items:stretch">
-              <input type="text" id="lgOutput" readonly style="flex:1;font-size:13px;font-family:monospace;background:#f9fafb;color:var(--text)" placeholder="—" />
-              <button class="btn btn-primary btn-sm" onclick="lgCopy()" style="white-space:nowrap">Copy &amp; Save</button>
+          <!-- Generate + Output -->
+          <div style="margin-top:20px">
+            <button class="btn btn-primary" onclick="lgBuild()" style="width:100%;margin-bottom:14px">Generate Link &amp; QR Code</button>
+            <div id="lgOutputWrap" style="display:none">
+              <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Generated Link</label>
+              <div style="display:flex;gap:8px;align-items:stretch">
+                <input type="text" id="lgOutput" readonly style="flex:1;font-size:13px;font-family:monospace;background:#f9fafb;color:var(--text)" />
+                <button class="btn btn-ghost btn-sm" onclick="lgCopy()" style="white-space:nowrap">Copy &amp; Save</button>
+              </div>
+              <div id="lgCopyMsg" style="font-size:12px;color:var(--green-dark);margin-top:6px;min-height:18px"></div>
             </div>
-            <div id="lgCopyMsg" style="font-size:12px;color:var(--green-dark);margin-top:6px;min-height:18px"></div>
           </div>
         </div>
 
@@ -1749,15 +1752,20 @@ function lgNextSerial()  { const n = lgGetCounter() + 1; localStorage.setItem('l
 function lgGetRegistry() { try { return JSON.parse(localStorage.getItem('lgRegistry') || '[]') } catch { return [] } }
 function lgSaveRegistry(r) { localStorage.setItem('lgRegistry', JSON.stringify(r)) }
 
+function lgResetOutput() {
+  document.getElementById('lgOutputWrap').style.display = 'none'
+  document.getElementById('lgOutput').value = ''
+  document.getElementById('lgCopyMsg').textContent = ''
+  lgClearQR()
+}
+
 function setLgMode(mode) {
   lgMode = mode
   document.getElementById('lgTabIndividual').classList.toggle('active', mode === 'individual')
   document.getElementById('lgTabCampaign').classList.toggle('active', mode === 'campaign')
   document.getElementById('lgModeIndividual').classList.toggle('hidden', mode !== 'individual')
   document.getElementById('lgModeCampaign').classList.toggle('hidden', mode !== 'campaign')
-  document.getElementById('lgOutput').value = ''
-  document.getElementById('lgCopyMsg').textContent = ''
-  lgClearQR()
+  lgResetOutput()
 }
 
 function lgBuild() {
@@ -1766,15 +1774,14 @@ function lgBuild() {
 
   if (lgMode === 'individual') {
     const name = document.getElementById('lgIndivName').value.trim()
-    if (!name) { document.getElementById('lgOutput').value = ''; lgClearQR(); return }
-    // Peek at what next serial would be (don't increment yet — only on Copy)
+    if (!name) { alert('Please enter a name first.'); return }
     const next = lgGetCounter() + 1
     const serial = String(next).padStart(3, '0')
     url = `${base}?ref=${serial}`
     qrLabel = `ref ${serial}`
   } else {
     const src = document.getElementById('lgSource').value.trim().replace(/\s+/g,'_')
-    if (!src) { document.getElementById('lgOutput').value = ''; lgClearQR(); return }
+    if (!src) { alert('Source is required.'); return }
     const med = document.getElementById('lgMedium').value.trim().replace(/\s+/g,'_')
     const cam = document.getElementById('lgCampaign').value.trim().replace(/\s+/g,'_')
     const p = new URLSearchParams()
@@ -1786,6 +1793,7 @@ function lgBuild() {
   }
 
   document.getElementById('lgOutput').value = url
+  document.getElementById('lgOutputWrap').style.display = 'block'
   document.getElementById('lgCopyMsg').textContent = ''
   lgRenderQR(url, qrLabel)
 }
