@@ -1035,8 +1035,8 @@
         </div>
 
         <footer class="footer">
-            <a href="https://communitycarpool.org/support.html" target="_blank">Questions?
-                Contact us</a>
+            <a href="https://communitycarpool.org/support.html" target="_blank">Questions? Contact us</a> &nbsp;·&nbsp;
+            <a href="https://communitycarpool.org/help.html" target="_blank">Help & FAQ</a>
         </footer>
     </div>
 
@@ -1102,6 +1102,7 @@
         let fromLatLng = '', toLatLng = '';
         let fromSelected = false, toSelected = false;
         let userIP = '', userCountry = 'ae';
+        let fromCountry = null; // ISO country code from Google Maps address_components (e.g. 'AE')
         let fromAutocomplete = null, toAutocomplete = null;
         let editToken = null; // For editing via URL
 
@@ -1161,6 +1162,24 @@
         }
 
         checkEditToken();
+
+        // ============================================
+        // REFERRAL / UTM CAPTURE — strip from URL immediately
+        // ============================================
+        (function () {
+            const p = new URLSearchParams(window.location.search);
+            const tracking = ['ref', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+            let found = false;
+            tracking.forEach(function (k) {
+                const v = p.get(k);
+                if (v) { sessionStorage.setItem('cc_' + k, v); p.delete(k); found = true; }
+            });
+            if (found) {
+                // Clean address bar — keeps ?client= and ?edit= if present
+                const clean = window.location.pathname + (p.toString() ? '?' + p.toString() : '');
+                history.replaceState(null, '', clean);
+            }
+        })();
 
         // ============================================
         // CHECK FOR DELETE TOKEN IN URL
@@ -1322,7 +1341,7 @@
             const bounds = circle.getBounds();
 
             const options = {
-                fields: ['formatted_address', 'name', 'geometry'],
+                fields: ['formatted_address', 'name', 'geometry', 'address_components'],
                 types: ['geocode', 'establishment']
             };
 
@@ -1338,6 +1357,11 @@
                     } else {
                         fromLocationText = place.name || place.formatted_address;
                     }
+                    // Extract country ISO code from address_components (e.g. 'AE', 'IN')
+                    // This is more accurate than IP geolocation for knowing where the journey is
+                    const countryComp = place.address_components?.find(c => c.types.includes('country'))
+                    fromCountry = countryComp?.short_name?.toUpperCase() || null
+
                     if (place.geometry && place.geometry.location) {
                         fromLatLng = place.geometry.location.lat() + ',' + place.geometry.location.lng();
                         fromSelected = true;
@@ -1519,7 +1543,7 @@
                 distance: distanceLabel, // Send label (e.g., "1 - 3 km")
                 distanceValue: distanceStep, // Send step value (1-4)
                 ip: userIP || 'unknown',
-                country: userCountry || 'ae',
+                country: fromCountry || userCountry?.toUpperCase() || 'AE',
                 orgCode: orgCode || undefined
             };
 
