@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script src="config.js"></script>
   <style>
     :root {
@@ -481,56 +482,76 @@
     <div id="panel-campaigns" class="panel hidden">
       <div class="section-hd">
         <div>
-          <div class="section-title">Campaign Link Generator</div>
-          <div class="section-sub">Build UTM-tagged URLs to track which channel drives signups</div>
+          <div class="section-title">Link Generator</div>
+          <div class="section-sub">Create trackable links for campaigns, individuals, or any distribution channel — with QR code</div>
         </div>
       </div>
 
-      <div class="inline-form" style="max-width:680px">
-        <div class="form-grid-2">
-          <div class="form-group" style="grid-column:1/-1">
-            <label>Base URL</label>
-            <select id="utmBase" onchange="buildUTM()">
-              <option value="https://communitycarpool.org">https://communitycarpool.org (Production)</option>
-              <option value="https://dev.communitycarpool.org">https://dev.communitycarpool.org (Dev)</option>
-            </select>
+      <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap">
+
+        <!-- LEFT: Form -->
+        <div class="inline-form" style="flex:1;min-width:320px;max-width:620px">
+          <div class="form-grid-2">
+            <div class="form-group" style="grid-column:1/-1">
+              <label>Label <span style="color:var(--text-muted);font-weight:400">(your internal name — person, channel, or campaign)</span></label>
+              <input type="text" id="utmLabel" placeholder="e.g. John Smith, Instagram Bio, Office Flyer…" oninput="buildUTM()" />
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label>Base URL</label>
+              <select id="utmBase" onchange="buildUTM()">
+                <option value="https://communitycarpool.org">https://communitycarpool.org (Production)</option>
+                <option value="https://dev.communitycarpool.org">https://dev.communitycarpool.org (Dev)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Source <span style="color:var(--text-muted);font-weight:400">(required)</span></label>
+              <input type="text" id="utmSource" placeholder="instagram, whatsapp, flyer, john_smith…" oninput="buildUTM()" />
+            </div>
+            <div class="form-group">
+              <label>Medium <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
+              <input type="text" id="utmMedium" placeholder="social, email, referral, print…" oninput="buildUTM()" />
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label>Campaign <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
+              <input type="text" id="utmCampaign" placeholder="ramadan_2026, jvc_launch, q2_push…" oninput="buildUTM()" />
+            </div>
+            <div class="form-group">
+              <label>Content <span style="color:var(--text-muted);font-weight:400">(optional, A/B)</span></label>
+              <input type="text" id="utmContent" placeholder="banner_a, story_v2…" oninput="buildUTM()" />
+            </div>
+            <div class="form-group">
+              <label>Term <span style="color:var(--text-muted);font-weight:400">(optional, keywords)</span></label>
+              <input type="text" id="utmTerm" placeholder="carpool dubai, commute…" oninput="buildUTM()" />
+            </div>
           </div>
-          <div class="form-group">
-            <label>Source <span style="color:var(--text-muted);font-weight:400">(required)</span></label>
-            <input type="text" id="utmSource" placeholder="instagram, whatsapp, google, email…" oninput="buildUTM()" />
-          </div>
-          <div class="form-group">
-            <label>Medium</label>
-            <input type="text" id="utmMedium" placeholder="social, paid, email, organic…" oninput="buildUTM()" />
-          </div>
-          <div class="form-group" style="grid-column:1/-1">
-            <label>Campaign</label>
-            <input type="text" id="utmCampaign" placeholder="summer_2026, jvc_launch, ramadan…" oninput="buildUTM()" />
-          </div>
-          <div class="form-group">
-            <label>Content <span style="color:var(--text-muted);font-weight:400">(optional, for A/B)</span></label>
-            <input type="text" id="utmContent" placeholder="banner_a, story_v2…" oninput="buildUTM()" />
-          </div>
-          <div class="form-group">
-            <label>Term <span style="color:var(--text-muted);font-weight:400">(optional, paid keywords)</span></label>
-            <input type="text" id="utmTerm" placeholder="carpool dubai, commute…" oninput="buildUTM()" />
+
+          <div style="margin-top:6px">
+            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Generated URL</label>
+            <div style="display:flex;gap:8px;align-items:stretch">
+              <input type="text" id="utmOutput" readonly style="flex:1;font-size:12px;font-family:monospace;background:#f9fafb;color:var(--text);cursor:text" placeholder="Fill in Source to generate a link…" />
+              <button class="btn btn-primary btn-sm" onclick="copyUTM()" style="white-space:nowrap">Copy</button>
+            </div>
+            <div id="utmCopyMsg" style="font-size:12px;color:var(--green-dark);margin-top:6px;min-height:18px"></div>
           </div>
         </div>
 
-        <div style="margin-top:6px">
-          <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Generated URL</label>
-          <div style="display:flex;gap:8px;align-items:stretch">
-            <input type="text" id="utmOutput" readonly style="flex:1;font-size:12px;font-family:monospace;background:#f9fafb;color:var(--text);cursor:text" placeholder="Fill in Source to generate a link…" />
-            <button class="btn btn-primary btn-sm" onclick="copyUTM()" id="utmCopyBtn" style="white-space:nowrap">Copy</button>
+        <!-- RIGHT: QR Code -->
+        <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);min-width:210px">
+          <div style="font-size:12px;font-weight:700;color:var(--text-secondary);letter-spacing:0.05em">QR CODE</div>
+          <div id="utmQrWrap" style="width:180px;height:180px;display:flex;align-items:center;justify-content:center;background:#f9fafb;border-radius:8px;border:1px dashed var(--border)">
+            <span style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px">Fill in Source<br>to generate</span>
           </div>
-          <div id="utmCopyMsg" style="font-size:12px;color:var(--green-dark);margin-top:6px;min-height:18px"></div>
+          <div id="utmQrLabel" style="font-size:12px;color:var(--text-secondary);text-align:center;max-width:180px;word-break:break-word;min-height:16px"></div>
+          <button class="btn btn-ghost btn-sm" id="utmQrDownload" onclick="downloadQR()" style="display:none;width:100%">⬇ Download QR</button>
         </div>
 
-        <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px">
-          <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:10px">RECENT LINKS</div>
-          <div id="utmHistory" style="display:flex;flex-direction:column;gap:8px">
-            <div style="font-size:12px;color:var(--text-muted)">No links generated yet this session.</div>
-          </div>
+      </div>
+
+      <!-- History -->
+      <div style="margin-top:24px;border-top:1px solid var(--border);padding-top:16px;max-width:860px">
+        <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:10px">RECENT LINKS <span style="font-weight:400;color:var(--text-muted)">(this session)</span></div>
+        <div id="utmHistory" style="display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:12px;color:var(--text-muted)">No links generated yet.</div>
         </div>
       </div>
     </div>
@@ -1703,27 +1724,87 @@ async function saveEditAdmin() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// CAMPAIGN LINK GENERATOR
+// LINK GENERATOR (UTM + QR)
 // ═══════════════════════════════════════════════════════════════
 const utmHistory = []
+let utmQrInstance = null
+
+function slug(s) { return s.trim().replace(/\s+/g, '_') }
 
 function buildUTM() {
   const base     = document.getElementById('utmBase').value
-  const source   = document.getElementById('utmSource').value.trim().replace(/\s+/g, '_')
-  const medium   = document.getElementById('utmMedium').value.trim().replace(/\s+/g, '_')
-  const campaign = document.getElementById('utmCampaign').value.trim().replace(/\s+/g, '_')
-  const content  = document.getElementById('utmContent').value.trim().replace(/\s+/g, '_')
-  const term     = document.getElementById('utmTerm').value.trim().replace(/\s+/g, '_')
+  const source   = slug(document.getElementById('utmSource').value)
+  const medium   = slug(document.getElementById('utmMedium').value)
+  const campaign = slug(document.getElementById('utmCampaign').value)
+  const content  = slug(document.getElementById('utmContent').value)
+  const term     = slug(document.getElementById('utmTerm').value)
+  const label    = document.getElementById('utmLabel').value.trim()
   const output   = document.getElementById('utmOutput')
-  if (!source) { output.value = ''; return }
+
+  if (!source) {
+    output.value = ''
+    clearQR()
+    return
+  }
+
   const params = new URLSearchParams()
   params.set('utm_source', source)
   if (medium)   params.set('utm_medium', medium)
   if (campaign) params.set('utm_campaign', campaign)
   if (content)  params.set('utm_content', content)
   if (term)     params.set('utm_term', term)
-  output.value = `${base}?${params.toString()}`
+  const url = `${base}?${params.toString()}`
+  output.value = url
   document.getElementById('utmCopyMsg').textContent = ''
+  renderQR(url, label || source)
+}
+
+function renderQR(url, label) {
+  const wrap = document.getElementById('utmQrWrap')
+  wrap.innerHTML = '<canvas id="utmQrCanvas"></canvas>'
+  QRCode.toCanvas(document.getElementById('utmQrCanvas'), url, {
+    width: 180, margin: 2,
+    color: { dark: '#15803d', light: '#ffffff' }
+  }, (err) => {
+    if (err) console.error(err)
+  })
+  document.getElementById('utmQrLabel').textContent = label
+  document.getElementById('utmQrDownload').style.display = 'block'
+}
+
+function clearQR() {
+  document.getElementById('utmQrWrap').innerHTML =
+    '<span style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px">Fill in Source<br>to generate</span>'
+  document.getElementById('utmQrLabel').textContent = ''
+  document.getElementById('utmQrDownload').style.display = 'none'
+}
+
+function downloadQR() {
+  const canvas = document.getElementById('utmQrCanvas')
+  if (!canvas) return
+  const label = document.getElementById('utmLabel').value.trim() ||
+                document.getElementById('utmSource').value.trim() || 'qr'
+  const filename = `qr_${label.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`
+
+  // Draw onto a larger canvas with white padding + label text
+  const pad = 20
+  const labelText = label
+  const out = document.createElement('canvas')
+  out.width  = canvas.width  + pad * 2
+  out.height = canvas.height + pad * 2 + 28
+  const ctx = out.getContext('2d')
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, out.width, out.height)
+  ctx.drawImage(canvas, pad, pad)
+  ctx.fillStyle = '#15803d'
+  ctx.font = 'bold 13px Inter, Arial, sans-serif'
+  ctx.textAlign = 'center'
+  ctx.fillText(labelText, out.width / 2, canvas.height + pad + 20)
+
+  const a = document.createElement('a')
+  a.href = out.toDataURL('image/png')
+  a.download = filename
+  a.click()
 }
 
 function copyUTM() {
@@ -1732,11 +1813,11 @@ function copyUTM() {
   navigator.clipboard.writeText(url).then(() => {
     document.getElementById('utmCopyMsg').textContent = '✓ Copied to clipboard'
     setTimeout(() => document.getElementById('utmCopyMsg').textContent = '', 2500)
-    // Add to history
+    const label    = document.getElementById('utmLabel').value.trim()
     const source   = document.getElementById('utmSource').value.trim()
     const campaign = document.getElementById('utmCampaign').value.trim()
-    const label    = [source, campaign].filter(Boolean).join(' · ')
-    utmHistory.unshift({ label, url, ts: new Date() })
+    const display  = label || [source, campaign].filter(Boolean).join(' · ')
+    utmHistory.unshift({ display, url, ts: new Date() })
     if (utmHistory.length > 10) utmHistory.pop()
     renderUTMHistory()
   })
@@ -1744,20 +1825,19 @@ function copyUTM() {
 
 function renderUTMHistory() {
   const el = document.getElementById('utmHistory')
-  if (!utmHistory.length) { el.innerHTML = '<div style="font-size:12px;color:var(--text-muted)">No links generated yet this session.</div>'; return }
+  if (!utmHistory.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--text-muted)">No links generated yet.</div>'
+    return
+  }
   el.innerHTML = utmHistory.map(h => `
     <div style="background:#f9fafb;border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px">
       <div style="flex:1;min-width:0">
-        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px">${esc(h.label)}</div>
+        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px">${esc(h.display)}</div>
         <div style="font-size:11px;font-family:monospace;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(h.url)}</div>
       </div>
-      <button class="btn btn-ghost btn-sm" style="flex-shrink:0;font-size:11px" onclick="navigator.clipboard.writeText('${h.url.replace(/'/g,"\\'")}').then(()=>toast('Copied'))">Copy</button>
+      <button class="btn btn-ghost btn-sm" style="flex-shrink:0;font-size:11px"
+        onclick="navigator.clipboard.writeText(${JSON.stringify(h.url)}).then(()=>{this.textContent='✓';setTimeout(()=>this.textContent='Copy',1500)})">Copy</button>
     </div>`).join('')
-}
-
-function toast(msg) {
-  document.getElementById('utmCopyMsg').textContent = '✓ ' + msg
-  setTimeout(() => document.getElementById('utmCopyMsg').textContent = '', 2500)
 }
 
 // ═══════════════════════════════════════════════════════════════
