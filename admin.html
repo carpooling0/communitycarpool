@@ -483,75 +483,90 @@
       <div class="section-hd">
         <div>
           <div class="section-title">Link Generator</div>
-          <div class="section-sub">Create trackable links for campaigns, individuals, or any distribution channel — with QR code</div>
+          <div class="section-sub">Generate trackable links and QR codes for any channel or individual</div>
         </div>
+      </div>
+
+      <!-- Mode toggle -->
+      <div class="pill-tabs" style="margin-bottom:20px;width:fit-content">
+        <button class="pill-tab active" id="lgTabIndividual" onclick="setLgMode('individual')">Individual</button>
+        <button class="pill-tab" id="lgTabCampaign" onclick="setLgMode('campaign')">Campaign / Channel</button>
       </div>
 
       <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap">
 
         <!-- LEFT: Form -->
-        <div class="inline-form" style="flex:1;min-width:320px;max-width:620px">
-          <div class="form-grid-2">
-            <div class="form-group" style="grid-column:1/-1">
-              <label>Label <span style="color:var(--text-muted);font-weight:400">(your internal name — person, channel, or campaign)</span></label>
-              <input type="text" id="utmLabel" placeholder="e.g. John Smith, Instagram Bio, Office Flyer…" oninput="buildUTM()" />
-            </div>
-            <div class="form-group" style="grid-column:1/-1">
-              <label>Base URL</label>
-              <select id="utmBase" onchange="buildUTM()">
-                <option value="https://communitycarpool.org">https://communitycarpool.org (Production)</option>
-                <option value="https://dev.communitycarpool.org">https://dev.communitycarpool.org (Dev)</option>
-              </select>
-            </div>
+        <div class="inline-form" style="flex:1;min-width:300px;max-width:560px">
+
+          <!-- Base URL (both modes) -->
+          <div class="form-group" style="margin-bottom:14px">
+            <label>Destination</label>
+            <select id="lgBase" onchange="lgBuild()">
+              <option value="https://communitycarpool.org">communitycarpool.org (Production)</option>
+              <option value="https://dev.communitycarpool.org">dev.communitycarpool.org (Dev)</option>
+            </select>
+          </div>
+
+          <!-- INDIVIDUAL fields -->
+          <div id="lgModeIndividual">
             <div class="form-group">
-              <label>Source <span style="color:var(--text-muted);font-weight:400">(required)</span></label>
-              <input type="text" id="utmSource" placeholder="instagram, whatsapp, flyer, john_smith…" oninput="buildUTM()" />
+              <label>Person's name <span style="color:var(--text-muted);font-weight:400">(internal only — never appears in the link)</span></label>
+              <input type="text" id="lgIndivName" placeholder="e.g. Ahmed Al Farsi, Sarah from HR…" oninput="lgBuild()" />
             </div>
-            <div class="form-group">
-              <label>Medium <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
-              <input type="text" id="utmMedium" placeholder="social, email, referral, print…" oninput="buildUTM()" />
-            </div>
-            <div class="form-group" style="grid-column:1/-1">
-              <label>Campaign <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
-              <input type="text" id="utmCampaign" placeholder="ramadan_2026, jvc_launch, q2_push…" oninput="buildUTM()" />
-            </div>
-            <div class="form-group">
-              <label>Content <span style="color:var(--text-muted);font-weight:400">(optional, A/B)</span></label>
-              <input type="text" id="utmContent" placeholder="banner_a, story_v2…" oninput="buildUTM()" />
-            </div>
-            <div class="form-group">
-              <label>Term <span style="color:var(--text-muted);font-weight:400">(optional, keywords)</span></label>
-              <input type="text" id="utmTerm" placeholder="carpool dubai, commute…" oninput="buildUTM()" />
+            <div style="margin-top:4px;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:var(--green-dark)">
+              Generates a short serial link e.g. <strong>?ref=042</strong>. The number is opaque — only this panel knows who it belongs to.
             </div>
           </div>
 
-          <div style="margin-top:6px">
-            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Generated URL</label>
-            <div style="display:flex;gap:8px;align-items:stretch">
-              <input type="text" id="utmOutput" readonly style="flex:1;font-size:12px;font-family:monospace;background:#f9fafb;color:var(--text);cursor:text" placeholder="Fill in Source to generate a link…" />
-              <button class="btn btn-primary btn-sm" onclick="copyUTM()" style="white-space:nowrap">Copy</button>
+          <!-- CAMPAIGN fields -->
+          <div id="lgModeCampaign" class="hidden">
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label>Source <span style="color:var(--text-muted);font-weight:400">(required)</span></label>
+                <input type="text" id="lgSource" placeholder="instagram, whatsapp, email, flyer…" oninput="lgBuild()" />
+              </div>
+              <div class="form-group">
+                <label>Medium <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
+                <input type="text" id="lgMedium" placeholder="social, paid, print, email…" oninput="lgBuild()" />
+              </div>
+              <div class="form-group" style="grid-column:1/-1">
+                <label>Campaign <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
+                <input type="text" id="lgCampaign" placeholder="ramadan_2026, jvc_launch…" oninput="lgBuild()" />
+              </div>
             </div>
-            <div id="utmCopyMsg" style="font-size:12px;color:var(--green-dark);margin-top:6px;min-height:18px"></div>
+          </div>
+
+          <!-- Output -->
+          <div style="margin-top:16px">
+            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Generated Link</label>
+            <div style="display:flex;gap:8px;align-items:stretch">
+              <input type="text" id="lgOutput" readonly style="flex:1;font-size:13px;font-family:monospace;background:#f9fafb;color:var(--text)" placeholder="—" />
+              <button class="btn btn-primary btn-sm" onclick="lgCopy()" style="white-space:nowrap">Copy &amp; Save</button>
+            </div>
+            <div id="lgCopyMsg" style="font-size:12px;color:var(--green-dark);margin-top:6px;min-height:18px"></div>
           </div>
         </div>
 
-        <!-- RIGHT: QR Code -->
+        <!-- RIGHT: QR -->
         <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);min-width:210px">
-          <div style="font-size:12px;font-weight:700;color:var(--text-secondary);letter-spacing:0.05em">QR CODE</div>
-          <div id="utmQrWrap" style="width:180px;height:180px;display:flex;align-items:center;justify-content:center;background:#f9fafb;border-radius:8px;border:1px dashed var(--border)">
-            <span style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px">Fill in Source<br>to generate</span>
+          <div style="font-size:11px;font-weight:700;color:var(--text-secondary);letter-spacing:0.06em">QR CODE</div>
+          <div id="lgQrWrap" style="width:180px;height:180px;display:flex;align-items:center;justify-content:center;background:#f9fafb;border-radius:8px;border:1px dashed var(--border)">
+            <span style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px">Fill in the form<br>to generate</span>
           </div>
-          <div id="utmQrLabel" style="font-size:12px;color:var(--text-secondary);text-align:center;max-width:180px;word-break:break-word;min-height:16px"></div>
-          <button class="btn btn-ghost btn-sm" id="utmQrDownload" onclick="downloadQR()" style="display:none;width:100%">⬇ Download QR</button>
+          <div id="lgQrSub" style="font-size:12px;color:var(--text-secondary);text-align:center;max-width:180px;min-height:16px"></div>
+          <button class="btn btn-ghost btn-sm" id="lgQrDownload" onclick="lgDownloadQR()" style="display:none;width:100%">⬇ Download QR</button>
         </div>
 
       </div>
 
-      <!-- History -->
+      <!-- History / Registry -->
       <div style="margin-top:24px;border-top:1px solid var(--border);padding-top:16px;max-width:860px">
-        <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:10px">RECENT LINKS <span style="font-weight:400;color:var(--text-muted)">(this session)</span></div>
-        <div id="utmHistory" style="display:flex;flex-direction:column;gap:8px">
-          <div style="font-size:12px;color:var(--text-muted)">No links generated yet.</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:12px;font-weight:700;color:var(--text-secondary)">LINK REGISTRY <span style="font-weight:400;color:var(--text-muted)">(saved in browser)</span></div>
+          <button class="btn btn-ghost btn-sm" style="font-size:11px;color:var(--red)" onclick="lgClearHistory()">Clear all</button>
+        </div>
+        <div id="lgHistory" style="display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:12px;color:var(--text-muted)">No links saved yet.</div>
         </div>
       </div>
     </div>
@@ -1724,74 +1739,83 @@ async function saveEditAdmin() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// LINK GENERATOR (UTM + QR)
+// LINK GENERATOR (Individual serial + Campaign UTM + QR)
 // ═══════════════════════════════════════════════════════════════
-const utmHistory = []
-let utmQrInstance = null
+let lgMode = 'individual'
 
-function slug(s) { return s.trim().replace(/\s+/g, '_') }
+// Persist counter + registry in localStorage
+function lgGetCounter()  { return parseInt(localStorage.getItem('lgRefCounter') || '0') }
+function lgNextSerial()  { const n = lgGetCounter() + 1; localStorage.setItem('lgRefCounter', n); return n }
+function lgGetRegistry() { try { return JSON.parse(localStorage.getItem('lgRegistry') || '[]') } catch { return [] } }
+function lgSaveRegistry(r) { localStorage.setItem('lgRegistry', JSON.stringify(r)) }
 
-function buildUTM() {
-  const base     = document.getElementById('utmBase').value
-  const source   = slug(document.getElementById('utmSource').value)
-  const medium   = slug(document.getElementById('utmMedium').value)
-  const campaign = slug(document.getElementById('utmCampaign').value)
-  const content  = slug(document.getElementById('utmContent').value)
-  const term     = slug(document.getElementById('utmTerm').value)
-  const label    = document.getElementById('utmLabel').value.trim()
-  const output   = document.getElementById('utmOutput')
+function setLgMode(mode) {
+  lgMode = mode
+  document.getElementById('lgTabIndividual').classList.toggle('active', mode === 'individual')
+  document.getElementById('lgTabCampaign').classList.toggle('active', mode === 'campaign')
+  document.getElementById('lgModeIndividual').classList.toggle('hidden', mode !== 'individual')
+  document.getElementById('lgModeCampaign').classList.toggle('hidden', mode !== 'campaign')
+  document.getElementById('lgOutput').value = ''
+  document.getElementById('lgCopyMsg').textContent = ''
+  lgClearQR()
+}
 
-  if (!source) {
-    output.value = ''
-    clearQR()
-    return
+function lgBuild() {
+  const base = document.getElementById('lgBase').value
+  let url = '', qrLabel = ''
+
+  if (lgMode === 'individual') {
+    const name = document.getElementById('lgIndivName').value.trim()
+    if (!name) { document.getElementById('lgOutput').value = ''; lgClearQR(); return }
+    // Peek at what next serial would be (don't increment yet — only on Copy)
+    const next = lgGetCounter() + 1
+    const serial = String(next).padStart(3, '0')
+    url = `${base}?ref=${serial}`
+    qrLabel = `ref ${serial}`
+  } else {
+    const src = document.getElementById('lgSource').value.trim().replace(/\s+/g,'_')
+    if (!src) { document.getElementById('lgOutput').value = ''; lgClearQR(); return }
+    const med = document.getElementById('lgMedium').value.trim().replace(/\s+/g,'_')
+    const cam = document.getElementById('lgCampaign').value.trim().replace(/\s+/g,'_')
+    const p = new URLSearchParams()
+    p.set('utm_source', src)
+    if (med) p.set('utm_medium', med)
+    if (cam) p.set('utm_campaign', cam)
+    url = `${base}?${p.toString()}`
+    qrLabel = [src, cam].filter(Boolean).join(' · ')
   }
 
-  const params = new URLSearchParams()
-  params.set('utm_source', source)
-  if (medium)   params.set('utm_medium', medium)
-  if (campaign) params.set('utm_campaign', campaign)
-  if (content)  params.set('utm_content', content)
-  if (term)     params.set('utm_term', term)
-  const url = `${base}?${params.toString()}`
-  output.value = url
-  document.getElementById('utmCopyMsg').textContent = ''
-  renderQR(url, label || source)
+  document.getElementById('lgOutput').value = url
+  document.getElementById('lgCopyMsg').textContent = ''
+  lgRenderQR(url, qrLabel)
 }
 
-function renderQR(url, label) {
-  const wrap = document.getElementById('utmQrWrap')
-  wrap.innerHTML = '<canvas id="utmQrCanvas"></canvas>'
-  QRCode.toCanvas(document.getElementById('utmQrCanvas'), url, {
-    width: 180, margin: 2,
-    color: { dark: '#15803d', light: '#ffffff' }
-  }, (err) => {
-    if (err) console.error(err)
+function lgRenderQR(url, sub) {
+  const wrap = document.getElementById('lgQrWrap')
+  wrap.innerHTML = '<canvas id="lgQrCanvas"></canvas>'
+  QRCode.toCanvas(document.getElementById('lgQrCanvas'), url, {
+    width: 180, margin: 2, color: { dark: '#15803d', light: '#ffffff' }
   })
-  document.getElementById('utmQrLabel').textContent = label
-  document.getElementById('utmQrDownload').style.display = 'block'
+  document.getElementById('lgQrSub').textContent = sub
+  document.getElementById('lgQrDownload').style.display = 'block'
 }
 
-function clearQR() {
-  document.getElementById('utmQrWrap').innerHTML =
-    '<span style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px">Fill in Source<br>to generate</span>'
-  document.getElementById('utmQrLabel').textContent = ''
-  document.getElementById('utmQrDownload').style.display = 'none'
+function lgClearQR() {
+  document.getElementById('lgQrWrap').innerHTML =
+    '<span style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px">Fill in the form<br>to generate</span>'
+  document.getElementById('lgQrSub').textContent = ''
+  document.getElementById('lgQrDownload').style.display = 'none'
 }
 
-function downloadQR() {
-  const canvas = document.getElementById('utmQrCanvas')
+function lgDownloadQR() {
+  const canvas = document.getElementById('lgQrCanvas')
   if (!canvas) return
-  const label = document.getElementById('utmLabel').value.trim() ||
-                document.getElementById('utmSource').value.trim() || 'qr'
-  const filename = `qr_${label.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`
-
-  // Draw onto a larger canvas with white padding + label text
-  const pad = 20
-  const labelText = label
+  const sub = document.getElementById('lgQrSub').textContent || 'qr'
+  const filename = `qr_${sub.replace(/[^a-z0-9]/gi,'_').toLowerCase()}.png`
+  const pad = 20, textH = 28
   const out = document.createElement('canvas')
-  out.width  = canvas.width  + pad * 2
-  out.height = canvas.height + pad * 2 + 28
+  out.width = canvas.width + pad * 2
+  out.height = canvas.height + pad * 2 + textH
   const ctx = out.getContext('2d')
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, out.width, out.height)
@@ -1799,45 +1823,76 @@ function downloadQR() {
   ctx.fillStyle = '#15803d'
   ctx.font = 'bold 13px Inter, Arial, sans-serif'
   ctx.textAlign = 'center'
-  ctx.fillText(labelText, out.width / 2, canvas.height + pad + 20)
-
+  ctx.fillText(sub, out.width / 2, canvas.height + pad + 20)
   const a = document.createElement('a')
   a.href = out.toDataURL('image/png')
   a.download = filename
   a.click()
 }
 
-function copyUTM() {
-  const url = document.getElementById('utmOutput').value
+function lgCopy() {
+  const url = document.getElementById('lgOutput').value
   if (!url) return
   navigator.clipboard.writeText(url).then(() => {
-    document.getElementById('utmCopyMsg').textContent = '✓ Copied to clipboard'
-    setTimeout(() => document.getElementById('utmCopyMsg').textContent = '', 2500)
-    const label    = document.getElementById('utmLabel').value.trim()
-    const source   = document.getElementById('utmSource').value.trim()
-    const campaign = document.getElementById('utmCampaign').value.trim()
-    const display  = label || [source, campaign].filter(Boolean).join(' · ')
-    utmHistory.unshift({ display, url, ts: new Date() })
-    if (utmHistory.length > 10) utmHistory.pop()
-    renderUTMHistory()
+    document.getElementById('lgCopyMsg').textContent = '✓ Copied!'
+    setTimeout(() => document.getElementById('lgCopyMsg').textContent = '', 2500)
+
+    let display, ref = null
+    if (lgMode === 'individual') {
+      const name   = document.getElementById('lgIndivName').value.trim()
+      const serial = lgNextSerial()  // NOW we increment
+      ref          = String(serial).padStart(3, '0')
+      display      = `#${ref} — ${name}`
+      // Rebuild URL with the now-committed serial
+      const base = document.getElementById('lgBase').value
+      const committed = `${base}?ref=${ref}`
+      document.getElementById('lgOutput').value = committed
+      lgRenderQR(committed, `ref ${ref}`)
+    } else {
+      const src = document.getElementById('lgSource').value.trim()
+      const cam = document.getElementById('lgCampaign').value.trim()
+      display   = [src, cam].filter(Boolean).join(' · ')
+    }
+
+    const registry = lgGetRegistry()
+    registry.unshift({ display, url: document.getElementById('lgOutput').value, mode: lgMode, ref, ts: Date.now() })
+    lgSaveRegistry(registry)
+    lgRenderHistory()
   })
 }
 
-function renderUTMHistory() {
-  const el = document.getElementById('utmHistory')
-  if (!utmHistory.length) {
-    el.innerHTML = '<div style="font-size:12px;color:var(--text-muted)">No links generated yet.</div>'
+function lgRenderHistory() {
+  const el = document.getElementById('lgHistory')
+  const registry = lgGetRegistry()
+  if (!registry.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--text-muted)">No links saved yet.</div>'
     return
   }
-  el.innerHTML = utmHistory.map(h => `
-    <div style="background:#f9fafb;border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px">
+  el.innerHTML = registry.map((h, i) => `
+    <div style="background:#f9fafb;border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px">
       <div style="flex:1;min-width:0">
-        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px">${esc(h.display)}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+          <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;background:${h.mode==='individual'?'#f0fdf4':'#eff6ff'};color:${h.mode==='individual'?'var(--green-dark)':'#1d4ed8'}">${h.mode==='individual'?'Individual':'Campaign'}</span>
+          <span style="font-size:12px;font-weight:600;color:var(--text)">${esc(h.display)}</span>
+        </div>
         <div style="font-size:11px;font-family:monospace;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(h.url)}</div>
       </div>
       <button class="btn btn-ghost btn-sm" style="flex-shrink:0;font-size:11px"
         onclick="navigator.clipboard.writeText(${JSON.stringify(h.url)}).then(()=>{this.textContent='✓';setTimeout(()=>this.textContent='Copy',1500)})">Copy</button>
     </div>`).join('')
+}
+
+function lgClearHistory() {
+  if (!confirm('Clear all saved links? The serial counter will NOT reset.')) return
+  lgSaveRegistry([])
+  lgRenderHistory()
+}
+
+// Load history when panel is opened
+const _origSwitchPanel = switchPanel
+function switchPanel(panel) {
+  _origSwitchPanel(panel)
+  if (panel === 'campaigns') lgRenderHistory()
 }
 
 // ═══════════════════════════════════════════════════════════════
