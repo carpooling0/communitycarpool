@@ -9,7 +9,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script src="config.js"></script>
   <style>
     :root {
@@ -551,7 +550,8 @@
         <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);min-width:210px">
           <div style="font-size:11px;font-weight:700;color:var(--text-secondary);letter-spacing:0.06em">QR CODE</div>
           <div id="lgQrWrap" style="width:180px;height:180px;display:flex;align-items:center;justify-content:center;background:#f9fafb;border-radius:8px;border:1px dashed var(--border)">
-            <span style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px">Fill in the form<br>to generate</span>
+            <span id="lgQrPlaceholder" style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px">Fill in the form<br>to generate</span>
+            <img id="lgQrImg" src="" alt="QR Code" style="display:none;width:180px;height:180px;border-radius:8px" />
           </div>
           <div id="lgQrSub" style="font-size:12px;color:var(--text-secondary);text-align:center;max-width:180px;min-height:16px"></div>
           <button class="btn btn-ghost btn-sm" id="lgQrDownload" onclick="lgDownloadQR()" style="display:none;width:100%">⬇ Download QR</button>
@@ -1791,43 +1791,40 @@ function lgBuild() {
 }
 
 function lgRenderQR(url, sub) {
-  const wrap = document.getElementById('lgQrWrap')
-  wrap.innerHTML = '<canvas id="lgQrCanvas"></canvas>'
-  QRCode.toCanvas(document.getElementById('lgQrCanvas'), url, {
-    width: 180, margin: 2, color: { dark: '#15803d', light: '#ffffff' }
-  })
+  const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&color=15803d&bgcolor=ffffff&margin=8&data=${encodeURIComponent(url)}`
+  const img = document.getElementById('lgQrImg')
+  img.src = apiUrl
+  img.style.display = 'block'
+  document.getElementById('lgQrPlaceholder').style.display = 'none'
   document.getElementById('lgQrSub').textContent = sub
   document.getElementById('lgQrDownload').style.display = 'block'
+  // store for download
+  document.getElementById('lgQrDownload').dataset.src = apiUrl
+  document.getElementById('lgQrDownload').dataset.sub = sub
 }
 
 function lgClearQR() {
-  document.getElementById('lgQrWrap').innerHTML =
-    '<span style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px">Fill in the form<br>to generate</span>'
+  document.getElementById('lgQrImg').style.display = 'none'
+  document.getElementById('lgQrPlaceholder').style.display = ''
   document.getElementById('lgQrSub').textContent = ''
   document.getElementById('lgQrDownload').style.display = 'none'
 }
 
 function lgDownloadQR() {
-  const canvas = document.getElementById('lgQrCanvas')
-  if (!canvas) return
-  const sub = document.getElementById('lgQrSub').textContent || 'qr'
+  const btn = document.getElementById('lgQrDownload')
+  const apiUrl = btn.dataset.src
+  const sub = btn.dataset.sub || 'qr'
+  if (!apiUrl) return
   const filename = `qr_${sub.replace(/[^a-z0-9]/gi,'_').toLowerCase()}.png`
-  const pad = 20, textH = 28
-  const out = document.createElement('canvas')
-  out.width = canvas.width + pad * 2
-  out.height = canvas.height + pad * 2 + textH
-  const ctx = out.getContext('2d')
-  ctx.fillStyle = '#ffffff'
-  ctx.fillRect(0, 0, out.width, out.height)
-  ctx.drawImage(canvas, pad, pad)
-  ctx.fillStyle = '#15803d'
-  ctx.font = 'bold 13px Inter, Arial, sans-serif'
-  ctx.textAlign = 'center'
-  ctx.fillText(sub, out.width / 2, canvas.height + pad + 20)
-  const a = document.createElement('a')
-  a.href = out.toDataURL('image/png')
-  a.download = filename
-  a.click()
+  fetch(apiUrl)
+    .then(r => r.blob())
+    .then(blob => {
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = filename
+      a.click()
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000)
+    })
 }
 
 function lgCopy() {
