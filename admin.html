@@ -1442,16 +1442,22 @@ async function searchUser() {
   const data = await apiPost('users.search', { email })
   if (!data.success) { document.getElementById('usersContent').innerHTML = `<div class="empty-state"><p>${esc(data.error)}</p></div>`; return }
 
-  const u = data.user, subs = data.submissions || []
+  const u = data.user, subs = data.submissions || [], isBlacklisted = data.isBlacklisted, blInfo = data.blacklistInfo
   let html = `<div class="user-card">
     <div class="user-card-hd">
       <div>
-        <div style="font-size:16px;font-weight:700">${esc(u.name)}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:16px;font-weight:700">${esc(u.name)}</span>
+          ${isBlacklisted ? `<span class="badge badge-red" style="font-size:11px;padding:2px 8px">🚫 Blacklisted</span>` : ''}
+        </div>
         <div style="color:var(--text-secondary);margin-top:2px">${esc(u.email)}</div>
         <div style="color:var(--text-muted);font-size:12px;margin-top:4px">Joined ${fmtDate(u.first_seen_at)} · Last seen ${fmtDate(u.last_seen_at)}</div>
         ${u.deletion_requested_at ? `<div style="margin-top:6px">${statusBadge('deletion_pending')} Requested ${fmtDate(u.deletion_requested_at)}</div>` : ''}
+        ${isBlacklisted && blInfo ? `<div style="margin-top:6px;font-size:12px;color:var(--text-muted)">Blacklisted by <strong>${esc(blInfo.blacklisted_by||'—')}</strong> on ${fmtDate(blInfo.created_at)}${blInfo.reason ? ` · <em>${esc(blInfo.reason)}</em>` : ''}</div>` : ''}
       </div>
-      <button class="btn btn-ghost-red btn-sm" onclick="addToBlacklist('${esc(u.email)}')">+ Blacklist</button>
+      ${isBlacklisted
+        ? `<button class="btn btn-ghost btn-sm" style="border-color:var(--green-dark);color:var(--green-dark)" onclick="removeFromBlacklist('${esc(u.email)}')">✓ Remove from Blacklist</button>`
+        : `<button class="btn btn-ghost-red btn-sm" onclick="addToBlacklist('${esc(u.email)}')">+ Blacklist</button>`}
     </div>`
 
   if (!subs.length) {
@@ -1493,7 +1499,14 @@ async function addToBlacklist(email) {
   const reason = prompt(`Add ${email} to blacklist?\nEnter reason (or leave blank):`, '')
   if (reason === null) return
   const data = await apiPost('blacklist.add', { email, reason: reason || undefined })
-  if (data.success) showToast('Added to blacklist ✓', 'success')
+  if (data.success) { showToast('Added to blacklist ✓', 'success'); searchUser() }
+  else showToast(data.error || 'Error', 'error')
+}
+
+async function removeFromBlacklist(email) {
+  if (!confirm(`Remove ${email} from blacklist?`)) return
+  const data = await apiPost('blacklist.remove', { email })
+  if (data.success) { showToast('Removed from blacklist ✓', 'success'); searchUser() }
   else showToast(data.error || 'Error', 'error')
 }
 
