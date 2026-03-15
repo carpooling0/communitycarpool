@@ -92,25 +92,37 @@ Deno.serve(async (req) => {
       userId = existingUser.user_id
       userJourneyLimit = existingUser.journey_limit
       const updates: Record<string, any> = { last_seen_at: new Date().toISOString(), name: firstName }
-      // Only set referral data on first touch — never overwrite existing attribution
-      if (!existingUser.ref_code && (refCode || utmSource)) {
-        if (refCode)    updates.ref_code     = refCode
-        if (utmSource)  updates.utm_source   = utmSource
-        if (utmMedium)  updates.utm_medium   = utmMedium
-        if (utmCampaign) updates.utm_campaign = utmCampaign
+      // Only set ref_code on first touch — never overwrite existing attribution
+      if (!existingUser.ref_code && refCode) {
+        updates.ref_code = refCode
       }
       await supabase.from('users').update(updates).eq('user_id', userId)
-    } else {
-      const { data: newUser } = await supabase.from('users')
-        .insert({
-          email: email.toLowerCase(), name: firstName, last_seen_at: new Date().toISOString(),
-          ref_code:     refCode     || null,
+      // Insert UTM attribution row if any UTM params present (first touch only)
+      if (!existingUser.ref_code && (utmSource || utmMedium || utmCampaign)) {
+        await supabase.from('user_attribution').insert({
+          user_id: userId,
           utm_source:   utmSource   || null,
           utm_medium:   utmMedium   || null,
           utm_campaign: utmCampaign || null,
         })
+      }
+    } else {
+      const { data: newUser } = await supabase.from('users')
+        .insert({
+          email: email.toLowerCase(), name: firstName, last_seen_at: new Date().toISOString(),
+          ref_code: refCode || null,
+        })
         .select('user_id').single()
       userId = newUser!.user_id
+      // Insert UTM attribution row for new user if any UTM params present
+      if (utmSource || utmMedium || utmCampaign) {
+        await supabase.from('user_attribution').insert({
+          user_id: userId,
+          utm_source:   utmSource   || null,
+          utm_medium:   utmMedium   || null,
+          utm_campaign: utmCampaign || null,
+        })
+      }
     }
 
     // 4. Check journey limit — per-user override takes priority over global config
