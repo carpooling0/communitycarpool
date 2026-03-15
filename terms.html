@@ -92,7 +92,7 @@
     <div class="container">
         <h1>Terms and Conditions</h1>
 
-        <p><em>Version 1.0 &nbsp;·&nbsp; Last updated: January 25, 2026</em></p>
+        <p><em>Version <span id="terms-ver">1.0</span> &nbsp;·&nbsp; Last updated: January 25, 2026</em></p>
 
         <h3>1. Introduction</h3>
         <p>Welcome to Community Carpool. By accessing or using our service, you agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, you must not use this service.</p>
@@ -146,6 +146,12 @@
 
         <a href="index.html" class="back-link">← Back to Home</a>
     </div>
+<script src="config.js"></script>
+<script>
+  if (typeof window.TERMS_VERSION !== 'undefined') {
+    document.getElementById('terms-ver').textContent = window.TERMS_VERSION;
+  }
+</script>
 </body>
 
 </html>
