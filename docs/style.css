@@ -318,6 +318,14 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
 }
 @media (max-width: 600px) {
   .cards-grid, .cards-grid.two-col { grid-template-columns: 1fr; }
-  .home-hero h1 { font-size: 24px; }
-  .article-title { font-size: 22px; }
+  body { font-size: 17px; }
+  .home-hero h1 { font-size: 28px; }
+  .home-hero p { font-size: 18px; }
+  .doc-card-title { font-size: 18px; }
+  .doc-card-desc { font-size: 15px; }
+  .doc-card-links a { font-size: 15px; }
+  .article-title { font-size: 24px; }
+  .article-lead { font-size: 17px; }
+  .article-main h2 { font-size: 21px; }
+  .article-main p, .article-main li { font-size: 17px; }
 }
