@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sidebar Style Options</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #16a34a; --green-dark: #15803d; --green-light: #dcfce7;
+      --green-mid: #86efac; --border: #e5e7eb; --text: #111827;
+      --text-secondary: #6b7280; --text-muted: #9ca3af;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',sans-serif; background:#f1f5f9; padding:32px 24px; }
+    h1 { font-size:18px; font-weight:800; margin-bottom:6px; color:#111827; }
+    .subtitle { font-size:13px; color:#6b7280; margin-bottom:28px; }
+    .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
+    .option { background:white; border-radius:12px; overflow:hidden; border:2px solid #e5e7eb; }
+    .option-label { background:#f8fafc; border-bottom:1px solid #e5e7eb; padding:10px 14px; font-size:12px; font-weight:700; color:#374151; letter-spacing:0.05em; text-transform:uppercase; }
+    .sidebar { padding:16px 0 24px; width:220px; }
+    .link { display:block; font-size:13px; color:#6b7280; text-decoration:none; padding:5px 18px; }
+    .link.active { color:#15803d; font-weight:600; border-left:2px solid #16a34a; background:#dcfce7; }
+
+    /* OPTION A — green band */
+    .a-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:#15803d; background:#dcfce7; padding:8px 18px; margin-top:8px; display:block; }
+
+    /* OPTION B — left accent border */
+    .b-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:#374151; border-left:3px solid #16a34a; background:#f9fafb; padding:8px 16px; margin-top:8px; display:block; }
+
+    /* OPTION C — bold text + divider */
+    .c-section { padding-top:16px; margin-bottom:2px; }
+    .c-label { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:#374151; padding:0 18px 6px; display:block; border-bottom:1px solid #e5e7eb; margin:0 10px 4px; }
+
+    /* OPTION D — pill badge */
+    .d-label { display:inline-flex; align-items:center; background:#dcfce7; color:#15803d; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; padding:3px 10px; border-radius:20px; margin:12px 18px 4px; }
+  </style>
+</head>
+<body>
+  <h1>Sidebar Section Heading — Style Options</h1>
+  <p class="subtitle">Pick which style works best. Current (Status Quo) shown at left for comparison.</p>
+
+  <div class="grid">
+
+    <!-- STATUS QUO -->
+    <div class="option">
+      <div class="option-label">Current (status quo)</div>
+      <div class="sidebar">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9ca3af;padding:10px 18px 4px;display:block;">Getting Started</span>
+        <a class="link active">What is Community Carpool?</a>
+        <a class="link">Submitting your journey</a>
+        <a class="link">What happens after you submit</a>
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9ca3af;padding:10px 18px 4px;display:block;">Your Matches</span>
+        <a class="link">Accessing your matches page</a>
+        <a class="link">Understanding match strength</a>
+        <a class="link">Expressing interest or declining</a>
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9ca3af;padding:10px 18px 4px;display:block;">Privacy & Your Data</span>
+        <a class="link">How your information is protected</a>
+        <a class="link">When your name & email are visible</a>
+      </div>
+    </div>
+
+    <!-- OPTION A -->
+    <div class="option">
+      <div class="option-label">Option A — Green band</div>
+      <div class="sidebar">
+        <span class="a-label">Getting Started</span>
+        <a class="link active">What is Community Carpool?</a>
+        <a class="link">Submitting your journey</a>
+        <a class="link">What happens after you submit</a>
+        <span class="a-label">Your Matches</span>
+        <a class="link">Accessing your matches page</a>
+        <a class="link">Understanding match strength</a>
+        <a class="link">Expressing interest or declining</a>
+        <span class="a-label">Privacy & Your Data</span>
+        <a class="link">How your information is protected</a>
+        <a class="link">When your name & email are visible</a>
+      </div>
+    </div>
+
+    <!-- OPTION B -->
+    <div class="option">
+      <div class="option-label">Option B — Left accent border</div>
+      <div class="sidebar">
+        <span class="b-label">Getting Started</span>
+        <a class="link active">What is Community Carpool?</a>
+        <a class="link">Submitting your journey</a>
+        <a class="link">What happens after you submit</a>
+        <span class="b-label">Your Matches</span>
+        <a class="link">Accessing your matches page</a>
+        <a class="link">Understanding match strength</a>
+        <a class="link">Expressing interest or declining</a>
+        <span class="b-label">Privacy & Your Data</span>
+        <a class="link">How your information is protected</a>
+        <a class="link">When your name & email are visible</a>
+      </div>
+    </div>
+
+    <!-- OPTION C -->
+    <div class="option">
+      <div class="option-label">Option C — Bold + divider</div>
+      <div class="sidebar">
+        <div class="c-section">
+          <span class="c-label">Getting Started</span>
+          <a class="link active">What is Community Carpool?</a>
+          <a class="link">Submitting your journey</a>
+          <a class="link">What happens after you submit</a>
+        </div>
+        <div class="c-section">
+          <span class="c-label">Your Matches</span>
+          <a class="link">Accessing your matches page</a>
+          <a class="link">Understanding match strength</a>
+          <a class="link">Expressing interest or declining</a>
+        </div>
+        <div class="c-section">
+          <span class="c-label">Privacy & Your Data</span>
+          <a class="link">How your information is protected</a>
+          <a class="link">When your name & email are visible</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Option D below since 5 doesn't fit in 4 col -->
+  <div style="margin-top:20px;max-width:220px;">
+    <div class="option">
+      <div class="option-label">Option D — Pill badge</div>
+      <div class="sidebar">
+        <span class="d-label">Getting Started</span>
+        <a class="link active">What is Community Carpool?</a>
+        <a class="link">Submitting your journey</a>
+        <a class="link">What happens after you submit</a>
+        <span class="d-label">Your Matches</span>
+        <a class="link">Accessing your matches page</a>
+        <a class="link">Understanding match strength</a>
+        <a class="link">Expressing interest or declining</a>
+        <span class="d-label">Privacy & Your Data</span>
+        <a class="link">How your information is protected</a>
+        <a class="link">When your name & email are visible</a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

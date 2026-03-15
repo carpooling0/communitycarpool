@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>How Your Information is Protected | Docs</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2020/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .privacy-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:18px 0; }
+    .privacy-card { background:white; border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); }
+    .privacy-card .icon { font-size:24px; margin-bottom:8px; }
+    .privacy-card h3 { font-size:14px; font-weight:700; margin-bottom:5px; }
+    .privacy-card p { font-size:13px; color:var(--text-secondary); margin:0; line-height:1.5; }
+    @media(max-width:600px){ .privacy-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <a class="topnav-logo" href="../../index.html"><img src="../../logo.png" alt="CCP"/><span>Community Carpool</span></a>
+  <div class="topnav-divider"></div>
+  <span class="topnav-section">User Docs</span>
+  <div class="topnav-spacer"></div>
+  <a class="topnav-home" href="../index.html">← Docs home</a>
+</nav>
+
+<div class="article-shell">
+  <aside class="sidebar"><div id="sidebar-nav"></div></aside>
+  <main class="article-main">
+
+    <div class="breadcrumb">
+      <a href="../index.html">Docs</a><span class="breadcrumb-sep">/</span>
+      <a href="#">Users</a><span class="breadcrumb-sep">/</span>
+      <span>Privacy &amp; Your Data</span>
+    </div>
+
+    <div class="article-eyebrow">🔒 Privacy &amp; Your Data</div>
+    <h1 class="article-title">How your information is protected</h1>
+    <p class="article-lead">Community Carpool was built with privacy as a core principle, not an afterthought. This page explains the protections built into the platform to keep your information safe.</p>
+
+    <div class="privacy-grid">
+      <div class="privacy-card">
+        <div class="icon">👤</div>
+        <h3>Names are masked</h3>
+        <p>Until a mutual match is confirmed, other users only see your initial followed by asterisks (e.g. "S****"). Your full name is never displayed to anyone who hasn't matched with you mutually.</p>
+      </div>
+      <div class="privacy-card">
+        <div class="icon">📧</div>
+        <h3>Email is hidden until mutual</h3>
+        <p>Your email address is never shown to another user unless both of you have independently clicked Interested on the same match. One-sided interest reveals nothing.</p>
+      </div>
+      <div class="privacy-card">
+        <div class="icon">📍</div>
+        <h3>Approximate locations only</h3>
+        <p>You enter a neighbourhood or community name, not an exact address. The matching algorithm works with area-level coordinates, not your front door.</p>
+      </div>
+      <div class="privacy-card">
+        <div class="icon">🔑</div>
+        <h3>Token-secured access</h3>
+        <p>Your matches page is only accessible via a unique, time-limited secure link sent to your email. It cannot be guessed or accessed by anyone without your link.</p>
+      </div>
+    </div>
+
+    <h2>Who can see your data?</h2>
+    <ul>
+      <li><strong>Other users</strong> — Only see your masked name and general route until a mutual match. After mutual match: your first name and email only.</li>
+      <li><strong>Community Carpool support staff</strong> — Can see your name, email, and journey details for the purpose of handling support requests. They cannot see match decisions or mutual match contacts.</li>
+      <li><strong>Third parties</strong> — Your data is never sold or shared with third-party advertisers or marketers.</li>
+    </ul>
+
+    <h2>How your data is stored</h2>
+    <p>All data is stored on secure, encrypted servers. The platform is built on Supabase infrastructure with row-level security controls, meaning even application-level queries cannot access data outside permitted scopes.</p>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>You are in control</strong> — You can request deletion of all your data at any time. See <a href="deleting-account.html">Deleting your account</a> for the full process.</div>
+    </div>
+
+    <div class="article-nav">
+      <a href="mutual-match.html">
+        <span class="nav-dir">← Previous</span>
+        <span class="nav-title">What happens when it's mutual</span>
+      </a>
+      <a class="next" href="name-and-email-visibility.html">
+        <span class="nav-dir">Next →</span>
+        <span class="nav-title">When your name &amp; email are visible</span>
+      </a>
+    </div>
+
+  </main>
+</div>
+
+<script>DOC_ACTIVE='how-information-is-protected'</script>
+<script src="_sidebar.js"></script>
+</body>
+</html>

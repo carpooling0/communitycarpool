@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>What Data We Store & For How Long | Docs</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2020/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .data-table { width:100%; border-collapse:collapse; font-size:14px; margin:16px 0; }
+    .data-table th { background:#f9fafb; padding:9px 14px; text-align:left; font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid var(--border); }
+    .data-table td { padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+    .data-table tr:last-child td { border-bottom:none; }
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <a class="topnav-logo" href="../../index.html"><img src="../../logo.png" alt="CCP"/><span>Community Carpool</span></a>
+  <div class="topnav-divider"></div>
+  <span class="topnav-section">User Docs</span>
+  <div class="topnav-spacer"></div>
+  <a class="topnav-home" href="../index.html">← Docs home</a>
+</nav>
+
+<div class="article-shell">
+  <aside class="sidebar"><div id="sidebar-nav"></div></aside>
+  <main class="article-main">
+
+    <div class="breadcrumb">
+      <a href="../index.html">Docs</a><span class="breadcrumb-sep">/</span>
+      <a href="#">Users</a><span class="breadcrumb-sep">/</span>
+      <span>Privacy &amp; Your Data</span>
+    </div>
+
+    <div class="article-eyebrow">🔒 Privacy &amp; Your Data</div>
+    <h1 class="article-title">What data we store &amp; for how long</h1>
+    <p class="article-lead">This page explains exactly what information Community Carpool collects, why it's needed, and how long it is retained.</p>
+
+    <h2>Data we collect</h2>
+    <table class="data-table">
+      <thead><tr><th>Data</th><th>Why we collect it</th><th>Retention</th></tr></thead>
+      <tbody>
+        <tr><td><strong>First name</strong></td><td>Personalise emails and display masked version to matches</td><td>Until account deletion</td></tr>
+        <tr><td><strong>Email address</strong></td><td>Send match notifications and secure access links</td><td>Until account deletion</td></tr>
+        <tr><td><strong>Home area (From location)</strong></td><td>Run the matching algorithm</td><td>Until account deletion</td></tr>
+        <tr><td><strong>Workplace (To location)</strong></td><td>Run the matching algorithm</td><td>Until account deletion</td></tr>
+        <tr><td><strong>Matching distance preference</strong></td><td>Filter matches to your tolerance</td><td>Until account deletion</td></tr>
+        <tr><td><strong>Match decisions (Interested / Not for me)</strong></td><td>Determine mutual matches and prevent repeat matching</td><td>Until account deletion</td></tr>
+        <tr><td><strong>Email open/click events</strong></td><td>Understand notification delivery (anonymised)</td><td>90 days</td></tr>
+        <tr><td><strong>Support ticket content</strong></td><td>Handle and resolve your request</td><td>1 year after resolution</td></tr>
+      </tbody>
+    </table>
+
+    <h2>What we do NOT collect</h2>
+    <ul>
+      <li>Last name or surname</li>
+      <li>Phone number</li>
+      <li>Exact home address or apartment/villa number</li>
+      <li>Payment information (the service is free)</li>
+      <li>Precise GPS location or device location data</li>
+      <li>Browsing history or device fingerprint</li>
+    </ul>
+
+    <h2>Journey data retention</h2>
+    <p>Active journeys are retained for <strong>30 days</strong> following your last match notification. After this period, if no new matches have been found, your journey is automatically expired. You can resubmit at any time.</p>
+
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>Journey expiry ≠ account deletion</strong> — When a journey expires, only that journey's submission is deactivated. Your user record (name and email) is retained until you explicitly request account deletion. See <a href="deleting-account.html">Deleting your account</a>.</div>
+    </div>
+
+    <h2>Requesting your data</h2>
+    <p>You can request a copy of all data we hold about you at any time by submitting a request via the <a href="../../support.html">support page</a>. We will respond within 5 working days.</p>
+
+    <div class="article-nav">
+      <a href="name-and-email-visibility.html">
+        <span class="nav-dir">← Previous</span>
+        <span class="nav-title">When your name &amp; email are visible</span>
+      </a>
+      <a class="next" href="multiple-journeys.html">
+        <span class="nav-dir">Next →</span>
+        <span class="nav-title">Submitting multiple journeys</span>
+      </a>
+    </div>
+
+  </main>
+</div>
+
+<script>DOC_ACTIVE='data-storage'</script>
+<script src="_sidebar.js"></script>
+</body>
+</html>
