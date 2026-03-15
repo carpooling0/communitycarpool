@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json()
     const { firstName, email, fromLocation, fromLatLng, toLocation, toLatLng, distance, distanceValue, ip, country, orgCode,
-            refCode, utmSource, utmMedium, utmCampaign } = body
+            refCode, utmSource, utmMedium, utmCampaign, termsVersion } = body
 
     // 1. Check blacklist
     const { data: blacklisted } = await supabase
@@ -168,7 +168,8 @@ Deno.serve(async (req) => {
         user_id: userId, org_id: submissionOrgId,
         journey_status: 'active', journey_num: journeyNum,
         distance_km: Math.round(distanceKm * 10) / 10,
-        expires_at: expiresAt.toISOString()
+        expires_at: expiresAt.toISOString(),
+        terms_version: termsVersion || null
       }).select('submission_id').single()
     if (subError) throw subError
 
