@@ -12,10 +12,6 @@
   <style>
     .home-page { max-width: 1060px; margin: 0 auto; padding: 0 24px 80px; }
     .section-heading { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); padding: 32px 0 16px; }
-    .cards-grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 8px; }
-    @media (max-width: 1100px) { .cards-grid-5 { grid-template-columns: repeat(3, 1fr); } }
-    @media (max-width: 700px) { .cards-grid-5 { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 480px) { .cards-grid-5 { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -37,12 +33,10 @@
   <!-- Hero -->
   <div class="home-hero" style="padding-top:48px;">
     <h1>Community Carpool Docs</h1>
-    <p>Guides and references for users, support staff, admins, and system operators.</p>
+    <p>Guides and answers for Community Carpool users.</p>
   </div>
 
-  <!-- User Section -->
-  <div class="section-heading">🚗 For General Users</div>
-  <div class="cards-grid-5">
+  <div class="cards-grid">
 
     <div class="doc-card">
       <div class="doc-card-icon">🚀</div>
@@ -105,12 +99,6 @@
       </ul>
     </div>
 
-  </div>
-
-  <!-- Placeholder for other audience sections -->
-  <div class="section-heading" style="margin-top:16px;">🔧 Coming Soon</div>
-  <div style="background:white;border:1px solid var(--border);border-radius:10px;padding:20px 24px;font-size:14px;color:var(--text-secondary);">
-    Support Staff, Admin, and Super-Admin documentation will be added here.
   </div>
 
 </div>
