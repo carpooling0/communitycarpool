@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Documentation | Community Carpool</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .home-page { max-width: 1060px; margin: 0 auto; padding: 0 24px 80px; }
+    .section-heading { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); padding: 32px 0 16px; }
+    .cards-grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 8px; }
+    @media (max-width: 1100px) { .cards-grid-5 { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 700px) { .cards-grid-5 { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .cards-grid-5 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<!-- Top Nav -->
+<nav class="topnav">
+  <a class="topnav-logo" href="../index.html">
+    <img src="../logo.png" alt="Community Carpool"/>
+    <span>Community Carpool</span>
+  </a>
+  <div class="topnav-divider"></div>
+  <span class="topnav-section">Documentation</span>
+  <div class="topnav-spacer"></div>
+  <a class="topnav-home" href="../index.html">← Back to site</a>
+</nav>
+
+<div class="home-page">
+
+  <!-- Hero -->
+  <div class="home-hero" style="padding-top:48px;">
+    <h1>Community Carpool Docs</h1>
+    <p>Guides and references for users, support staff, admins, and system operators.</p>
+  </div>
+
+  <!-- User Section -->
+  <div class="section-heading">🚗 For General Users</div>
+  <div class="cards-grid-5">
+
+    <div class="doc-card">
+      <div class="doc-card-icon">🚀</div>
+      <div class="doc-card-title">Getting Started</div>
+      <div class="doc-card-desc">New to Community Carpool? Start here.</div>
+      <ul class="doc-card-links">
+        <li><a href="users/what-is-community-carpool.html">What is Community Carpool?</a></li>
+        <li><a href="users/submitting-your-journey.html">Submitting your journey</a></li>
+        <li><a href="users/after-you-submit.html">What happens after you submit</a></li>
+      </ul>
+    </div>
+
+    <div class="doc-card">
+      <div class="doc-card-icon">🔗</div>
+      <div class="doc-card-title">Your Matches</div>
+      <div class="doc-card-desc">Understand and act on your carpool matches.</div>
+      <ul class="doc-card-links">
+        <li><a href="users/accessing-your-matches.html">Accessing your matches page</a></li>
+        <li><a href="users/match-strength.html">Understanding match strength</a></li>
+        <li><a href="users/expressing-interest.html">Expressing interest or declining</a></li>
+        <li><a href="users/mutual-match.html">What happens when it's mutual</a></li>
+      </ul>
+    </div>
+
+    <div class="doc-card">
+      <div class="doc-card-icon">🔒</div>
+      <div class="doc-card-title">Privacy &amp; Your Data</div>
+      <div class="doc-card-desc">How your information is stored and shared.</div>
+      <ul class="doc-card-links">
+        <li><a href="users/how-information-is-protected.html">How your information is protected</a></li>
+        <li><a href="users/name-and-email-visibility.html">When your name &amp; email are visible</a></li>
+        <li><a href="users/data-storage.html">What data we store &amp; for how long</a></li>
+      </ul>
+    </div>
+
+    <div class="doc-card">
+      <div class="doc-card-icon">⚙️</div>
+      <div class="doc-card-title">Managing Your Journey</div>
+      <div class="doc-card-desc">Update, pause, or remove your journey.</div>
+      <ul class="doc-card-links">
+        <li><a href="users/multiple-journeys.html">Submitting multiple journeys</a></li>
+        <li><a href="users/pausing-deactivating.html">Pausing or deactivating a journey</a></li>
+        <li><a href="users/email-notifications.html">Managing email notifications</a></li>
+        <li><a href="users/deleting-account.html">Deleting your account</a></li>
+      </ul>
+    </div>
+
+    <div class="doc-card">
+      <div class="doc-card-icon">🛠️</div>
+      <div class="doc-card-title">Troubleshooting &amp; Support</div>
+      <div class="doc-card-desc">Common problems, questions, and how to get help.</div>
+      <ul class="doc-card-links">
+        <li><a href="users/no-matches-yet.html">Why haven't I received any matches?</a></li>
+        <li><a href="users/how-long-matching-takes.html">How long does matching take?</a></li>
+        <li><a href="users/link-not-working.html">My matches link isn't working</a></li>
+        <li><a href="users/i-moved-resubmit.html">I moved — do I need to resubmit?</a></li>
+        <li><a href="users/expressed-interest-nothing-happened.html">I expressed interest — what now?</a></li>
+        <li><a href="users/not-receiving-emails.html">I'm not receiving emails</a></li>
+        <li><a href="users/getting-support.html">How to contact support</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Placeholder for other audience sections -->
+  <div class="section-heading" style="margin-top:16px;">🔧 Coming Soon</div>
+  <div style="background:white;border:1px solid var(--border);border-radius:10px;padding:20px 24px;font-size:14px;color:var(--text-secondary);">
+    Support Staff, Admin, and Super-Admin documentation will be added here.
+  </div>
+
+</div>
+
+</body>
+</html>

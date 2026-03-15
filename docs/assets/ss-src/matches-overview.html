@@ -1,0 +1,69 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:#fafafa;color:#111827;}
+.header{background:white;border-bottom:1px solid #e5e7eb;padding:14px 20px;display:flex;align-items:center;gap:10px;}
+.header img{height:40px;}
+.page{max-width:580px;margin:0 auto;padding:24px 16px 40px;}
+.greeting{font-size:19px;font-weight:700;margin-bottom:3px;}
+.sub{font-size:14px;color:#6b7280;margin-bottom:20px;}
+.journey-card{background:white;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 1px 3px rgba(0,0,0,0.08);overflow:hidden;}
+.journey-hd{padding:14px 18px;border-bottom:1px solid #e5e7eb;}
+.journey-route{font-size:14px;font-weight:700;}
+.journey-meta{font-size:12px;color:#6b7280;margin-top:2px;}
+.match-card{padding:16px 18px;border-bottom:1px solid #f3f4f6;}
+.match-card:last-child{border-bottom:none;}
+.match-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.match-name{font-size:15px;font-weight:700;}
+.match-route{font-size:13px;color:#6b7280;margin-top:2px;}
+.chip-pending{background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;margin-left:6px;vertical-align:middle;}
+.chip-mutual{background:#dcfce7;color:#166534;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;margin-left:6px;vertical-align:middle;}
+.strength{background:#dcfce7;color:#15803d;font-size:13px;font-weight:700;padding:4px 12px;border-radius:20px;}
+.match-actions{display:flex;gap:8px;margin-top:10px;}
+.btn-yes{background:#16a34a;color:white;border:none;padding:9px 22px;border-radius:8px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;}
+.btn-no{background:white;color:#6b7280;border:1.5px solid #e5e7eb;padding:9px 22px;border-radius:8px;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;}
+.mutual-banner{background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:13px 15px;margin-top:10px;}
+.mutual-title{font-size:14px;font-weight:700;color:#15803d;margin-bottom:5px;}
+.mutual-detail{font-size:13px;color:#166534;}
+</style></head><body>
+<header class="header"><img src="../../logo.png" alt="Community Carpool"/></header>
+<div class="page">
+  <div class="greeting">Hi Sarah 👋</div>
+  <div class="sub">You have 2 matches for your journey</div>
+  <div class="journey-card">
+    <div class="journey-hd">
+      <div class="journey-route">JVC District 11 → DIFC Gate Village</div>
+      <div class="journey-meta">Registered 3 days ago &middot; Max 3–5 km</div>
+    </div>
+    <!-- Match 1 -->
+    <div class="match-card">
+      <div class="match-top">
+        <div>
+          <span class="match-name">A****<span class="chip-pending">Pending</span></span>
+          <div class="match-route">JVC District 10 → DIFC</div>
+        </div>
+        <div class="strength">87% match</div>
+      </div>
+      <div class="match-actions">
+        <button class="btn-yes">Interested</button>
+        <button class="btn-no">Not for me</button>
+      </div>
+    </div>
+    <!-- Match 2 mutual -->
+    <div class="match-card">
+      <div class="match-top">
+        <div>
+          <span class="match-name">James T.<span class="chip-mutual">✓ Mutual match</span></span>
+          <div class="match-route">JVC Cluster L → DIFC Gate Avenue</div>
+        </div>
+        <div class="strength">92% match</div>
+      </div>
+      <div class="mutual-banner">
+        <div class="mutual-title">🎉 You're both interested!</div>
+        <div class="mutual-detail">📧 james.t@example.com</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>
