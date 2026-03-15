@@ -1941,18 +1941,27 @@ async function lgRenderQR(url, sub) {
 
   // Step 3: composite logo if enabled
   if (showLogo) {
-    const logoSize = Math.round(SIZE * 0.30)  // 30% of QR — safe with H error correction
-    const logoR    = logoSize / 2
+    const logoSize = Math.round(SIZE * 0.28)  // 28% of QR — safe with H error correction
+    const pad = 3                              // tight white margin around logo
     const cx = SIZE / 2, cy = SIZE / 2
-    // White circle background (slightly larger than logo)
+    const bx = cx - logoSize / 2 - pad,  by = cy - logoSize / 2 - pad
+    const bw = logoSize + pad * 2,        bh = logoSize + pad * 2
+    const br = 7                               // corner radius for rounded square
+    // Tight white rounded-square background
     ctx.fillStyle = '#ffffff'
-    ctx.beginPath(); ctx.arc(cx, cy, logoR + 5, 0, Math.PI * 2); ctx.fill()
-    // Draw clean logo (logo-qr.png — white/transparent background, no pixel hacks needed)
+    ctx.beginPath()
+    ctx.moveTo(bx + br, by)
+    ctx.lineTo(bx + bw - br, by);        ctx.quadraticCurveTo(bx + bw, by,      bx + bw, by + br)
+    ctx.lineTo(bx + bw, by + bh - br);   ctx.quadraticCurveTo(bx + bw, by + bh, bx + bw - br, by + bh)
+    ctx.lineTo(bx + br, by + bh);        ctx.quadraticCurveTo(bx,      by + bh, bx, by + bh - br)
+    ctx.lineTo(bx, by + br);             ctx.quadraticCurveTo(bx,      by,      bx + br, by)
+    ctx.closePath(); ctx.fill()
+    // Draw logo
     try {
       const logo = new Image()
       logo.crossOrigin = 'anonymous'
       await new Promise((res, rej) => { logo.onload = res; logo.onerror = rej; logo.src = '/logo-qr.png' })
-      ctx.drawImage(logo, cx - logoR, cy - logoR, logoSize, logoSize)
+      ctx.drawImage(logo, cx - logoSize / 2, cy - logoSize / 2, logoSize, logoSize)
     } catch (e) { console.warn('[lgRenderQR] logo failed', e) }
   }
 
