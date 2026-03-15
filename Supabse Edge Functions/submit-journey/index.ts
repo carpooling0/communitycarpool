@@ -81,9 +81,14 @@ Deno.serve(async (req) => {
     let userId: number
     let userJourneyLimit: number | null = null
     const { data: existingUser } = await supabase
-      .from('users').select('user_id, journey_limit, ref_code').eq('email', email.toLowerCase()).single()
+      .from('users').select('user_id, journey_limit, ref_code, deletion_requested_at').eq('email', email.toLowerCase()).single()
 
     if (existingUser) {
+      // Block journey creation if a confirmed deletion request is pending
+      if (existingUser.deletion_requested_at) {
+        return new Response(JSON.stringify({ success: false, error: 'Your account is scheduled for deletion. You cannot create new journeys. Contact support if you changed your mind.' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 })
+      }
       userId = existingUser.user_id
       userJourneyLimit = existingUser.journey_limit
       const updates: Record<string, any> = { last_seen_at: new Date().toISOString(), name: firstName }
