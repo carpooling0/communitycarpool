@@ -47,5 +47,6 @@
   });
 
   const el = document.getElementById('sidebar-nav');
+  console.log('[sidebar] el:', el, 'html length:', html.length, 'DOC_ACTIVE:', window.DOC_ACTIVE);
   if (el) el.innerHTML = html;
 })();
