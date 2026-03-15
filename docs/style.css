@@ -308,6 +308,8 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
   .cards-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
   .article-main { padding: 24px 20px 60px; }
   .sidebar { display: none; }
 }
