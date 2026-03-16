@@ -278,7 +278,7 @@ UPDATE organisations SET allow_cross_matching = false WHERE org_code = 'ACME';</
     <pre><code class="language-sql">SELECT
   o.org_code,
   o.org_name,
-  COUNT(s.id) AS submission_count
+  COUNT(s.submission_id) AS submission_count
 FROM organisations o
 LEFT JOIN submissions s ON s.org_id = o.org_id AND s.journey_status = 'active'
 GROUP BY o.org_id, o.org_code, o.org_name
@@ -288,10 +288,10 @@ ORDER BY submission_count DESC;</code></pre>
     <pre><code class="language-sql">SELECT
   o.org_code,
   o.org_name,
-  COUNT(DISTINCT m.id) AS match_count
+  COUNT(DISTINCT m.match_id) AS match_count
 FROM organisations o
 JOIN submissions s ON s.org_id = o.org_id
-JOIN matches m ON m.sub_a_id = s.id OR m.sub_b_id = s.id
+JOIN matches m ON m.sub_a_id = s.submission_id OR m.sub_b_id = s.submission_id
 GROUP BY o.org_id, o.org_code, o.org_name
 ORDER BY match_count DESC;</code></pre>
 
@@ -303,16 +303,16 @@ ORDER BY match_count DESC;</code></pre>
   COUNT(s.id) AS submissions
 FROM organisations o
 JOIN submissions s ON s.org_id = o.org_id
-JOIN users u ON u.id = s.user_id
+JOIN users u ON u.user_id = s.user_id
 WHERE s.journey_status = 'active'
-GROUP BY o.org_code, u.id, u.name, u.email
+GROUP BY o.org_code, u.user_id, u.name, u.email
 ORDER BY o.org_code, submissions DESC;</code></pre>
 
     <h3>Org growth over time (submissions per org per month)</h3>
     <pre><code class="language-sql">SELECT
   o.org_code,
   DATE_TRUNC('month', s.created_at) AS month,
-  COUNT(*) AS new_submissions
+  COUNT(s.submission_id) AS new_submissions
 FROM submissions s
 JOIN organisations o ON o.org_id = s.org_id
 GROUP BY o.org_code, month

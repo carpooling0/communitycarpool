@@ -137,10 +137,10 @@
           <td>github.com/settings/billing</td>
         </tr>
         <tr>
-          <td>Domain registrar</td>
+          <td>Porkbun (domain)</td>
           <td>Annual renewal</td>
-          <td>[REDACTED]</td>
-          <td>[REDACTED]</td>
+          <td>~$10–12/year</td>
+          <td><a href="https://porkbun.com/account/domains" target="_blank">porkbun.com/account/domains</a></td>
         </tr>
       </tbody>
     </table>
@@ -177,8 +177,22 @@
       <li>Consider setting a budget alert in GCP Billing to notify when monthly spend exceeds a threshold</li>
     </ul>
 
-    <h2>Domain registration</h2>
-    <p>The domain <code>communitycarpool.org</code> is registered with [REDACTED]. It renews annually. Keep an eye on the renewal date to avoid expiry — a lapsed domain would take the entire site offline. Registrar login: [REDACTED] — see password manager.</p>
+    <h2>Domain registration — Porkbun</h2>
+    <p>The domain <code>communitycarpool.org</code> is registered with <a href="https://porkbun.com" target="_blank">Porkbun</a> (account: <strong>communitycarpool</strong>). Login credentials: see password manager.</p>
+    <table>
+      <thead><tr><th>Detail</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Expiry date</td><td><strong>2027-02-17</strong></td></tr>
+        <tr><td>Auto-renew</td><td><span class="tag tag-green">Enabled</span> — renews automatically ~30 days before expiry</td></tr>
+        <tr><td>Domain lock</td><td><span class="tag tag-green">Enabled</span> — prevents unauthorised transfers</td></tr>
+        <tr><td>WHOIS privacy</td><td><span class="tag tag-green">Enabled</span> — registrant details hidden from public WHOIS</td></tr>
+        <tr><td>Annual cost</td><td>~$10–12/year (charged to payment method on file)</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>A lapsed domain takes the entire site offline immediately.</strong> Auto-renew is ON, but verify the payment method in Porkbun is valid at least one month before the expiry date. If the card on file has expired, auto-renew will silently fail.</div>
+    </div>
 
     <h2>Setting up billing alerts</h2>
     <p>It is strongly recommended to configure spending alerts for each paid service:</p>
@@ -192,6 +206,71 @@
       <div class="callout-icon">💡</div>
       <div class="callout-body">Review all service dashboards at the start of each month to track usage trends. This takes about 10 minutes and can prevent surprise bills.</div>
     </div>
+
+    <h2>Renewal &amp; subscription calendar</h2>
+    <p>A single view of all services, their billing cycles, and next renewal dates. Review this at the start of each year.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Service</th>
+          <th>Billing cycle</th>
+          <th>Next renewal / expiry</th>
+          <th>Auto-renew?</th>
+          <th>Action if lapsed</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Porkbun</strong> (domain)</td>
+          <td>Annual</td>
+          <td><strong>2027-02-17</strong></td>
+          <td><span class="tag tag-green">Yes</span></td>
+          <td>Site goes offline. Log in to Porkbun and renew immediately. Propagation takes minutes once renewed.</td>
+        </tr>
+        <tr>
+          <td><strong>Supabase</strong> (prod)</td>
+          <td>Monthly</td>
+          <td>Ongoing — check dashboard</td>
+          <td><span class="tag tag-green">Yes</span></td>
+          <td>DB and edge functions go offline. Update payment method in Supabase billing settings.</td>
+        </tr>
+        <tr>
+          <td><strong>Resend</strong></td>
+          <td>Monthly (if on paid plan)</td>
+          <td>Ongoing — check dashboard</td>
+          <td><span class="tag tag-green">Yes</span></td>
+          <td>Emails stop sending. Free tier continues at reduced limits (100/day). Upgrade or switch to SES.</td>
+        </tr>
+        <tr>
+          <td><strong>Google Maps</strong></td>
+          <td>Pay-per-use (monthly billing)</td>
+          <td>No fixed renewal</td>
+          <td>N/A</td>
+          <td>Autocomplete on submission form stops working. Check GCP billing — may need to add credits or update payment method.</td>
+        </tr>
+        <tr>
+          <td><strong>Mapbox</strong></td>
+          <td>Pay-per-use (monthly billing)</td>
+          <td>No fixed renewal</td>
+          <td>N/A</td>
+          <td>Road distance calculation falls back to haversine (straight-line). Match quality unaffected but distances slightly less accurate.</td>
+        </tr>
+        <tr>
+          <td><strong>GitHub</strong></td>
+          <td>Free</td>
+          <td>No renewal required</td>
+          <td>N/A</td>
+          <td>N/A — free plan is indefinite for public repos.</td>
+        </tr>
+        <tr>
+          <td><strong>Google Fonts</strong></td>
+          <td>Free</td>
+          <td>No renewal required</td>
+          <td>N/A</td>
+          <td>Site falls back to system fonts (Inter → system-ui). No functional impact.</td>
+        </tr>
+      </tbody>
+    </table>
 
     <div class="article-nav">
       <a class="prev" href="dev-vs-prod.html"><span class="nav-dir">← Previous</span><span class="nav-title">Dev vs Prod environments</span></a>

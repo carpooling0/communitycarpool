@@ -143,11 +143,25 @@
           <td><a href="https://github.com/carpooling0" target="_blank">github.com/carpooling0</a></td>
         </tr>
         <tr>
-          <td><strong>Domain registrar</strong></td>
-          <td>Domain ownership + DNS management for communitycarpool.org</td>
+          <td><strong>Porkbun</strong></td>
+          <td>Domain registrar + DNS management for communitycarpool.org. Expiry: 2027-02-17, auto-renew ON.</td>
           <td>Login credentials</td>
-          <td>[REDACTED] — see password manager</td>
-          <td>[REDACTED]</td>
+          <td>Account: communitycarpool — see password manager</td>
+          <td><a href="https://porkbun.com/account/domains" target="_blank">porkbun.com/account/domains</a></td>
+        </tr>
+        <tr>
+          <td><strong>esm.sh</strong></td>
+          <td>CDN for Deno package imports inside edge functions (<code>@supabase/supabase-js</code> and others)</td>
+          <td>No authentication — public CDN</td>
+          <td>N/A — no credentials required</td>
+          <td><a href="https://esm.sh" target="_blank">esm.sh</a></td>
+        </tr>
+        <tr>
+          <td><strong>Google Fonts</strong></td>
+          <td>Serves the Inter font used across all site pages (<code>fonts.googleapis.com</code>)</td>
+          <td>No authentication — public CDN</td>
+          <td>N/A — no credentials required</td>
+          <td><a href="https://fonts.google.com" target="_blank">fonts.google.com</a></td>
         </tr>
       </tbody>
     </table>
@@ -192,6 +206,13 @@
       <li>Service role key is NOT present in any committed file</li>
       <li>GitHub SSH key or PAT is not shared between team members — each person uses their own credentials</li>
       <li>All team member logins to external services use unique credentials (not a shared password)</li>
+    </ul>
+
+    <h2>CDN dependencies</h2>
+    <p>Two public CDNs are used passively — no accounts or API keys are required, but an outage would affect the site:</p>
+    <ul>
+      <li><strong>esm.sh</strong> (<code>https://esm.sh</code>) — imported at the top of every edge function as <code>import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'</code>. If esm.sh is unavailable during a cold start, edge functions will fail to load. This is extremely rare but worth knowing during an incident. Mitigation: Supabase caches imports after the first cold start, so brief outages are unlikely to cascade.</li>
+      <li><strong>Google Fonts</strong> (<code>https://fonts.googleapis.com</code>) — loads the Inter typeface on all site pages. If blocked or unavailable, the site falls back to system-ui fonts. No functional impact.</li>
     </ul>
 
     <div class="article-nav">
