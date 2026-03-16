@@ -115,46 +115,110 @@
     </table>
 
     <h2>DNS records reference</h2>
+    <p>All records are managed in Porkbun → Domain Management → DNS for <code>communitycarpool.org</code>. TTL is 600 (10 minutes) on all records.</p>
+
+    <h3>GitHub Pages routing</h3>
     <table>
-      <thead><tr><th>Type</th><th>Host / Name</th><th>Value</th><th>Purpose</th></tr></thead>
+      <thead><tr><th>Type</th><th>Host</th><th>Value</th><th>Purpose</th></tr></thead>
       <tbody>
         <tr>
           <td><span class="tag tag-blue">A</span></td>
-          <td><code>@</code></td>
+          <td><code>communitycarpool.org</code></td>
           <td>185.199.108.153<br/>185.199.109.153<br/>185.199.110.153<br/>185.199.111.153</td>
-          <td>GitHub Pages — apex domain routing. All four IPs should be set.</td>
+          <td>Routes apex domain to GitHub Pages. All four IPs must be present.</td>
         </tr>
         <tr>
           <td><span class="tag tag-blue">CNAME</span></td>
-          <td><code>www</code></td>
+          <td><code>www.communitycarpool.org</code></td>
           <td><code>carpooling0.github.io</code></td>
-          <td>GitHub Pages — www subdomain redirect</td>
+          <td>Routes www subdomain → GitHub Pages (production site)</td>
         </tr>
         <tr>
-          <td><span class="tag tag-green">TXT</span></td>
-          <td><code>@</code></td>
-          <td><code>v=spf1 include:resend.com ~all</code></td>
-          <td>Email SPF — authorises Resend to send email from this domain</td>
-        </tr>
-        <tr>
-          <td><span class="tag tag-green">TXT</span></td>
-          <td><code>resend._domainkey</code></td>
-          <td>[REDACTED] — copy from Resend dashboard &gt; Domains</td>
-          <td>Email DKIM — cryptographic signing key for email authentication</td>
-        </tr>
-        <tr>
-          <td><span class="tag tag-green">TXT</span></td>
-          <td><code>_dmarc</code></td>
-          <td><code>v=DMARC1; p=none; rua=mailto:[REDACTED]</code></td>
-          <td>DMARC policy — reports failed SPF/DKIM checks. Start with <code>p=none</code> to monitor before enforcing.</td>
+          <td><span class="tag tag-blue">CNAME</span></td>
+          <td><code>dev.communitycarpool.org</code></td>
+          <td><code>carpooling0.github.io</code></td>
+          <td>Routes dev subdomain → GitHub Pages (dev site at communitycarpool-dev repo). Access dev at <a href="https://dev.communitycarpool.org" target="_blank">dev.communitycarpool.org</a>.</td>
         </tr>
       </tbody>
     </table>
 
+    <h3>Resend email authentication (root domain — <code>communitycarpool.org</code>)</h3>
+    <table>
+      <thead><tr><th>Type</th><th>Host</th><th>Value</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag-green">TXT</span></td>
+          <td><code>resend._domainkey.communitycarpool.org</code></td>
+          <td><code>p=MIGfMA0GCSqGSIb3DQEBAQUAA4G…</code> (full key in Porkbun DNS)</td>
+          <td>Resend DKIM public key — signs outbound emails sent via Resend from <code>@communitycarpool.org</code></td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-green">TXT</span></td>
+          <td><code>_dmarc.communitycarpool.org</code></td>
+          <td><code>v=DMARC1; p=none;</code></td>
+          <td>DMARC policy — currently monitor-only (<code>p=none</code>). No reporting address set. See DMARC section below.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>AWS SES email authentication (sending subdomain — <code>send.communitycarpool.org</code>)</h3>
+    <p>SES uses <code>send.communitycarpool.org</code> as its sending domain. Three CNAME records verify the domain with AWS Easy DKIM:</p>
+    <table>
+      <thead><tr><th>Type</th><th>Host</th><th>Value</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag-blue">CNAME</span></td>
+          <td><code>4hrxidlzv2qcdtntjyncsr2ir4bjhjcx._domainkey.communitycarpool.org</code></td>
+          <td><code>4hrxidlzv2qcdtntjyncsr2ir4bjhjcx.dkim.amazonses.com</code></td>
+          <td>SES Easy DKIM verification (key 1 of 3)</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-blue">CNAME</span></td>
+          <td><code>paw6loc3dit3w3jzfptiejxsu5fusuli._domainkey.communitycarpool.org</code></td>
+          <td><code>paw6loc3dit3w3jzfptiejxsu5fusuli.dkim.amazonses.com</code></td>
+          <td>SES Easy DKIM verification (key 2 of 3)</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-blue">CNAME</span></td>
+          <td><code>2xtljbyhu3n44oahgi223mqrzvtydekq._domainkey.communitycarpool.org</code></td>
+          <td><code>2xtljbyhu3n44oahgi223mqrzvtydekq.dkim.amazonses.com</code></td>
+          <td>SES Easy DKIM verification (key 3 of 3)</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-green">TXT</span></td>
+          <td><code>send.communitycarpool.org</code></td>
+          <td><code>v=spf1 include:amazonses.com ~all</code></td>
+          <td>SPF — authorises AWS SES to send email from the <code>send</code> subdomain</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-amber">MX</span></td>
+          <td><code>send.communitycarpool.org</code></td>
+          <td><code>feedback-smtp.eu-west-1.amazonses.com</code> (priority 10)</td>
+          <td>SES bounce &amp; complaint feedback loop — delivery notifications are routed back to SES via this MX record</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-body"><strong>Two email providers are configured.</strong> Resend authenticates against the root domain (<code>@communitycarpool.org</code>) via its DKIM TXT record. SES authenticates against the <code>send.communitycarpool.org</code> subdomain. Both are ready — the active provider is determined by which secrets are set in Supabase Vault. Currently, <code>RESEND_API_KEY</code> is active; SES is standby.</div>
+    </div>
+
     <div class="callout info">
       <div class="callout-icon">ℹ️</div>
-      <div class="callout-body">DNS changes can take up to 48 hours to propagate globally, though most changes are visible within 1–2 hours. Use <a href="https://toolbox.googleapps.com/apps/checkmx/" target="_blank">Google MX Toolbox</a> or <a href="https://mxtoolbox.com" target="_blank">mxtoolbox.com</a> to verify records after changes.</div>
+      <div class="callout-body">DNS changes can take up to 48 hours to propagate globally, though most changes are visible within 1–2 hours. Use <a href="https://mxtoolbox.com/SuperTool.aspx" target="_blank">MXToolbox SuperTool</a> to verify any record type after changes.</div>
     </div>
+
+    <h2>Subdomains summary</h2>
+    <table>
+      <thead><tr><th>Subdomain</th><th>Points to</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>communitycarpool.org</code></td><td>GitHub Pages (4× A records)</td><td>Production site</td></tr>
+        <tr><td><code>www.communitycarpool.org</code></td><td><code>carpooling0.github.io</code></td><td>www redirect → production</td></tr>
+        <tr><td><code>dev.communitycarpool.org</code></td><td><code>carpooling0.github.io</code></td><td>Dev site (communitycarpool-dev repo)</td></tr>
+        <tr><td><code>send.communitycarpool.org</code></td><td>SES (SPF + MX + DKIM)</td><td>AWS SES sending domain (standby)</td></tr>
+      </tbody>
+    </table>
 
     <h2>GitHub Pages custom domain setup</h2>
     <p>To verify that the custom domain is configured correctly in GitHub:</p>
@@ -165,25 +229,23 @@
       <li>The <strong>Enforce HTTPS</strong> checkbox should be ticked (requires DNS to propagate first)</li>
       <li>GitHub will show a green tick when the domain is verified and HTTPS is active</li>
     </ol>
-    <p>A <code>CNAME</code> file in the repo root contains the custom domain value — do not delete this file.</p>
+    <p>A <code>CNAME</code> file in each repo root (<code>communitycarpool.org</code> in prod, <code>dev.communitycarpool.org</code> in dev) ties the repo to its domain — do not delete these files.</p>
 
     <h2>Email domain verification in Resend</h2>
-    <p>After setting the SPF and DKIM records:</p>
+    <p>Resend's DKIM TXT record is already set. To verify status:</p>
     <ol>
       <li>Go to <a href="https://resend.com/domains" target="_blank">resend.com/domains</a></li>
-      <li>Find <code>communitycarpool.org</code></li>
-      <li>Click <strong>Verify</strong> — Resend will check for the DNS records</li>
-      <li>Status should show <span class="tag tag-green">Verified</span> for both SPF and DKIM</li>
+      <li>Find <code>communitycarpool.org</code> — status should show <span class="tag tag-green">Verified</span></li>
+      <li>If not verified, the <code>resend._domainkey</code> TXT record may need re-copying from the Resend dashboard — ensure no trailing dot is appended by Porkbun</li>
     </ol>
-    <p>If not verified, double-check the record names (some DNS providers automatically append the domain, so <code>resend._domainkey</code> may need to be entered as <code>resend._domainkey.communitycarpool.org</code> — check your registrar's instructions).</p>
 
     <h2>DMARC progression</h2>
-    <p>The DMARC policy starts as <code>p=none</code> (monitor only — failed checks are reported but not rejected). Once you are confident the SPF and DKIM are working correctly and emails are delivering reliably, tighten the policy:</p>
-    <ul>
-      <li><code>p=quarantine</code> — failed emails go to spam</li>
-      <li><code>p=reject</code> — failed emails are rejected outright</li>
-    </ul>
-    <p>Moving to <code>p=reject</code> is the gold standard for email security. Do this only after verifying that all legitimate email sources are correctly listed in SPF.</p>
+    <p>The current DMARC policy is <code>p=none</code> with no reporting address — this means failed checks are silently ignored (monitor mode with no visibility). Recommended next steps:</p>
+    <ol>
+      <li><strong>Add a reporting address</strong> — update to <code>v=DMARC1; p=none; rua=mailto:carpooling0@gmail.com</code> to start receiving aggregate failure reports</li>
+      <li><strong>Tighten to <code>p=quarantine</code></strong> — once email delivery is confirmed stable, failed emails go to spam rather than inbox</li>
+      <li><strong>Move to <code>p=reject</code></strong> — gold standard. Failed emails are rejected outright. Only do this after confirming both Resend and SES (if active) are correctly authenticating.</li>
+    </ol>
 
     <div class="article-nav">
       <a class="prev" href="maps.html"><span class="nav-dir">← Previous</span><span class="nav-title">Google Maps &amp; Mapbox</span></a>
