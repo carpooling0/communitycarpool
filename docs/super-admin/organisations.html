@@ -48,6 +48,7 @@
         <a class="sidebar-link" href="github.html">GitHub &amp; deployment</a>
         <a class="sidebar-link" href="dev-vs-prod.html">Dev vs Prod environments</a>
         <a class="sidebar-link" href="cost-billing.html">Cost &amp; billing</a>
+        <a class="sidebar-link" href="architecture.html">System architecture</a>
       </div>
       <div class="sidebar-section">
         <div class="sidebar-section-label">Integrations &amp; APIs</div>
@@ -300,7 +301,7 @@ ORDER BY match_count DESC;</code></pre>
   o.org_code,
   u.name,
   u.email,
-  COUNT(s.id) AS submissions
+  COUNT(s.submission_id) AS submissions
 FROM organisations o
 JOIN submissions s ON s.org_id = o.org_id
 JOIN users u ON u.user_id = s.user_id
