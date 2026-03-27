@@ -1727,6 +1727,7 @@
                     img.setAttribute('src', orgLogoUrl); // use setAttribute so & in URL is never HTML-parsed
                     img.setAttribute('alt', orgName);
                     img.style.cssText = 'max-width:180px;height:auto;display:block;margin:0 auto 12px;';
+                    img.onerror = () => img.remove();
                     brandingBlock.appendChild(img);
                 }
 
