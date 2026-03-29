@@ -1,107 +1,159 @@
 /* =========================================================
-   Brand Guidelines — Layout & Typography Overrides
-   Fixes: hero height, section spacing, font readability
+   Brand Guidelines — Compact Layout Overrides
    ========================================================= */
 
-/* 1. HERO / HEADER — reduce green bar height */
+/* ── HERO (index page) ── */
 .hero {
-  padding: 55px 40px 44px !important;
-  margin-top: 60px !important;
+  padding: 28px 40px 24px !important;
+  margin-top: 58px !important;
+}
+.hero h1 {
+  font-size: 28px !important;
+  margin-bottom: 8px !important;
+  letter-spacing: -0.5px !important;
+  line-height: 1.2 !important;
+}
+.hero p {
+  font-size: 14px !important;
+  margin-bottom: 16px !important;
+  line-height: 1.5 !important;
+}
+.hero .buttons {
+  gap: 10px !important;
+}
+.hero .btn {
+  padding: 8px 20px !important;
+  font-size: 13px !important;
 }
 @media (max-width: 768px) {
-  .hero { padding: 40px 20px 36px !important; margin-top: 50px !important; }
-}
-header {
-  padding: 24px 40px !important;
+  .hero { padding: 20px !important; margin-top: 50px !important; }
+  .hero h1 { font-size: 22px !important; }
 }
 
-/* 2. SECTIONS — reduce vertical whitespace */
+/* ── SUB-PAGE HEADERS ── */
+header {
+  padding: 16px 40px !important;
+}
+header h1 {
+  font-size: 22px !important;
+  margin-bottom: 4px !important;
+}
+header p {
+  font-size: 13px !important;
+  margin: 0 !important;
+}
+
+/* ── NAV ── */
+nav {
+  padding: 8px 40px !important;
+}
+
+/* ── SECTIONS ── */
 section {
-  padding: 48px 0 !important;
+  padding: 14px 0 !important;
   margin-bottom: 0 !important;
 }
 section.hero {
-  padding: 55px 40px 44px !important;
+  padding: 28px 40px 24px !important;
 }
 .section {
-  padding: 40px 0 !important;
-  margin-bottom: 32px !important;
-}
-.card-section {
-  margin-bottom: 40px !important;
-}
-
-/* Section headings — tighten top margin */
-section h2,
-h2 {
-  margin-top: 32px !important;
-  margin-bottom: 14px !important;
-  font-size: 30px !important;
-}
-section h3,
-h3 {
-  margin-top: 22px !important;
+  padding: 12px 0 !important;
   margin-bottom: 10px !important;
+}
+.card-section,
+.download-section {
+  margin-bottom: 12px !important;
+}
+
+/* ── HEADINGS ── */
+section h2, h2 {
   font-size: 20px !important;
+  margin-top: 14px !important;
+  margin-bottom: 6px !important;
+  padding-bottom: 4px !important;
 }
-
-/* Intro paragraphs under section headings */
-section .intro {
-  margin-bottom: 28px !important;
+section h3, h3 {
+  font-size: 16px !important;
+  margin-top: 10px !important;
+  margin-bottom: 4px !important;
 }
-
-/* Main content area */
-main {
-  padding: 36px 40px !important;
-}
-
-/* Footer */
-footer {
-  padding: 32px 40px !important;
-  margin-top: 40px !important;
-}
-
-/* 3. FONT SIZES — minimum readable sizes */
-body {
-  font-size: 15px;
-}
-p, li {
-  font-size: 15px;
-  line-height: 1.65;
-}
-th, td {
+section h4, h4 {
   font-size: 14px !important;
-  padding: 12px 16px !important;
+  margin-top: 8px !important;
+  margin-bottom: 3px !important;
+}
+section .intro {
+  margin-bottom: 10px !important;
+  font-size: 14px !important;
 }
 
-/* Small labels that were 12px → 13px */
-.font-type,
-.weight-badge,
-.color-code,
-.token-value,
-.swatch,
-.tag,
-.badge,
-nav a,
-.nav-link,
-.label,
-small {
-  font-size: 13px !important;
+/* ── MAIN CONTENT AREA ── */
+main {
+  padding: 14px 40px !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
 }
 
-/* Code blocks */
+/* ── FOOTER ── */
+footer {
+  padding: 16px 40px !important;
+  margin-top: 20px !important;
+}
+
+/* ── FONT SIZES ── minimum readable */
+body { font-size: 14px; line-height: 1.6; }
+p, li { font-size: 14px !important; line-height: 1.6 !important; }
+th, td { font-size: 13px !important; padding: 8px 12px !important; }
+small, .label, .tag, .badge,
+.font-type, .weight-badge, .color-code,
+.token-value, .swatch, nav a, .nav-link {
+  font-size: 12px !important;
+}
 code, pre, .code, .code-block {
-  font-size: 13px !important;
-  line-height: 1.6 !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
 }
 
-/* Cards and boxes — reduce internal padding slightly */
-.card, .box, .usage, .value-box {
-  padding: 20px !important;
-  margin: 16px 0 !important;
+/* ── CARDS / BOXES ── tighter padding (all variants) */
+.card, .box, .usage, .value-box,
+.essence-box, .info-box, .example-box,
+.callout-box, .preview, .component-preview,
+.color-card, .font-card, .component-card,
+.font-preview, .logo-preview, .mockup-card,
+.image-card, .nav-card, .stat-card,
+.scenario-card, .shadow-card, .channel-card,
+.promise-card, .spacing-box, .layout-example,
+.color-item, .color-palette, .footer-cta,
+.summary-section, .what-not, .document-section {
+  padding: 14px !important;
+  margin: 8px 0 !important;
 }
 
-/* Grid gaps */
-.grid, .cards, .color-grid, .font-grid {
-  gap: 20px !important;
+/* ── GRIDS ── tighter gaps */
+.grid, .cards, .cards-grid,
+.color-grid, .font-grid, .font-family,
+.component-grid, .token-grid,
+.comparison-grid, .mockup-grid,
+.scenario-grid, .image-grid,
+.state-grid, .nav-grid, .logo-grid,
+.promise-grid, .footer-grid {
+  gap: 12px !important;
 }
+
+/* ── TABLES ── */
+table { margin: 8px 0 !important; }
+.usage-table { margin: 8px 0 !important; }
+
+/* ── MISC SPACING ── */
+.section-header, .section-label { margin-bottom: 10px !important; }
+.section-content { padding: 12px 0 !important; }
+hr { margin: 12px 0 !important; }
+.container { padding: 0 32px !important; }
+.timeline-item { margin-bottom: 12px !important; padding: 12px !important; }
+.stats-row, .comparison-row, .enhancement-row, .state-row { margin: 6px 0 !important; }
+.document-header { padding: 12px !important; margin-bottom: 12px !important; }
+.logo-section, .component-section { margin-bottom: 16px !important; }
+.footer-action, .footer-bottom { margin-top: 8px !important; padding: 8px !important; }
+
+/* ── STAT VALUES ── keep readable */
+.stat-value { font-size: 24px !important; }
