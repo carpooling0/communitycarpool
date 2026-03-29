@@ -8,13 +8,13 @@
   margin-top: 58px !important;
 }
 .hero h1 {
-  font-size: 28px !important;
+  font-size: 32px !important;
   margin-bottom: 8px !important;
   letter-spacing: -0.5px !important;
   line-height: 1.2 !important;
 }
 .hero p {
-  font-size: 14px !important;
+  font-size: 15px !important;
   margin-bottom: 16px !important;
   line-height: 1.5 !important;
 }
@@ -27,7 +27,7 @@
 }
 @media (max-width: 768px) {
   .hero { padding: 20px !important; margin-top: 50px !important; }
-  .hero h1 { font-size: 22px !important; }
+  .hero h1 { font-size: 24px !important; }
 }
 
 /* ── SUB-PAGE HEADERS ── */
@@ -39,7 +39,7 @@ header h1 {
   margin-bottom: 4px !important;
 }
 header p {
-  font-size: 13px !important;
+  font-size: 14px !important;
   margin: 0 !important;
 }
 
@@ -67,24 +67,24 @@ section.hero {
 
 /* ── HEADINGS ── */
 section h2, h2 {
-  font-size: 20px !important;
+  font-size: 22px !important;
   margin-top: 14px !important;
   margin-bottom: 6px !important;
   padding-bottom: 4px !important;
 }
 section h3, h3 {
-  font-size: 16px !important;
+  font-size: 17px !important;
   margin-top: 10px !important;
   margin-bottom: 4px !important;
 }
 section h4, h4 {
-  font-size: 14px !important;
+  font-size: 15px !important;
   margin-top: 8px !important;
   margin-bottom: 3px !important;
 }
 section .intro {
   margin-bottom: 10px !important;
-  font-size: 14px !important;
+  font-size: 15px !important;
 }
 
 /* ── MAIN CONTENT AREA ── */
@@ -100,18 +100,34 @@ footer {
   margin-top: 20px !important;
 }
 
-/* ── FONT SIZES ── minimum readable */
-body { font-size: 14px; line-height: 1.6; }
-p, li { font-size: 14px !important; line-height: 1.6 !important; }
-th, td { font-size: 13px !important; padding: 8px 12px !important; }
+/* ── FONT SIZES ── readable at all sizes */
+body { font-size: 15px; line-height: 1.6; }
+p, li { font-size: 15px !important; line-height: 1.6 !important; }
+th, td { font-size: 14px !important; padding: 8px 12px !important; }
 small, .label, .tag, .badge,
-.font-type, .weight-badge, .color-code,
-.token-value, .swatch, nav a, .nav-link {
+.font-type, .weight-badge,
+nav a, .nav-link {
   font-size: 12px !important;
 }
+.color-code, .token-value {
+  font-size: 13px !important;
+}
 code, pre, .code, .code-block {
-  font-size: 12px !important;
+  font-size: 13px !important;
   line-height: 1.5 !important;
+}
+
+/* ── DECORATIVE MOCKUP / PREVIEW BOXES ── shrink tall placeholders */
+.mockup-preview {
+  height: 70px !important;
+  min-height: 0 !important;
+}
+
+/* ── COLOR SWATCHES ── reduce height */
+.swatch {
+  height: 60px !important;
+  min-height: 0 !important;
+  font-size: 13px !important;
 }
 
 /* ── CARDS / BOXES ── tighter padding (all variants) */
