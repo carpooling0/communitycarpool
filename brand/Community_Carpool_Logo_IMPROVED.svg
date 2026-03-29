@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 280">
+  <!-- Define colors -->
+  <defs>
+    <style>
+      .dark-green { fill: #1B5C3A; }
+      .bright-green { fill: #B4E035; }
+      .white-fill { fill: #FFFFFF; }
+      .tagline { font-family: Georgia, serif; font-size: 18px; font-style: italic; fill: #333333; }
+      .community { font-family: Arial, sans-serif; font-size: 60px; font-weight: bold; fill: #B4E035; }
+      .carpool { font-family: Arial, sans-serif; font-size: 60px; font-weight: bold; fill: #1B5C3A; }
+    </style>
+  </defs>
+
+  <!-- Left Pin (Dark Green) -->
+  <g id="left-pin">
+    <!-- Pin shape -->
+    <path class="dark-green" d="M 200 80 C 160 80, 140 110, 140 150 C 140 200, 200 240, 200 240 C 200 240, 260 200, 260 150 C 260 110, 240 80, 200 80 Z" />
+    <!-- White circle inside -->
+    <circle class="white-fill" cx="200" cy="140" r="28" />
+  </g>
+
+  <!-- Right Pin (Bright Green) -->
+  <g id="right-pin">
+    <!-- Pin shape -->
+    <path class="bright-green" d="M 330 80 C 290 80, 270 110, 270 150 C 270 200, 330 240, 330 240 C 330 240, 390 200, 390 150 C 390 110, 370 80, 330 80 Z" />
+    <!-- White circle inside -->
+    <circle class="white-fill" cx="330" cy="140" r="28" />
+  </g>
+
+  <!-- Extended Arc at Intersection (Convex shape) -->
+  <g id="intersection-arc">
+    <!-- Full convex arc covering the entire intersection -->
+    <path class="bright-green" d="M 270 150 Q 300 200, 330 150 Q 300 180, 270 150 Z" opacity="0.6" />
+    <!-- Darker green overlay for depth -->
+    <path class="dark-green" d="M 280 155 Q 305 185, 320 155 Q 305 170, 280 155 Z" opacity="0.4" />
+  </g>
+
+  <!-- Swoosh beneath pins (curved lines) -->
+  <g id="swoosh">
+    <!-- Main swoosh curve -->
+    <path d="M 150 210 Q 265 250, 380 210" stroke="#1B5C3A" stroke-width="8" fill="none" stroke-linecap="round" />
+    <!-- Secondary swoosh (lighter) -->
+    <path d="M 160 220 Q 265 260, 370 220" stroke="#B4E035" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.7" />
+  </g>
+
+  <!-- Text: COMMUNITY -->
+  <text class="community" x="420" y="130">COMMUNITY</text>
+
+  <!-- Text: CARPOOL -->
+  <text class="carpool" x="420" y="190">CARPOOL</text>
+
+  <!-- Tagline -->
+  <text class="tagline" x="200" y="270">Share rides. Cut emissions.</text>
+</svg>

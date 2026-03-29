@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Carpool - Enhancement Approval Form</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --brand-green: #5EC576;
+            --dark-neutral: #2C3E50;
+            --light-gray: #F5F5F5;
+            --white: #FFFFFF;
+            --text-gray: #555555;
+            --light-text: #888888;
+            --success: #27AE60;
+            --warning: #F39C12;
+            --danger: #E74C3C;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(180deg, var(--white) 0%, #F9F9F9 100%);
+            color: var(--text-gray);
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--brand-green) 0%, #4BA25A 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 12px rgba(94, 197, 118, 0.2);
+        }
+        
+        header h1 {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+        
+        header p {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        
+        .document-section {
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        
+        .document-header {
+            background: var(--light-gray);
+            padding: 24px;
+            border-bottom: 3px solid var(--brand-green);
+        }
+        
+        .document-header h2 {
+            font-size: 24px;
+            color: var(--dark-neutral);
+            margin-bottom: 8px;
+        }
+        
+        .document-status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 8px;
+        }
+        
+        .status-complete {
+            background: rgba(39, 174, 96, 0.15);
+            color: var(--success);
+        }
+        
+        .status-pending {
+            background: rgba(243, 156, 18, 0.15);
+            color: var(--warning);
+        }
+        
+        .enhancement-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .enhancement-row {
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            flex-wrap: wrap;
+            padding: 0;
+        }
+        
+        .enhancement-row:last-child {
+            border-bottom: none;
+        }
+        
+        .enhancement-cell {
+            padding: 20px;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .cell-number {
+            background: var(--light-gray);
+            font-weight: 700;
+            color: var(--brand-green);
+            min-width: 60px;
+            padding: 20px 12px;
+            text-align: center;
+        }
+        
+        .cell-enhancement {
+            flex: 2;
+            background: white;
+        }
+        
+        .cell-enhancement h4 {
+            color: var(--dark-neutral);
+            font-size: 16px;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+        
+        .cell-reason {
+            flex: 2;
+            background: rgba(94, 197, 118, 0.02);
+            color: var(--text-gray);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .cell-decision {
+            min-width: 180px;
+            padding: 20px 12px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+        
+        button {
+            flex: 1;
+            padding: 10px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .btn-accept {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--success);
+            border: 2px solid var(--success);
+        }
+        
+        .btn-accept:hover {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-accept.selected {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-decline {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--danger);
+            border: 2px solid var(--danger);
+        }
+        
+        .btn-decline:hover {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-decline.selected {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .decision-indicator {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            height: 20px;
+        }
+        
+        .indicator-accept {
+            color: var(--success);
+        }
+        
+        .indicator-decline {
+            color: var(--danger);
+        }
+        
+        .summary-section {
+            background: linear-gradient(135deg, rgba(94, 197, 118, 0.1) 0%, rgba(75, 162, 90, 0.05) 100%);
+            border: 2px solid var(--brand-green);
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+        }
+        
+        .summary-section h3 {
+            color: var(--brand-green);
+            margin-bottom: 16px;
+            font-size: 18px;
+        }
+        
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 16px;
+            border-radius: 6px;
+            text-align: center;
+            border-left: 4px solid var(--brand-green);
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--brand-green);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--light-text);
+            margin-top: 4px;
+        }
+        
+        .footer-action {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+        
+        .btn-primary {
+            background: var(--brand-green);
+            color: white;
+            padding: 14px 32px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: #4BA25A;
+            box-shadow: 0 4px 12px rgba(94, 197, 118, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            background: var(--light-gray);
+            color: var(--light-text);
+            cursor: not-allowed;
+        }
+        
+        .instructions {
+            background: rgba(52, 152, 219, 0.05);
+            border-left: 4px solid #3498DB;
+            padding: 16px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .instructions strong {
+            color: var(--dark-neutral);
+        }
+        
+        @media (max-width: 900px) {
+            .enhancement-row {
+                flex-direction: column;
+            }
+            
+            .enhancement-cell,
+            .cell-reason,
+            .cell-decision {
+                width: 100%;
+                min-width: auto;
+            }
+            
+            .cell-number {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📋 Enhancement Approval Form</h1>
+        <p>Community Carpool - Brand Guidelines Documents</p>
+    </header>
+    
+    <div class="container">
+        <div class="instructions">
+            <strong>How to use:</strong> For each enhancement, click ✅ ACCEPT or ❌ DECLINE. Your selections will be saved. Then submit to confirm.
+        </div>
+        
+        <div class="summary-section">
+            <h3>Summary</h3>
+            <div class="summary-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-enhancements">29</div>
+                    <div class="stat-label">Total Enhancements</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="accepted-count">0</div>
+                    <div class="stat-label">Accepted</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="declined-count">0</div>
+                    <div class="stat-label">Declined</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="pending-count">29</div>
+                    <div class="stat-label">Pending Decision</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ===== DOCUMENT 1: BRAND FOUNDATION ===== -->
+        <div class="document-section">
+            <div class="document-header">
+                <h2>1️⃣ BRAND FOUNDATION</h2>
+                <span class="document-status status-complete">✅ COMPLETED</span>
+                <p style="margin-top: 12px; font-size: 14px; color: var(--text-gray);">Status: Already Enhanced (9 improvements implemented)</p>
+            </div>
+            
+            <div class="enhancement-table">
+                <div class="enhancement-row">
+                    <div class="cell-number">1</div>
+                    <div class="cell-enhancement"><h4>Move Brand Essence to top</h4></div>
+                    <div class="cell-reason">Readers need the North Star FIRST before understanding purpose</div>
+                    <div class="cell-decision"><div class="decision-indicator indicator-accept">✅ DONE</div></div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">2</div>
+                    <div class="cell-enhancement"><h4>Add Stakeholder Promises grid</h4></div>
+                    <div class="cell-reason">Different audiences need different value messages</div>
+                    <div class="cell-decision"><div class="decision-indicator indicator-accept">✅ DONE</div></div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">3</div>
+                    <div class="cell-enhancement"><h4>Add "What We're NOT" section</h4></div>
+                    <div class="cell-reason">Prevents misunderstanding. Clear anti-patterns build trust.</div>
+                    <div class="cell-decision"><div class="decision-indicator indicator-accept">✅ DONE</div></div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">4</div>
+                    <div class="cell-enhancement"><h4>Add Brand Story Timeline</h4></div>
+                    <div class="cell-reason">Visual progression is more compelling than prose</div>
+                    <div class="cell-decision"><div class="decision-indicator indicator-accept">✅ DONE</div></div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">5</div>
+                    <div class="cell-enhancement"><h4>Add Success Metrics card grid</h4></div>
+                    <div class="cell-reason">Numbers prove viability. Data is credible.</div>
+                    <div class="cell-decision"><div class="decision-indicator indicator-accept">✅ DONE</div></div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">6</div>
+                    <div class="cell-enhancement"><h4>Add Voice Preview section</h4></div>
+                    <div class="cell-reason">Bridge between Foundation and Voice guide</div>
+                    <div class="cell-decision"><div class="decision-indicator indicator-accept">✅ DONE</div></div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">7</div>
+                    <div class="cell-enhancement"><h4>Add Call-to-Action footer</h4></div>
+                    <div class="cell-reason">Guides readers on next steps</div>
+                    <div class="cell-decision"><div class="decision-indicator indicator-accept">✅ DONE</div></div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">8</div>
+                    <div class="cell-enhancement"><h4>Add visual icons to values</h4></div>
+                    <div class="cell-reason">Make content scannable and memorable</div>
+                    <div class="cell-decision"><div class="decision-indicator indicator-accept">✅ DONE</div></div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">9</div>
+                    <div class="cell-enhancement"><h4>Enhanced design/spacing</h4></div>
+                    <div class="cell-reason">Better breathing room, prevent wall-of-text feel</div>
+                    <div class="cell-decision"><div class="decision-indicator indicator-accept">✅ DONE</div></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ===== DOCUMENT 2: BRAND VOICE GUIDE ===== -->
+        <div class="document-section">
+            <div class="document-header">
+                <h2>2️⃣ BRAND VOICE GUIDE</h2>
+                <span class="document-status status-pending">⏳ AWAITING YOUR APPROVAL</span>
+                <p style="margin-top: 12px; font-size: 14px; color: var(--text-gray);">9 proposed enhancements. Accept all, some, or none.</p>
+            </div>
+            
+            <div class="enhancement-table">
+                <div class="enhancement-row">
+                    <div class="cell-number">A</div>
+                    <div class="cell-enhancement"><h4>Move "Voice Foundation" to top</h4></div>
+                    <div class="cell-reason">Readers should understand Emotional Pillars FIRST (Empowered, Trusted, Relieved, Connected)</div>
+                    <div class="cell-decision">
+                        <div class="btn-group">
+                            <button class="btn-accept" onclick="setDecision('BVG-A', 'accept')">✅ Accept</button>
+                            <button class="btn-decline" onclick="setDecision('BVG-A', 'decline')">❌ Decline</button>
+                        </div>
+                        <div class="decision-indicator" id="decision-BVG-A"></div>
+                    </div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">B</div>
+                    <div class="cell-enhancement"><h4>Add "Do vs Don't" comparison table</h4></div>
+                    <div class="cell-reason">Side-by-side examples make guidelines clearer (❌ "Reduce per-capita costs" vs ✅ "Save money")</div>
+                    <div class="cell-decision">
+                        <div class="btn-group">
+                            <button class="btn-accept" onclick="setDecision('BVG-B', 'accept')">✅ Accept</button>
+                            <button class="btn-decline" onclick="setDecision('BVG-B', 'decline')">❌ Decline</button>
+                        </div>
+                        <div class="decision-indicator" id="decision-BVG-B"></div>
+                    </div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">C</div>
+                    <div class="cell-enhancement"><h4>Create "Voice Character Profile"</h4></div>
+                    <div class="cell-reason">Describe "The Optimistic Neighbor" with personality traits, speech patterns, emotional tone</div>
+                    <div class="cell-decision">
+                        <div class="btn-group">
+                            <button class="btn-accept" onclick="setDecision('BVG-C', 'accept')">✅ Accept</button>
+                            <button class="btn-decline" onclick="setDecision('BVG-C', 'decline')">❌ Decline</button>
+                        </div>
+                        <div class="decision-indicator" id="decision-BVG-C"></div>
+                    </div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">D</div>
+                    <div class="cell-enhancement"><h4>Add "Common Pitfalls" subsection</h4></div>
+                    <div class="cell-reason">Mistakes to avoid with real examples (jargon, corporate speak, fake friendliness)</div>
+                    <div class="cell-decision">
+                        <div class="btn-group">
+                            <button class="btn-accept" onclick="setDecision('BVG-D', 'accept')">✅ Accept</button>
+                            <button class="btn-decline" onclick="setDecision('BVG-D', 'decline')">❌ Decline</button>
+                        </div>
+                        <div class="decision-indicator" id="decision-BVG-D"></div>
+                    </div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">E</div>
+                    <div class="cell-enhancement"><h4>Expand emotional ratings explanation</h4></div>
+                    <div class="cell-reason">Explain what each emotion (Empowered, Trusted, Relieved, Connected) looks like in actual copy</div>
+                    <div class="cell-decision">
+                        <div class="btn-group">
+                            <button class="btn-accept" onclick="setDecision('BVG-E', 'accept')">✅ Accept</button>
+                            <button class="btn-decline" onclick="setDecision('BVG-E', 'decline')">❌ Decline</button>
+                        </div>
+                        <div class="decision-indicator" id="decision-BVG-E"></div>
+                    </div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">F</div>
+                    <div class="cell-enhancement"><h4>Add "Tone shift guide by context"</h4></div>
+                    <div class="cell-reason">Show how tone adapts by platform while keeping core character consistent</div>
+                    <div class="cell-decision">
+                        <div class="btn-group">
+                            <button class="btn-accept" onclick="setDecision('BVG-F', 'accept')">✅ Accept</button>
+                            <button class="btn-decline" onclick="setDecision('BVG-F', 'decline')">❌ Decline</button>
+                        </div>
+                        <div class="decision-indicator" id="decision-BVG-F"></div>
+                    </div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">G</div>
+                    <div class="cell-enhancement"><h4>Expand writing examples library</h4></div>
+                    <div class="cell-reason">Expand from 6 examples to 12+ real scenarios (subject lines, CTAs, error messages, notifications)</div>
+                    <div class="cell-decision">
+                        <div class="btn-group">
+                            <button class="btn-accept" onclick="setDecision('BVG-G', 'accept')">✅ Accept</button>
+                            <button class="btn-decline" onclick="setDecision('BVG-G', 'decline')">❌ Decline</button>
+                        </div>
+                        <div class="decision-indicator" id="decision-BVG-G"></div>
+                    </div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">H</div>
+                    <div class="cell-enhancement"><h4>Add "Accessibility & Clarity checklist"</h4></div>
+                    <div class="cell-reason">Plain language reading level, sentence length limits, passive voice rules with concrete numbers</div>
+                    <div class="cell-decision">
+                        <div class="btn-group">
+                            <button class="btn-accept" onclick="setDecision('BVG-H', 'accept')">✅ Accept</button>
+                            <button class="btn-decline" onclick="setDecision('BVG-H', 'decline')">❌ Decline</button>
+                        </div>
+                        <div class="decision-indicator" id="decision-BVG-H"></div>
+                    </div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">I</div>
+                    <div class="cell-enhancement"><h4>Add footer CTA & resource links</h4></div>
+                    <div class="cell-reason">Guide readers to Channel-Specific Voice guide and Brand Foundation</div>
+                    <div class="cell-decision">
+                        <div class="btn-group">
+                            <button class="btn-accept" onclick="setDecision('BVG-I', 'accept')">✅ Accept</button>
+                            <button class="btn-decline" onclick="setDecision('BVG-I', 'decline')">❌ Decline</button>
+                        </div>
+                        <div class="decision-indicator" id="decision-BVG-I"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ===== DOCUMENT 3: CHANNEL-SPECIFIC VOICE ===== -->
+        <div class="document-section">
+            <div class="document-header">
+                <h2>3️⃣ CHANNEL-SPECIFIC VOICE</h2>
+                <span class="document-status status-pending">⏳ AWAITING YOUR APPROVAL</span>
+                <p style="margin-top: 12px; font-size: 14px; color: var(--text-gray);">11 proposed enhancements. Accept all, some, or none.</p>
+            </div>
+            
+            <div class="enhancement-table">
+                <div class="enhancement-row">
+                    <div class="cell-number">α</div>
+                    <div class="cell-enhancement"><h4>Add comparison table: 8 channels side-by-side</h4></div>
+                    <div class="cell-reason">Show tone, formality, length, frequency at a glance for easy reference</div>
+                    <div class="cell-decision">
+                        <div class="btn-group">
+                            <button class="btn-accept" onclick="setDecision('CSV-A', 'accept')">✅ Accept</button>
+                            <button class="btn-decline" onclick="setDecision('CSV-A', 'decline')">❌ Decline</button>
+                        </div>
+                        <div class="decision-indicator" id="decision-CSV-A"></div>
+                    </div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">β</div>
+                    <div class="cell-enhancement"><h4>Add "Real-world examples" for EACH channel</h4></div>
+                    <div class="cell-reason">2-3 actual posts/emails per channel showing voice in action, not just guidelines</div>
+                    <div class="cell-decision">
+                        <div class="btn-group">
+                            <button class="btn-accept" onclick="setDecision('CSV-B', 'accept')">✅ Accept</button>
+                            <button class="btn-decline" onclick="setDecision('CSV-B', 'decline')">❌ Decline</button>
+                        </div>
+                        <div class="decision-indicator" id="decision-CSV-B"></div>
+                    </div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">γ</div>
+                    <div class="cell-enhancement"><h4>Expand "Do's & Don'ts" for each channel</h4></div>
+                    <div class="cell-reason">3-4 comparison pairs per channel instead of current examples</div>
+                    <div class="cell-decision">
+                        <div class="btn-group">
+                            <button class="btn-accept" onclick="setDecision('CSV-C', 'accept')">✅ Accept</button>
+                            <button class="btn-decline" onclick="setDecision('CSV-C', 'decline')">❌ Decline</button>
+                        </div>
+                        <div class="decision-indicator" id="decision-CSV-C"></div>
+                    </div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">δ</div>
+                    <div class="cell-enhancement"><h4>Add "Tone adaptation slider"</h4></div>
+                    <div class="cell-reason">Visual showing where each channel sits on Formal↔Casual, Serious↔Witty, Verbose↔Concise</div>
+                    <div class="cell-decision">
+                        <div class="btn-group">
+                            <button class="btn-accept" onclick="setDecision('CSV-D', 'accept')">✅ Accept</button>
+                            <button class="btn-decline" onclick="setDecision('CSV-D', 'decline')">❌ Decline</button>
+                        </div>
+                        <div class="decision-indicator" id="decision-CSV-D"></div>
+                    </div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">ε</div>
+                    <div class="cell-enhancement"><h4>Add channel posting frequency guide</h4></div>
+                    <div class="cell-reason">When to post, how often (Reddit, Twitter, LinkedIn, Email frequency guidelines)</div>
+                    <div class="cell-decision">
+                        <div class="btn-group">
+                            <button class="btn-accept" onclick="setDecision('CSV-E', 'accept')">✅ Accept</button>
+                            <button class="btn-decline" onclick="setDecision('CSV-E', 'decline')">❌ Decline</button>
+                        </div>
+                        <div class="decision-indicator" id="decision-CSV-E"></div>
+                    </div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">ζ</div>
+                    <div class="cell-enhancement"><h4>Create "failure case studies"</h4></div>
+                    <div class="cell-reason">Show what NOT to do with real examples of tone failures on each platform</div>
+                    <div class="cell-decision">
+                        <div class="btn-group">
+                            <button class="btn-accept" onclick="setDecision('CSV-F', 'accept')">✅ Accept</button>
+                            <button class="btn-decline" onclick="setDecision('CSV-F', 'decline')">❌ Decline</button>
+                        </div>
+                        <div class="decision-indicator" id="decision-CSV-F"></div>
+                    </div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">η</div>
+                    <div class="cell-enhancement"><h4>Add "Voice consistency checklist"</h4></div>
+                    <div class="cell-reason">Template checklist for each platform: ☐ Brand essence? ☐ Plain language? ☐ Conversational?</div>
+                    <div class="cell-decision">
+                        <div class="btn-group">
+                            <button class="btn-accept" onclick="setDecision('CSV-G', 'accept')">✅ Accept</button>
+                            <button class="btn-decline" onclick="setDecision('CSV-G', 'decline')">❌ Decline</button>
+                        </div>
+                        <div class="decision-indicator" id="decision-CSV-G"></div>
+                    </div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">θ</div>
+                    <div class="cell-enhancement"><h4>Expand corporate pitch section</h4></div>
+                    <div class="cell-reason">Critical for growth. Add full pitch outline, deck talking points, objection handling</div>
+                    <div class="cell-decision">
+                        <div class="btn-group">
+                            <button class="btn-accept" onclick="setDecision('CSV-H', 'accept')">✅ Accept</button>
+                            <button class="btn-decline" onclick="setDecision('CSV-H', 'decline')">❌ Decline</button>
+                        </div>
+                        <div class="decision-indicator" id="decision-CSV-H"></div>
+                    </div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">ι</div>
+                    <div class="cell-enhancement"><h4>Add visual icons/badges per channel</h4></div>
+                    <div class="cell-reason">🔴 Reddit, 💼 LinkedIn, 🐦 Twitter, 📧 Email. Make it scannable and fun</div>
+                    <div class="cell-decision">
+                        <div class="btn-group">
+                            <button class="btn-accept" onclick="setDecision('CSV-I', 'accept')">✅ Accept</button>
+                            <button class="btn-decline" onclick="setDecision('CSV-I', 'decline')">❌ Decline</button>
+                        </div>
+                        <div class="decision-indicator" id="decision-CSV-I"></div>
+                    </div>
+                </div>
+                <div class="enhancement-row">
+                    <div class="cell-number">κ</div>
+                    <div class="cell-enhancement"><h4>Create appendix: quick reference cards</h4></div>
+                    <div class="cell-reason">Downloadable 1-page cheat sheet per channel (tone, dos/don'ts, examples)</div>
+                    <div class="cell-decision">
+                        <div class="btn-group">
+                            <button class="btn-accept" onclick="setDecision('CSV-J', 'accept')">✅ Accept</button>
+                            <button class="btn-decline" onclick="setDecision('CSV-J', 'decline')">❌ Decline</button>
+                        </div>
+                        <div class="decision-indicator" id="decision-CSV-J"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ===== SUBMIT SECTION ===== -->
+        <div class="footer-action">
+            <button class="btn-primary" onclick="submitDecisions()">📤 Submit My Decisions</button>
+        </div>
+        
+    </div>
+    
+    <script>
+        let decisions = {};
+        
+        function setDecision(enhancementId, decision) {
+            decisions[enhancementId] = decision;
+            updateUI(enhancementId, decision);
+            updateSummary();
+        }
+        
+        function updateUI(enhancementId, decision) {
+            const element = document.getElementById(`decision-${enhancementId}`);
+            if (!element) return;
+            
+            // Clear previous buttons
+            const buttons = element.parentElement.querySelector('.btn-group');
+            if (buttons) {
+                buttons.querySelectorAll('button').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                
+                if (decision === 'accept') {
+                    buttons.querySelector('.btn-accept').classList.add('selected');
+                    element.innerHTML = '<span class="indicator-accept">✅ ACCEPTED</span>';
+                } else {
+                    buttons.querySelector('.btn-decline').classList.add('selected');
+                    element.innerHTML = '<span class="indicator-decline">❌ DECLINED</span>';
+                }
+            }
+        }
+        
+        function updateSummary() {
+            const values = Object.values(decisions);
+            const accepted = values.filter(v => v === 'accept').length;
+            const declined = values.filter(v => v === 'decline').length;
+            const pending = 20 - (accepted + declined); // 20 total pending (9 + 11)
+            
+            document.getElementById('accepted-count').textContent = accepted;
+            document.getElementById('declined-count').textContent = declined;
+            document.getElementById('pending-count').textContent = pending;
+        }
+        
+        function submitDecisions() {
+            const acceptedItems = Object.entries(decisions)
+                .filter(([_, decision]) => decision === 'accept')
+                .map(([id, _]) => id);
+            
+            const declinedItems = Object.entries(decisions)
+                .filter(([_, decision]) => decision === 'decline')
+                .map(([id, _]) => id);
+            
+            let message = `📋 MY ENHANCEMENT DECISIONS:\n\n`;
+            message += `✅ ACCEPTED (${acceptedItems.length}):\n`;
+            message += acceptedItems.length > 0 
+                ? acceptedItems.join(', ') 
+                : '(none)\n';
+            message += `\n\n❌ DECLINED (${declinedItems.length}):\n`;
+            message += declinedItems.length > 0 
+                ? declinedItems.join(', ') 
+                : '(none)\n';
+            
+            alert(message + `\n\nCopy this and paste it in chat to submit your decisions!`);
+            
+            // Copy to clipboard
+            const textToCopy = acceptedItems.join(', ') + (declinedItems.length > 0 ? '\n\nDECLINED: ' + declinedItems.join(', ') : '');
+            navigator.clipboard.writeText(textToCopy).catch(() => {});
+        }
+    </script>
+</body>
+</html>

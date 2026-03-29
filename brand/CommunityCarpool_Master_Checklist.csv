@@ -1,0 +1,59 @@
+Task Name,Category,Phase,Week #,Priority,Status,Owner,Deadline,Time Estimate (hrs),Completion %,Notes,Link
+Set up Google Search Console,Technical,Phase 1,1,Critical,Not Started,You,2026-03-31,0.25,0,Verify domain ownership and submit sitemap,https://search.google.com/search-console
+Set up Google Analytics 4,Technical,Phase 1,1,Critical,Not Started,You,2026-03-31,0.25,0,Create GA4 property and link to website,https://analytics.google.com
+Add meta descriptions to all pages,Technical,Phase 1,1,High,Not Started,You,2026-03-31,0.5,0,Add descriptions to homepage and key pages,
+Add Open Graph tags,Technical,Phase 1,1,High,Not Started,You,2026-04-07,0.5,0,Add og:title og:description og:image meta tags,
+Create sitemap.xml,Technical,Phase 1,2,High,Not Started,You,2026-04-07,0.5,0,Generate XML sitemap for all URLs,
+Create robots.txt,Technical,Phase 1,2,High,Not Started,You,2026-04-07,0.25,0,Create robots.txt with sitemap location,
+Add Schema.org structured data,Technical,Phase 1,2,Medium,Not Started,You,2026-04-07,0.75,0,Add JSON-LD schema for WebApplication,
+Test mobile usability,Technical,Phase 1,2,Medium,Not Started,You,2026-04-07,0.25,0,Use Google Mobile-Friendly Test,https://search.google.com/test/mobile-friendly
+Test page speed,Technical,Phase 1,2,Medium,Not Started,You,2026-04-07,0.25,0,Run Lighthouse audit,
+Submit sitemap to Google Search Console,Technical,Phase 1,2,Low,Not Started,You,2026-04-07,0.1,0,Go to GSC and submit sitemap.xml,
+Hire first interns (Bangalore),Marketing,Phase 2,5,High,Not Started,You,2026-04-21,1,0,Recruit 3-4 students from IIT/BITS Bangalore,
+Create Google Sheet tracker,Marketing,Phase 1,1,High,Not Started,You,2026-03-31,0.5,0,Track signups by channel weekly,
+Create Canva graphics templates,Marketing,Phase 1,2,High,Not Started,You,2026-04-07,1,0,Cost-saving carbon-offset leaderboard templates,
+Download and learn CapCut,Marketing,Phase 1,2,Medium,Not Started,You,2026-04-07,0.5,0,Watch tutorial and create first test video,
+Create Gmail outreach template,Marketing,Phase 1,2,Medium,Not Started,You,2026-04-07,0.25,0,Draft email for company + college outreach,
+Post Reddit Bangalore - Post 1,Marketing,Phase 2,5,High,Not Started,Intern,2026-04-21,0.5,0,Title: Built a free carpooling tool for commuters,https://reddit.com/r/bangalore
+Post Reddit Bangalore - Post 2,Marketing,Phase 2,6,High,Not Started,Intern,2026-04-28,0.5,0,Title: Spent ₹3 lakhs on fuel - built solution,https://reddit.com/r/bangalore
+Post Reddit Mumbai - Post 1,Marketing,Phase 2,8,High,Not Started,Intern,2026-05-12,0.5,0,Title: Traffic is insane but carpool is simple,https://reddit.com/r/mumbai
+Post Reddit Delhi - Post 1,Marketing,Phase 2,9,High,Not Started,Intern,2026-05-19,0.5,0,Adapt Mumbai post for Delhi audience,https://reddit.com/r/delhi
+Join Slack communities (20),Marketing,Phase 2,5,High,Not Started,Intern,2026-04-21,2,0,Join Bangalore Tech Mumbai Tech Delhi Tech groups,
+Post Slack intro message,Marketing,Phase 2,5,Medium,Not Started,Intern,2026-04-21,1,0,Send intro message to 20+ communities,
+Post Facebook Groups,Marketing,Phase 2,6,Medium,Not Started,Intern,2026-04-28,1,0,Join parent groups + comment on commute posts,
+Email company outreach (15 targets),Marketing,Phase 2,7,High,Not Started,You,2026-05-05,2,0,Send personalized emails to HR/sustainability leads,
+Post LinkedIn - Cost/Savings Angle,Marketing,Phase 2,5,Medium,Active,You,2026-04-21,0.5,0,3x/week rotating angles - cost savings,
+Post LinkedIn - Privacy/Control Angle,Marketing,Phase 2,6,Medium,Active,You,2026-04-28,0.5,0,3x/week rotating angles - privacy,
+Post LinkedIn - Corporate/ESG Angle,Marketing,Phase 2,7,Medium,Active,You,2026-05-05,0.5,0,3x/week rotating angles - corporate,
+Create testimonial videos (CapCut),Marketing,Phase 2,10,Medium,Not Started,Intern,2026-05-26,1.5,0,Film 3-5 user testimonials (30 sec each),
+Write /bangalore-carpool landing page,Content,Phase 2,3,High,Not Started,You,2026-04-14,2,0,1500-2000 words + cost calculator + local stats,
+Write /mumbai-carpool landing page,Content,Phase 2,3,High,Not Started,You,2026-04-14,2,0,1500-2000 words tailored to Mumbai,
+Write /delhi-carpool landing page,Content,Phase 2,4,High,Not Started,You,2026-04-21,2,0,1500-2000 words tailored to Delhi,
+Write /how-much-can-you-save landing page,Content,Phase 2,4,High,Not Started,You,2026-04-21,1.5,0,Interactive savings calculator + analysis,
+Write /carpool-vs-uber-lyft landing page,Content,Phase 2,4,Medium,Not Started,You,2026-04-21,1.5,0,Cost comparison + detailed breakdown,
+Blog post: How Carpooling Saves ₹100k/Year,Content,Phase 2,5,High,Not Started,You,2026-04-28,3,0,2000+ words - real numbers + case studies,
+Blog post: Carpooling Laws in India,Content,Phase 2,5,High,Not Started,You,2026-04-28,2.5,0,Legal compliance + insurance + taxes,
+Blog post: Environmental Impact of Carpooling,Content,Phase 2,6,Medium,Not Started,You,2026-05-05,2.5,0,CO2 calculations + climate benefits,
+Blog post: Safety Tips for Carpool Matching,Content,Phase 2,6,Medium,Not Started,You,2026-05-05,2,0,Privacy + vetting + meeting tips,
+Blog post: Corporate Carpool Programs Guide,Content,Phase 2,7,Medium,Not Started,You,2026-05-12,2.5,0,B2B value prop + implementation guide,
+Optimize landing pages for keywords,Content,Phase 2,7,Medium,Not Started,You,2026-05-12,2,0,Use Ahrefs/AnswerThePublic for keyword research,
+Set up internal linking strategy,Technical,Phase 2,7,Medium,Not Started,You,2026-05-12,1.5,0,Create topic clusters and link map,
+Submit updated sitemap to GSC,Technical,Phase 2,8,Low,Not Started,You,2026-05-19,0.25,0,After publishing all content,
+Expand Reddit to 5 cities,Marketing,Phase 3,13,High,Not Started,Intern,2026-06-09,3,0,Add Hyderabad Pune Chennai Jaipur Surat,https://reddit.com
+Expand Slack to 40+ communities,Marketing,Phase 3,13,High,Not Started,Intern,2026-06-09,3,0,Double communities across all metro + tier 2,
+Create more video testimonials,Marketing,Phase 3,15,Medium,Not Started,Intern,2026-06-23,2,0,10+ testimonials using HeyGen optional,
+Hire interns in 5 new cities,Marketing,Phase 3,13,High,Not Started,You,2026-06-09,2,0,Bangalore Mumbai Delhi + Hyderabad Chennai,
+Email 50+ colleges/universities,Marketing,Phase 3,15,High,Not Started,You,2026-06-23,2.5,0,Sustainability club contacts + student recruitment,
+Launch campus ambassador program,Marketing,Phase 3,17,High,Not Started,You,2026-07-07,1.5,0,Formalize incentives + leaderboard + onboarding,
+Get mentioned in startup blogs,SEO,Phase 3,12,Medium,Not Started,You,2026-06-02,2,0,YourStory Inc42 TechCrunch India outreach,
+Submit to startup directories,SEO,Phase 3,9,Medium,Not Started,You,2026-05-26,1,0,AngelList Product Hunt Crunchbase,
+Publish press release,SEO,Phase 3,11,Medium,Not Started,You,2026-05-26,1.5,0,ePress Newswire Indian news sites,
+Partner with 5 sustainability orgs,SEO,Phase 3,15,Medium,Not Started,You,2026-06-23,2,0,Link exchanges + co-marketing,
+Get student ambassador backlinks,SEO,Phase 3,18,Medium,Not Started,Intern,2026-07-14,1.5,0,Campus website mentions + newsletters,
+Guest posts on 3 environmental blogs,SEO,Phase 3,16,Medium,Not Started,You,2026-07-07,3,0,Pitch to climate/sustainability blogs,
+Interview mentions (podcasts/webinars),SEO,Phase 3,19,Low,Not Started,You,2026-07-21,2,0,Pitch to sustainability podcasts,
+Track GSC metrics weekly,Analytics,Phase 2,8,High,Active,You,2026-12-31,0.5,0,Monitor impressions clicks avg position,https://search.google.com/search-console
+Track GA4 user behavior,Analytics,Phase 2,8,High,Active,You,2026-12-31,0.5,0,Monitor bounce rate conversion funnel,https://analytics.google.com
+Update Weekly Metrics sheet,Analytics,Phase 2,5,High,Active,You,2026-12-31,0.5,0,Every Friday - signups matches conversion,
+Monitor intern performance,Analytics,Phase 2,12,Medium,Active,You,2026-12-31,0.5,0,Weekly leaderboard + feedback,
+Monitor campaign sources,Analytics,Phase 2,5,High,Active,You,2026-12-31,0.5,0,Track which channels drive most signups,

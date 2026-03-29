@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Carpool - Typography System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --dark-green: #1B5C3A; --bright-green: #B4E035; --button-green: #10B981; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.8; color: #333; background: #f9f9f9; }
+        header { background: linear-gradient(135deg, #1B5C3A 0%, #10B981 100%); color: white; padding: 60px 40px; }
+        header h1 { font-size: 40px; margin-bottom: 8px; }
+        nav { background: #f5f5f5; padding: 16px 40px; border-bottom: 1px solid #eee; }
+        nav a { color: #10B981; text-decoration: none; font-weight: 600; margin-right: 20px; }
+        main { max-width: 1200px; margin: 0 auto; padding: 60px 40px; }
+        h2 { font-size: 36px; color: #2C3E50; margin: 60px 0 24px 0; border-bottom: 3px solid #10B981; padding-bottom: 12px; }
+        h3 { font-size: 22px; color: #2C3E50; margin: 40px 0 20px 0; }
+        .preview { background: white; padding: 32px; margin: 24px 0; border: 1px solid #eee; border-radius: 8px; }
+        .scale { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 24px 0; }
+        .scale-item { background: white; padding: 20px; border: 1px solid #eee; border-radius: 8px; }
+        .label { font-size: 12px; font-weight: 700; color: #666; text-transform: uppercase; margin-bottom: 8px; }
+        table { width: 100%; border-collapse: collapse; background: white; margin: 24px 0; border: 1px solid #eee; }
+        th, td { padding: 16px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f5f5f5; font-weight: 700; }
+        .box { background: white; border: 1px solid #eee; border-radius: 8px; padding: 24px; margin: 24px 0; }
+        footer { background: #f5f5f5; padding: 50px 40px; text-align: center; margin-top: 80px; font-size: 14px; color: #999; border-top: 2px solid #eee; }
+        
+        .roboto { font-family: 'Roboto', sans-serif; }
+        .inter { font-family: 'Inter', sans-serif; }
+        .system { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Community Carpool</h1>
+        <p>Typography System</p>
+    </header>
+    
+    <nav>
+        <a href="01_Brand_Guidelines_Site_Map.html">← Site Map</a>
+        <a href="07_Color_System.html">← Color System</a>
+    </nav>
+    
+    <main>
+        <section>
+            <h2>Font Families</h2>
+            
+            <div class="box">
+                <h3>Primary: System Stack</h3>
+                <p style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif</p>
+                <p style="color: #666; margin-top: 12px;">Use for: All UI text, body copy, labels<br>Why: Optimized for readability on screens, platform-native appearance</p>
+            </div>
+            
+            <div class="box">
+                <h3>Headings: Roboto Bold</h3>
+                <p style="font-family: 'Roboto', sans-serif; font-size: 28px; font-weight: 700;">Roboto Bold for Headings</p>
+                <p style="color: #666; margin-top: 12px;">Use for: H1-H6 hierarchy<br>Why: Strong personality, excellent web performance</p>
+            </div>
+            
+            <div class="box">
+                <h3>Monospace: Courier New</h3>
+                <p style="font-family: 'Courier New', monospace;">Courier New for code and technical content</p>
+                <p style="color: #666; margin-top: 12px;">Use for: Code blocks, API values, technical documentation</p>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Type Scale</h2>
+            <p>Consistent sizing hierarchy for all typography.</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Element</th>
+                        <th>Size</th>
+                        <th>Weight</th>
+                        <th>Line Height</th>
+                        <th>Usage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>H1</strong></td>
+                        <td>40px</td>
+                        <td>700 (bold)</td>
+                        <td>1.2</td>
+                        <td>Page titles, hero headings</td>
+                    </tr>
+                    <tr>
+                        <td><strong>H2</strong></td>
+                        <td>32px</td>
+                        <td>700 (bold)</td>
+                        <td>1.3</td>
+                        <td>Section headings</td>
+                    </tr>
+                    <tr>
+                        <td><strong>H3</strong></td>
+                        <td>24px</td>
+                        <td>700 (bold)</td>
+                        <td>1.4</td>
+                        <td>Subsection headings</td>
+                    </tr>
+                    <tr>
+                        <td><strong>H4</strong></td>
+                        <td>18px</td>
+                        <td>600 (semibold)</td>
+                        <td>1.5</td>
+                        <td>Card titles, small headings</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Body</strong></td>
+                        <td>16px</td>
+                        <td>400 (regular)</td>
+                        <td>1.6</td>
+                        <td>Paragraph text</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Small</strong></td>
+                        <td>14px</td>
+                        <td>400 (regular)</td>
+                        <td>1.5</td>
+                        <td>Labels, captions, secondary text</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tiny</strong></td>
+                        <td>12px</td>
+                        <td>500 (medium)</td>
+                        <td>1.4</td>
+                        <td>Form hints, badge text</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <section>
+            <h2>Hierarchy & Weights</h2>
+            
+            <div class="preview">
+                <div class="label">H1 - Bold</div>
+                <h1 style="font-size: 40px; font-weight: 700; margin-bottom: 24px;">Build a Sustainable Community</h1>
+                
+                <div class="label">H2 - Bold</div>
+                <h2 style="font-size: 32px; font-weight: 700; margin-bottom: 24px; border: none; padding: 0;">Share Rides, Reduce Emissions</h2>
+                
+                <div class="label">H3 - Bold</div>
+                <h3 style="font-size: 24px; font-weight: 700; margin: 0 0 24px 0;">Connect with Your Neighbors</h3>
+                
+                <div class="label">H4 - Semibold</div>
+                <h4 style="font-size: 18px; font-weight: 600; margin: 0 0 16px 0;">Private & Secure Matching</h4>
+                
+                <div class="label">Body - Regular</div>
+                <p style="font-size: 16px; font-weight: 400; line-height: 1.6; margin: 0 0 16px 0;">Find carpool matches on your exact commute route. Our smart matching algorithm connects you with neighbors heading the same way.</p>
+                
+                <div class="label">Small - Regular</div>
+                <p style="font-size: 14px; font-weight: 400; margin: 0 0 16px 0;">Secondary information like timestamps and helper text</p>
+                
+                <div class="label">Tiny - Medium</div>
+                <p style="font-size: 12px; font-weight: 500; margin: 0;">FORM LABELS • BADGES • SMALL CAPS</p>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Components & Design Tokens</h2>
+            <p>Spacing, shadows, borders, and other design constants.</p>
+            
+            <h3>Spacing Scale</h3>
+            <table>
+                <tr><td>4px</td><td>xs</td><td>Minimal gaps, inline spacing</td></tr>
+                <tr><td>8px</td><td>sm</td><td>Padding inside buttons, tight spacing</td></tr>
+                <tr><td>12px</td><td>md</td><td>Standard button padding</td></tr>
+                <tr><td>16px</td><td>lg</td><td>Card padding, section padding</td></tr>
+                <tr><td>24px</td><td>xl</td><td>Between sections, large gaps</td></tr>
+                <tr><td>32px</td><td>2xl</td><td>Major section breaks</td></tr>
+                <tr><td>48px</td><td>3xl</td><td>Page margins, hero spacing</td></tr>
+            </table>
+            
+            <h3>Shadows</h3>
+            <table>
+                <tr><td>0 2px 8px rgba(0,0,0,0.06)</td><td>Subtle</td><td>Cards, buttons</td></tr>
+                <tr><td>0 4px 16px rgba(0,0,0,0.12)</td><td>Medium</td><td>Modals, dropdowns</td></tr>
+                <tr><td>0 8px 32px rgba(0,0,0,0.15)</td><td>Large</td><td>Elevated overlays</td></tr>
+            </table>
+            
+            <h3>Border Radius</h3>
+            <table>
+                <tr><td>4px</td><td>Small corners (inputs, small buttons)</td></tr>
+                <tr><td>6px</td><td>Standard corners (cards, buttons)</td></tr>
+                <tr><td>8px</td><td>Larger corners (modals, panels)</td></tr>
+                <tr><td>50%</td><td>Fully round (avatars, badges)</td></tr>
+            </table>
+        </section>
+        
+        <section>
+            <h2>Buttons</h2>
+            
+            <div class="preview">
+                <h3 style="margin-top: 0;">Primary Button</h3>
+                <button style="background: #10B981; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer;">Get Started</button>
+                
+                <h3>Secondary Button</h3>
+                <button style="background: #1B5C3A; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer;">Learn More</button>
+                
+                <h3>Text Button</h3>
+                <button style="background: transparent; color: #10B981; border: none; padding: 12px 0; font-size: 16px; font-weight: 600; cursor: pointer; text-decoration: underline;">Cancel</button>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Forms & Inputs</h2>
+            
+            <div class="preview">
+                <label style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; color: #333;">Email Address</label>
+                <input type="email" placeholder="you@example.com" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; font-family: inherit;">
+                
+                <div style="font-size: 12px; color: #666; margin-top: 6px;">Helper text for additional context</div>
+                
+                <label style="display: block; font-size: 14px; font-weight: 600; margin-top: 24px; margin-bottom: 6px; color: #333;">Password</label>
+                <input type="password" placeholder="••••••••" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; font-family: inherit;">
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p><strong>Community Carpool Typography System</strong></p>
+        <p>Font Families, Type Scale, and Component Sizing | March 2026</p>
+    </footer>
+</body>
+</html>

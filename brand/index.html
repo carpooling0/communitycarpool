@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Community Carpool Brand Guidelines - Complete visual identity and design system">
+    <title>Community Carpool — Brand Guidelines</title>
+    <style>
+        :root {
+            --dark-green: #1B5C3A;
+            --bright-green: #B4E035;
+            --button-green: #10B981;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --text-light: #9CA3AF;
+            --bg-light: #F9FAFB;
+            --bg-white: #FFFFFF;
+            --border: #E5E7EB;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-light);
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        nav .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark-green);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        nav .logo::before {
+            content: '🌍';
+            font-size: 24px;
+        }
+
+        nav .nav-links {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--button-green);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--dark-green) 0%, var(--button-green) 100%);
+            color: white;
+            padding: 140px 40px 100px;
+            text-align: center;
+            margin-top: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .hero .container {
+            position: relative;
+            z-index: 1;
+            max-width: 700px;
+        }
+
+        .hero h1 {
+            font-size: 56px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            line-height: 1.2;
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            font-size: 20px;
+            opacity: 0.95;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .hero .buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--dark-green);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* Sections */
+        section {
+            padding: 100px 0;
+        }
+
+        section h2 {
+            font-size: 44px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--dark-green);
+        }
+
+        section .intro {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 60px;
+            max-width: 600px;
+            line-height: 1.8;
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            margin: 60px 0;
+        }
+
+        /* Card */
+        .card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-sm);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--button-green);
+        }
+
+        .card .icon {
+            font-size: 40px;
+            margin-bottom: 16px;
+            line-height: 1;
+        }
+
+        .card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .card p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            flex-grow: 1;
+            margin-bottom: 20px;
+        }
+
+        .card a {
+            color: var(--button-green);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: color 0.2s;
+            align-self: flex-start;
+        }
+
+        .card a:hover {
+            color: var(--dark-green);
+        }
+
+        /* Color Palette Section */
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .color-item {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            background: var(--bg-white);
+        }
+
+        .color-swatch {
+            height: 120px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            padding: 12px;
+        }
+
+        .color-info {
+            padding: 16px;
+        }
+
+        .color-name {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .color-code {
+            color: var(--text-light);
+            font-family: 'Monaco', 'Courier', monospace;
+            font-size: 12px;
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin: 60px 0;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--button-green);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Highlight Section */
+        .highlight {
+            background: linear-gradient(135deg, rgba(27, 92, 58, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 60px 40px;
+            text-align: center;
+            margin: 80px 0;
+        }
+
+        .highlight h3 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--dark-green);
+        }
+
+        .highlight p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 32px;
+            line-height: 1.8;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark-green);
+            color: white;
+            padding: 60px 40px 40px;
+            margin-top: 100px;
+        }
+
+        footer .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        footer h4 {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            opacity: 0.8;
+        }
+
+        footer a {
+            display: block;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 8px;
+            transition: color 0.2s;
+        }
+
+        footer a:hover {
+            color: white;
+        }
+
+        footer .bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 40px;
+            text-align: center;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav .nav-links { gap: 20px; }
+            nav .nav-links a { font-size: 12px; }
+            
+            .hero { padding: 100px 20px 60px; }
+            .hero h1 { font-size: 36px; }
+            .hero p { font-size: 16px; }
+            
+            section { padding: 60px 0; }
+            section h2 { font-size: 32px; }
+            
+            .container { padding: 0 20px; }
+            
+            .card { padding: 24px; }
+            
+            .highlight { padding: 40px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <a href="/" class="logo">Community Carpool</a>
+            <div class="nav-links">
+                <a href="#brand">Brand</a>
+                <a href="#guidelines">Guidelines</a>
+                <a href="#components">Components</a>
+                <a href="#assets">Assets</a>
+                <a href="#docs" class="btn btn-primary">View All</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Community Carpool Brand Guidelines</h1>
+            <p>Complete visual identity system, design components, and brand assets for Community Carpool</p>
+            <div class="buttons">
+                <a href="#guidelines" class="btn btn-primary">Explore Guidelines</a>
+                <a href="#assets" class="btn btn-secondary">Download Assets</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Brand Overview -->
+    <section id="brand">
+        <div class="container">
+            <h2>Our Brand</h2>
+            <p class="intro">Community Carpool is built on the principle that sustainable transportation starts with connection. Our brand reflects trust, optimism, and a commitment to building stronger neighborhoods through shared journeys.</p>
+            
+            <div class="grid">
+                <div class="card">
+                    <div class="icon">🎯</div>
+                    <h3>Brand Essence</h3>
+                    <p>"We can do this. Together. It is all our responsibility to cut emissions wherever we can."</p>
+                    <a href="#foundation">View Foundation →</a>
+                </div>
+
+                <div class="card">
+                    <div class="icon">💬</div>
+                    <h3>Voice & Tone</h3>
+                    <p>Optimistic, trusted, and human. We speak like a helpful neighbor who understands the challenges of commuting.</p>
+                    <a href="#voice">View Voice Guide →</a>
+                </div>
+
+                <div class="card">
+                    <div class="icon">🎨</div>
+                    <h3>Visual Identity</h3>
+                    <p>Clean, modern, and purposeful. Our colors, typography, and imagery reflect sustainability and connection.</p>
+                    <a href="#visual">View Identity →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Color System -->
+    <section id="guidelines">
+        <div class="container">
+            <h2>Visual System</h2>
+            <p class="intro">Carefully curated colors, typography, and design elements that work together to create a cohesive brand experience.</p>
+            
+            <h3 style="margin-top: 60px; margin-bottom: 30px;">Color Palette</h3>
+            <div class="color-palette">
+                <div class="color-item">
+                    <div class="color-swatch" style="background-color: #1B5C3A;">#1B5C3A</div>
+                    <div class="color-info">
+                        <div class="color-name">Dark Forest Green</div>
+                        <div class="color-code">Trust & Stability</div>
+                    </div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-swatch" style="background-color: #B4E035;">#B4E035</div>
+                    <div class="color-info">
+                        <div class="color-name">Bright Chartreuse</div>
+                        <div class="color-code">Energy & Growth</div>
+                    </div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-swatch" style="background-color: #10B981;">#10B981</div>
+                    <div class="color-info">
+                        <div class="color-name">Button Green</div>
+                        <div class="color-code">Action & Connection</div>
+                    </div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-swatch" style="background-color: #1F2937;">#1F2937</div>
+                    <div class="color-info">
+                        <div class="color-name">Text Primary</div>
+                        <div class="color-code">Readability</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 60px; margin-bottom: 30px;">Typography</h3>
+            <div class="grid">
+                <div class="card">
+                    <h4 style="margin-top: 0;">Headings</h4>
+                    <p style="font-family: 'Montserrat', sans-serif; font-size: 28px; font-weight: 700; margin: 16px 0;">Montserrat Bold</p>
+                    <p>Strong, modern, and confident. Used for all headings H1–H4.</p>
+                </div>
+
+                <div class="card">
+                    <h4 style="margin-top: 0;">Body Text</h4>
+                    <p style="font-family: 'Inter', -apple-system, sans-serif; font-size: 16px;">Inter Regular</p>
+                    <p>Clean, readable, and optimized for screen. Used for all body copy and UI text.</p>
+                </div>
+
+                <div class="card">
+                    <h4 style="margin-top: 0;">Code</h4>
+                    <p style="font-family: 'Source Code Pro', monospace; font-size: 13px;">monospace font</p>
+                    <p>Professional and technical. Used for code blocks and API documentation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Components -->
+    <section id="components">
+        <div class="container">
+            <h2>Design System</h2>
+            <p class="intro">A comprehensive library of reusable components built with consistency, accessibility, and usability in mind.</p>
+            
+            <div class="grid">
+                <div class="card">
+                    <div class="icon">🔘</div>
+                    <h3>Buttons</h3>
+                    <p>Primary, secondary, outline, and text variants with clear states for interaction and feedback.</p>
+                    <a href="components.html">View Buttons →</a>
+                </div>
+
+                <div class="card">
+                    <div class="icon">📝</div>
+                    <h3>Forms</h3>
+                    <p>Input fields, selects, checkboxes, and validation states for seamless user interactions.</p>
+                    <a href="components.html">View Forms →</a>
+                </div>
+
+                <div class="card">
+                    <div class="icon">🎴</div>
+                    <h3>Cards</h3>
+                    <p>Content containers with various layouts for displaying information and actions.</p>
+                    <a href="components.html">View Cards →</a>
+                </div>
+
+                <div class="card">
+                    <div class="icon">⚠️</div>
+                    <h3>Alerts</h3>
+                    <p>Success, warning, error, and info states for user feedback and notifications.</p>
+                    <a href="components.html">View Alerts →</a>
+                </div>
+
+                <div class="card">
+                    <div class="icon">🏷️</div>
+                    <h3>Badges</h3>
+                    <p>Status indicators and labels for inline information and categorization.</p>
+                    <a href="components.html">View Badges →</a>
+                </div>
+
+                <div class="card">
+                    <div class="icon">🧭</div>
+                    <h3>Navigation</h3>
+                    <p>Tabs, breadcrumbs, pagination, and navigation patterns for user guidance.</p>
+                    <a href="components.html">View Navigation →</a>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-number">60+</div>
+                    <div class="stat-label">Components</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">400+</div>
+                    <div class="stat-label">Variations</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Accessible</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Assets -->
+    <section id="assets">
+        <div class="container">
+            <h2>Brand Assets</h2>
+            <p class="intro">Download logos, icons, color swatches, and other brand materials for your projects.</p>
+            
+            <div class="highlight">
+                <h3>Ready to Download</h3>
+                <p>All brand assets are organized and optimized for web and print use.</p>
+                <a href="assets.html" class="btn btn-primary">Browse All Assets</a>
+            </div>
+
+            <div class="grid">
+                <div class="card">
+                    <div class="icon">🎯</div>
+                    <h3>Logos</h3>
+                    <p>Logo mark, full logo with text, and logo with tagline in all formats.</p>
+                    <a href="assets.html#logos">Download Logos →</a>
+                </div>
+
+                <div class="card">
+                    <div class="icon">🎨</div>
+                    <h3>Color Files</h3>
+                    <p>Swatches, palettes, and color specifications for design tools.</p>
+                    <a href="assets.html#colors">Download Colors →</a>
+                </div>
+
+                <div class="card">
+                    <div class="icon">📐</div>
+                    <h3>Design Files</h3>
+                    <p>Figma, Sketch, and Adobe XD files with complete component libraries.</p>
+                    <a href="assets.html#design-files">Open Design Files →</a>
+                </div>
+
+                <div class="card">
+                    <div class="icon">📸</div>
+                    <h3>Photography</h3>
+                    <p>Brand photography guidelines and curated image collections.</p>
+                    <a href="photography.html">View Guidelines →</a>
+                </div>
+
+                <div class="card">
+                    <div class="icon">📱</div>
+                    <h3>Mobile</h3>
+                    <p>Mobile app UI kit and responsive design specifications.</p>
+                    <a href="assets.html#mobile">Browse Mobile →</a>
+                </div>
+
+                <div class="card">
+                    <div class="icon">📄</div>
+                    <h3>Print</h3>
+                    <p>Business cards, flyers, and print material templates.</p>
+                    <a href="assets.html#print">Browse Print →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Documentation -->
+    <section id="docs">
+        <div class="container">
+            <h2>Complete Documentation</h2>
+            <p class="intro">In-depth guides covering every aspect of the Community Carpool brand system.</p>
+            
+            <div class="grid">
+                <div class="card">
+                    <h3>Brand Foundation</h3>
+                    <p>Our story, values, personality, and the principles that guide the Community Carpool brand.</p>
+                    <a href="foundation.html">Read →</a>
+                </div>
+
+                <div class="card">
+                    <h3>Voice & Tone</h3>
+                    <p>How to write in the Community Carpool voice across all channels and contexts.</p>
+                    <a href="voice.html">Read →</a>
+                </div>
+
+                <div class="card">
+                    <h3>Visual Identity</h3>
+                    <p>Complete color system, typography, and design system specifications.</p>
+                    <a href="visual.html">Read →</a>
+                </div>
+
+                <div class="card">
+                    <h3>Component Library</h3>
+                    <p>Detailed specifications for every component in the design system.</p>
+                    <a href="components.html">Read →</a>
+                </div>
+
+                <div class="card">
+                    <h3>Photography</h3>
+                    <p>Guidelines for selecting and creating brand photography.</p>
+                    <a href="photography.html">Read →</a>
+                </div>
+
+                <div class="card">
+                    <h3>Applications</h3>
+                    <p>Real-world brand examples across web, mobile, email, and print.</p>
+                    <a href="applications.html">Read →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div>
+                <h4>Brand</h4>
+                <a href="#brand">Foundation</a>
+                <a href="#brand">Voice</a>
+                <a href="#visual">Visual Identity</a>
+            </div>
+            <div>
+                <h4>Design System</h4>
+                <a href="#components">Components</a>
+                <a href="components.html">All Components</a>
+                <a href="assets.html">Design Files</a>
+            </div>
+            <div>
+                <h4>Resources</h4>
+                <a href="assets.html">Download Assets</a>
+                <a href="photography.html">Photography Guide</a>
+                <a href="applications.html">Applications</a>
+            </div>
+            <div>
+                <h4>More</h4>
+                <a href="https://communitycarpool.org">Visit Website</a>
+                <a href="https://communitycarpool.org/support">Support</a>
+                <a href="https://github.com/communitycarpool/brand">GitHub</a>
+            </div>
+        </div>
+        <div class="bottom">
+            <p>Community Carpool Brand Guidelines © 2026 | Made with ❤️ for our community</p>
+        </div>
+    </footer>
+</body>
+</html>

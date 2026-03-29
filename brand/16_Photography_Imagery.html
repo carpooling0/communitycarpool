@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Carpool - Photography & Imagery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --dark-green: #1B5C3A; --bright-green: #B4E035; --button-green: #10B981; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.8; color: #333; background: #f9f9f9; }
+        header { background: linear-gradient(135deg, #1B5C3A 0%, #10B981 100%); color: white; padding: 60px 40px; }
+        header h1 { font-size: 40px; margin-bottom: 8px; }
+        header p { font-size: 16px; opacity: 0.95; }
+        nav { background: white; padding: 16px 40px; border-bottom: 1px solid #eee; display: flex; gap: 20px; flex-wrap: wrap; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #10B981; text-decoration: none; font-weight: 600; font-size: 14px; }
+        main { max-width: 1200px; margin: 0 auto; padding: 60px 40px; }
+        h2 { font-size: 36px; color: #2C3E50; margin: 60px 0 24px 0; border-bottom: 3px solid #10B981; padding-bottom: 12px; }
+        h3 { font-size: 22px; color: #2C3E50; margin: 40px 0 20px 0; }
+        h4 { font-size: 16px; color: #2C3E50; margin: 24px 0 12px 0; font-weight: 600; }
+        p { color: #666; line-height: 1.8; margin-bottom: 16px; }
+        .section { background: white; border: 1px solid #eee; border-radius: 8px; padding: 32px; margin-bottom: 40px; }
+        .image-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 24px 0; }
+        .image-card { background: white; border: 1px solid #eee; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .image-placeholder { background: linear-gradient(135deg, #1B5C3A 0%, #10B981 100%); width: 100%; height: 180px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 600; }
+        .image-info { padding: 16px; }
+        .image-title { font-weight: 700; color: #1B5C3A; margin-bottom: 4px; }
+        .image-desc { font-size: 12px; color: #666; }
+        .specs-table { width: 100%; border-collapse: collapse; background: white; margin: 24px 0; border: 1px solid #eee; border-radius: 6px; overflow: hidden; }
+        .specs-table th, .specs-table td { padding: 14px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; }
+        .specs-table th { background: #f5f5f5; font-weight: 700; color: #2C3E50; }
+        .specs-table tr:hover { background: #f9f9f9; }
+        .guideline { background: #f5f5f5; border-left: 4px solid #10B981; padding: 16px; margin: 16px 0; border-radius: 4px; }
+        .guideline.warning { border-left-color: #F59E0B; background: rgba(245, 158, 11, 0.05); }
+        .guideline.error { border-left-color: #EF4444; background: rgba(239, 68, 68, 0.05); }
+        .color-sample { width: 100%; height: 120px; border-radius: 8px; margin: 16px 0; border: 1px solid #eee; }
+        .mood-board { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 20px 0; }
+        .mood-item { background: white; border: 1px solid #eee; border-radius: 8px; padding: 16px; text-align: center; }
+        .mood-color { width: 100%; height: 80px; border-radius: 6px; margin-bottom: 12px; border: 1px solid #ddd; }
+        .mood-name { font-weight: 600; color: #333; font-size: 13px; }
+        .mood-desc { font-size: 11px; color: #999; margin-top: 4px; }
+        .dos-donts { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+        .dos { border-left: 4px solid #10B981; }
+        .donts { border-left: 4px solid #EF4444; }
+        .do, .dont { padding: 12px; margin: 8px 0; background: white; border-radius: 6px; border: 1px solid #eee; }
+        .do { border-left: 2px solid #10B981; }
+        .dont { border-left: 2px solid #EF4444; }
+        .code-block { background: #1F2937; color: #E5E7EB; padding: 16px; border-radius: 6px; font-family: monospace; font-size: 12px; overflow-x: auto; margin: 16px 0; line-height: 1.5; }
+        footer { background: #f5f5f5; padding: 50px 40px; text-align: center; margin-top: 80px; font-size: 14px; color: #999; border-top: 2px solid #eee; }
+        @media (max-width: 768px) {
+            .image-grid { grid-template-columns: 1fr; }
+            .dos-donts { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Community Carpool</h1>
+        <p>Photography & Imagery Guidelines</p>
+    </header>
+    
+    <nav>
+        <a href="01_Brand_Guidelines_Site_Map.html">← Site Map</a>
+        <a href="15_Design_System.html">← Design System</a>
+    </nav>
+    
+    <main>
+        <section class="section">
+            <h2>Photography & Imagery Overview</h2>
+            <p>Guidelines for selecting, capturing, and using imagery that aligns with Community Carpool's brand identity.</p>
+            
+            <h3>Photography Principles</h3>
+            <p>Community Carpool imagery should feel authentic, inclusive, and human-centered. We avoid stock photos that feel overly staged or generic.</p>
+            
+            <table class="specs-table">
+                <thead>
+                    <tr>
+                        <th>Principle</th>
+                        <th>Definition</th>
+                        <th>Examples</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Authentic</strong></td>
+                        <td>Real people, real moments, real emotions</td>
+                        <td>Candid commute photos, genuine user interactions</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Inclusive</strong></td>
+                        <td>Diverse ages, backgrounds, abilities, and lifestyles</td>
+                        <td>Varied demographics, different car types, different scenarios</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Optimistic</strong></td>
+                        <td>Positive emotions, forward-facing, hopeful</td>
+                        <td>Smiling faces, helpful moments, successful connections</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Environmental</strong></td>
+                        <td>Green spaces, sustainable transport, nature</td>
+                        <td>Trees, cycling, walking, clean air, eco-friendly imagery</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Community-focused</strong></td>
+                        <td>People connecting, collaboration, togetherness</td>
+                        <td>Group dynamics, shared journeys, neighbor interaction</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- PHOTO STYLES -->
+        <section class="section">
+            <h2>Photography Styles</h2>
+            
+            <h3>Recommended Photography Styles</h3>
+            
+            <div class="image-grid">
+                <div class="image-card">
+                    <div class="image-placeholder">Real Candid Moments</div>
+                    <div class="image-info">
+                        <div class="image-title">Candid Photography</div>
+                        <div class="image-desc">Unposed, natural moments capturing genuine human interaction. Real commutes, real conversations.</div>
+                    </div>
+                </div>
+
+                <div class="image-card">
+                    <div class="image-placeholder">Lifestyle Portraits</div>
+                    <div class="image-info">
+                        <div class="image-title">Lifestyle Portraits</div>
+                        <div class="image-desc">Real people in authentic settings. Diverse ages, backgrounds, and abilities.</div>
+                    </div>
+                </div>
+
+                <div class="image-card">
+                    <div class="image-placeholder">Urban Scenes</div>
+                    <div class="image-info">
+                        <div class="image-title">Urban/Street Photography</div>
+                        <div class="image-desc">Real city environments, commute routes, traffic, neighborhoods.</div>
+                    </div>
+                </div>
+
+                <div class="image-card">
+                    <div class="image-placeholder">Nature Integration</div>
+                    <div class="image-info">
+                        <div class="image-title">Nature & Green Spaces</div>
+                        <div class="image-desc">Trees, parks, green routes, environmental sustainability context.</div>
+                    </div>
+                </div>
+
+                <div class="image-card">
+                    <div class="image-placeholder">Vehicle Focus</div>
+                    <div class="image-info">
+                        <div class="image-title">Vehicle Photography</div>
+                        <div class="image-desc">Various car types (old, new, electric, hybrid, economical). Real, not premium cars.</div>
+                    </div>
+                </div>
+
+                <div class="image-card">
+                    <div class="image-placeholder">Group Dynamics</div>
+                    <div class="image-info">
+                        <div class="image-title">Group Interactions</div>
+                        <div class="image-desc">Friends carpooling together, team collaboration, community moments.</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Photography to Avoid</h3>
+            <div class="dos-donts">
+                <div class="donts">
+                    <h4 style="color: #EF4444; margin-top: 0;">Don't Use</h4>
+                    <div class="dont">✗ Overly staged stock photos</div>
+                    <div class="dont">✗ Generic business people shaking hands</div>
+                    <div class="dont">✗ Unrealistic, too-perfect scenarios</div>
+                    <div class="dont">✗ Luxury cars or premium vehicles</div>
+                    <div class="dont">✗ Outdated or heavily filtered images</div>
+                    <div class="dont">✗ Single demographic (all one race/age/gender)</div>
+                    <div class="dont">✗ Unsafe driving scenarios</div>
+                    <div class="dont">✗ Polluted or negative urban scenes</div>
+                </div>
+                <div class="dos">
+                    <h4 style="color: #10B981; margin-top: 0;">Do Use</h4>
+                    <div class="do">✓ Authentic, real-life moments</div>
+                    <div class="do">✓ Genuine smiles and natural emotions</div>
+                    <div class="do">✓ Diverse people of all ages/backgrounds</div>
+                    <div class="do">✓ Everyday, relatable vehicles</div>
+                    <div class="do">✓ Minimal filtering, natural colors</div>
+                    <div class="do">✓ Inclusive representation</div>
+                    <div class="do">✓ Safe, responsible driving contexts</div>
+                    <div class="do">✓ Green spaces and nature</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- COLOR & TONE -->
+        <section class="section">
+            <h2>Color & Tone</h2>
+            
+            <h3>Photography Color Palette</h3>
+            <p>Photography should use our brand colors naturally and subtly. Avoid forcing brand colors into images.</p>
+            
+            <div class="mood-board">
+                <div class="mood-item">
+                    <div class="mood-color" style="background: linear-gradient(135deg, #1B5C3A 0%, #0d3a24 100%);"></div>
+                    <div class="mood-name">Deep Green</div>
+                    <div class="mood-desc">Trust, stability, nature</div>
+                </div>
+                <div class="mood-item">
+                    <div class="mood-color" style="background: linear-gradient(135deg, #B4E035 0%, #9fd01a 100%);"></div>
+                    <div class="mood-name">Bright Green</div>
+                    <div class="mood-desc">Energy, sustainability, action</div>
+                </div>
+                <div class="mood-item">
+                    <div class="mood-color" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);"></div>
+                    <div class="mood-name">Button Green</div>
+                    <div class="mood-desc">Connection, growth, success</div>
+                </div>
+                <div class="mood-item">
+                    <div class="mood-color" style="background: linear-gradient(135deg, #87CEEB 0%, #4ab8e6 100%);"></div>
+                    <div class="mood-name">Sky Blue</div>
+                    <div class="mood-desc">Open roads, freedom, opportunity</div>
+                </div>
+                <div class="mood-item">
+                    <div class="mood-color" style="background: linear-gradient(135deg, #F5DEB3 0%, #f0d891 100%);"></div>
+                    <div class="mood-name">Warm Yellow</div>
+                    <div class="mood-desc">Optimism, hope, friendly</div>
+                </div>
+                <div class="mood-item">
+                    <div class="mood-color" style="background: linear-gradient(135deg, #FFFFFF 0%, #f0f0f0 100%);"></div>
+                    <div class="mood-name">Neutral White</div>
+                    <div class="mood-desc">Clean, minimal, modern</div>
+                </div>
+            </div>
+
+            <h3>Tone & Mood</h3>
+            <table class="specs-table">
+                <thead>
+                    <tr>
+                        <th>Mood</th>
+                        <th>Lighting</th>
+                        <th>Saturation</th>
+                        <th>Composition</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Optimistic</strong></td>
+                        <td>Bright, natural daylight</td>
+                        <td>Natural, slightly enhanced</td>
+                        <td>Open frames, clear subjects</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Professional</strong></td>
+                        <td>Consistent, well-lit</td>
+                        <td>Balanced, not oversaturated</td>
+                        <td>Focused, clean composition</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Authentic</strong></td>
+                        <td>Real, varied lighting</td>
+                        <td>Natural colors, minimal edit</td>
+                        <td>Candid, unposed moments</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Welcoming</strong></td>
+                        <td>Warm, soft light</td>
+                        <td>Warm tones, inviting</td>
+                        <td>People-centered, approachable</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- IMAGE SPECIFICATIONS -->
+        <section class="section">
+            <h2>Image Specifications</h2>
+            
+            <h3>Digital Image Formats</h3>
+            <table class="specs-table">
+                <thead>
+                    <tr>
+                        <th>Format</th>
+                        <th>When to Use</th>
+                        <th>Dimensions</th>
+                        <th>File Size</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>JPEG</strong></td>
+                        <td>Photographs, web (primary)</td>
+                        <td>1200-1920px width</td>
+                        <td>&lt; 200KB (web)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PNG</strong></td>
+                        <td>Graphics with transparency, logos</td>
+                        <td>1200px+ width</td>
+                        <td>&lt; 500KB</td>
+                    </tr>
+                    <tr>
+                        <td><strong>WebP</strong></td>
+                        <td>Modern web, high quality</td>
+                        <td>1200-2400px width</td>
+                        <td>&lt; 150KB</td>
+                    </tr>
+                    <tr>
+                        <td><strong>RAW</strong></td>
+                        <td>Archive, high-quality editing</td>
+                        <td>Original camera resolution</td>
+                        <td>No limit (archive)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Common Image Dimensions</h3>
+            <table class="specs-table">
+                <thead>
+                    <tr>
+                        <th>Context</th>
+                        <th>Ratio</th>
+                        <th>Dimensions</th>
+                        <th>Use Case</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Hero Banner</strong></td>
+                        <td>16:9</td>
+                        <td>1920×1080px</td>
+                        <td>Homepage, landing pages</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Feature Image</strong></td>
+                        <td>4:3</td>
+                        <td>1200×900px</td>
+                        <td>Blog posts, articles</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Social Square</strong></td>
+                        <td>1:1</td>
+                        <td>1080×1080px</td>
+                        <td>Instagram, social media</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Social Landscape</strong></td>
+                        <td>16:9</td>
+                        <td>1200×675px</td>
+                        <td>Facebook, Twitter, LinkedIn</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Social Portrait</strong></td>
+                        <td>9:16</td>
+                        <td>1080×1920px</td>
+                        <td>Instagram Stories, Reels</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Card Image</strong></td>
+                        <td>3:2</td>
+                        <td>600×400px</td>
+                        <td>Product cards, testimonials</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- USAGE GUIDELINES -->
+        <section class="section">
+            <h2>Image Usage Guidelines</h2>
+            
+            <h3>Web Optimization</h3>
+            <div class="guideline">
+                <strong>✓ Image Optimization</strong>
+                <p>Always optimize images for web: compress files, use appropriate formats, provide multiple resolutions for responsive design, use WebP with JPEG fallback.</p>
+            </div>
+
+            <div class="guideline">
+                <strong>✓ Alt Text Requirements</strong>
+                <p>Every image must have descriptive alt text. Format: "[Image description that conveys meaning]". Examples: "Sarah smiling during her morning commute" not "IMG_1234.jpg"</p>
+            </div>
+
+            <div class="guideline">
+                <strong>✓ Image Spacing</strong>
+                <p>Leave adequate white space around images. Use 24px+ margin on desktop, 16px+ on mobile. Images should not touch container edges.</p>
+            </div>
+
+            <h3>Accessibility for Images</h3>
+            <table class="specs-table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Alt Text Required?</th>
+                        <th>Caption Needed?</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Decorative</strong></td>
+                        <td>No (alt="")</td>
+                        <td>No</td>
+                        <td>Background patterns, dividers</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Informational</strong></td>
+                        <td>Yes</td>
+                        <td>Optional</td>
+                        <td>Photos of people, vehicles</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Complex</strong></td>
+                        <td>Yes (detailed)</td>
+                        <td>Yes</td>
+                        <td>Charts, maps, diagrams</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Functional</strong></td>
+                        <td>Yes (action)</td>
+                        <td>Optional</td>
+                        <td>Icon buttons, linked images</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Copyright & Licensing</h3>
+            <div class="guideline">
+                <strong>✓ Rights Management</strong>
+                <p>All images must have clear licensing. Recommended sources: Unsplash, Pexels (free CC0), or licensed stock photos. Always include proper attribution when required.</p>
+            </div>
+
+            <div class="guideline">
+                <strong>✓ User-Generated Content</strong>
+                <p>When featuring user photos or testimonials, obtain explicit permission. Include release forms for identifiable people. Protect privacy at all times.</p>
+            </div>
+        </section>
+
+        <!-- PHOTO SCENARIOS -->
+        <section class="section">
+            <h2>Photography Scenarios</h2>
+            
+            <h3>Hero/Header Images</h3>
+            <div class="guideline">
+                <strong>Purpose:</strong> Set emotional tone, build interest, drive conversions<br>
+                <strong>Content:</strong> Real people, open roads, nature, optimistic moments<br>
+                <strong>Size:</strong> 1920×1080px (16:9) hero-size, 2x for retina<br>
+                <strong>Treatment:</strong> Bright, clear, minimal text overlay
+            </div>
+
+            <h3>Profile/Testimonial Images</h3>
+            <div class="guideline">
+                <strong>Purpose:</strong> Build trust, humanize brand, show real users<br>
+                <strong>Content:</strong> Genuine smiling faces, diverse demographics<br>
+                <strong>Size:</strong> 400×400px minimum (1:1 square crop-friendly)<br>
+                <strong>Treatment:</strong> Professional portrait style, good lighting, clear face
+            </div>
+
+            <h3>Journey Documentation</h3>
+            <div class="guideline">
+                <strong>Purpose:</strong> Show real commute experiences<br>
+                <strong>Content:</strong> Candid car moments, route scenery, real roads<br>
+                <strong>Size:</strong> 1200×900px (4:3) standard, 1080×1080px social<br>
+                <strong>Treatment:</strong> Authentic, natural lighting, minimal staging
+            </div>
+
+            <h3>Feature/Blog Images</h3>
+            <div class="guideline">
+                <strong>Purpose:</strong> Support content, break up text<br>
+                <strong>Content:</strong> Urban scenes, environmental context, detail shots<br>
+                <strong>Size:</strong> 1200×900px (4:3) primary, 600×400px for cards<br>
+                <strong>Treatment:</strong> Focused subject, clear composition, relevant to content
+            </div>
+        </section>
+
+        <!-- EDITING GUIDELINES -->
+        <section class="section">
+            <h2>Image Editing Guidelines</h2>
+            
+            <h3>Editing Standards</h3>
+            <table class="specs-table">
+                <thead>
+                    <tr>
+                        <th>Edit Type</th>
+                        <th>Acceptable</th>
+                        <th>Not Acceptable</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Exposure</strong></td>
+                        <td>Subtle brightening, shadow recovery</td>
+                        <td>Extreme overexposure, blown highlights</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Color</strong></td>
+                        <td>Natural color correction, white balance</td>
+                        <td>Unrealistic color grading, heavy saturation</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cropping</strong></td>
+                        <td>Composition improvement, aspect ratio</td>
+                        <td>Removing people, changing meaning</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Filters</strong></td>
+                        <td>Subtle vignette, minimal presets</td>
+                        <td>Heavy filters, Instagram-style effects</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Retouching</strong></td>
+                        <td>Blemish removal, dust cleanup</td>
+                        <td>Heavy smoothing, unrealistic faces</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Composition</strong></td>
+                        <td>Straightening horizons, removing distractions</td>
+                        <td>Adding/removing main subjects, manipulating</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="guideline warning">
+                <strong>⚠ Editing Philosophy</strong>
+                <p>Less is more. Images should feel natural and authentic, not heavily edited. Editing should enhance, not transform. If an image needs extensive editing, consider re-shooting instead.</p>
+            </div>
+        </section>
+
+        <!-- PHOTOGRAPHY BRIEF -->
+        <section class="section">
+            <h2>Photography Brief Template</h2>
+            <p>Use this template when commissioning new photography:</p>
+            
+            <div class="guideline">
+                <strong>Project Overview</strong><br>
+                Description of what needs to be photographed and why
+            </div>
+
+            <div class="guideline">
+                <strong>Key Messages</strong><br>
+                What emotions/ideas should the photos convey?
+            </div>
+
+            <div class="guideline">
+                <strong>Subject Matter</strong><br>
+                Specific scenes, people, locations, or scenarios
+            </div>
+
+            <div class="guideline">
+                <strong>Style Reference</strong><br>
+                Links to photography styles/mood boards we like
+            </div>
+
+            <div class="guideline">
+                <strong>Technical Specs</strong><br>
+                Dimensions, formats, file sizes, resolution requirements
+            </div>
+
+            <div class="guideline">
+                <strong>Usage Rights</strong><br>
+                Commercial use, exclusivity, licensing terms
+            </div>
+
+            <div class="guideline">
+                <strong>Deliverables</strong><br>
+                Number of images, formats, timeline, edits needed
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p><strong>Community Carpool Photography & Imagery Guidelines</strong></p>
+        <p>Complete guide for visual content creation and usage</p>
+        <p style="margin-top: 20px;">Last updated March 2026</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Carpool - Layout & Composition</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --dark-green: #1B5C3A; --bright-green: #B4E035; --button-green: #10B981; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.8; color: #333; background: #f9f9f9; }
+        header { background: linear-gradient(135deg, #1B5C3A 0%, #10B981 100%); color: white; padding: 60px 40px; }
+        header h1 { font-size: 40px; margin-bottom: 8px; }
+        nav { background: #f5f5f5; padding: 16px 40px; border-bottom: 1px solid #eee; }
+        nav a { color: #10B981; text-decoration: none; font-weight: 600; margin-right: 20px; }
+        main { max-width: 1200px; margin: 0 auto; padding: 60px 40px; }
+        h2 { font-size: 36px; color: #2C3E50; margin: 60px 0 24px 0; border-bottom: 3px solid #10B981; padding-bottom: 12px; }
+        h3 { font-size: 22px; color: #2C3E50; margin: 40px 0 20px 0; }
+        .preview { background: white; padding: 32px; margin: 24px 0; border: 1px solid #eee; border-radius: 8px; }
+        .grid { display: grid; gap: 16px; }
+        .grid-item { background: rgba(16, 185, 129, 0.1); border: 2px dashed #10B981; border-radius: 6px; padding: 16px; text-align: center; font-size: 12px; color: #666; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+        table { width: 100%; border-collapse: collapse; background: white; margin: 24px 0; border: 1px solid #eee; }
+        th, td { padding: 16px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
+        th { background: #f5f5f5; font-weight: 700; }
+        .layout-example { background: white; padding: 24px; border: 1px solid #eee; border-radius: 8px; margin: 24px 0; }
+        .spacing-box { background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 4px; padding: 16px; margin-bottom: 16px; }
+        footer { background: #f5f5f5; padding: 50px 40px; text-align: center; margin-top: 80px; font-size: 14px; color: #999; border-top: 2px solid #eee; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Community Carpool</h1>
+        <p>Layout & Composition System</p>
+    </header>
+    
+    <nav>
+        <a href="01_Brand_Guidelines_Site_Map.html">← Site Map</a>
+        <a href="10_Design_Tokens.html">← Design Tokens</a>
+    </nav>
+    
+    <main>
+        <section>
+            <h2>Container & Max-Width</h2>
+            <p>All content should respect the maximum width for readability and consistency.</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Container Type</th>
+                        <th>Max-Width</th>
+                        <th>Horizontal Padding</th>
+                        <th>Usage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Standard</td>
+                        <td>1200px</td>
+                        <td>16px</td>
+                        <td>Main content, forms, cards</td>
+                    </tr>
+                    <tr>
+                        <td>Narrow</td>
+                        <td>800px</td>
+                        <td>16px</td>
+                        <td>Onboarding flows, settings pages</td>
+                    </tr>
+                    <tr>
+                        <td>Full Width</td>
+                        <td>100%</td>
+                        <td>0px</td>
+                        <td>Hero sections, image backgrounds</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="layout-example">
+                <p style="text-align: center; font-size: 12px; color: #999; margin-bottom: 12px;">1200px Container (with 16px padding)</p>
+                <div style="max-width: 1200px; margin: 0 auto; padding: 0 16px;">
+                    <div style="background: #f0f0f0; border: 2px dashed #ccc; padding: 20px; text-align: center; color: #666; border-radius: 6px;">
+                        Content Area: 1200px - 32px (padding) = 1168px
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Grid System</h2>
+            <p>Flexible grid layouts for responsive design.</p>
+            
+            <h3>12-Column Grid</h3>
+            <div class="preview">
+                <div class="grid" style="grid-template-columns: repeat(12, 1fr);">
+                    <div class="grid-item" style="grid-column: span 4;">4 cols</div>
+                    <div class="grid-item" style="grid-column: span 4;">4 cols</div>
+                    <div class="grid-item" style="grid-column: span 4;">4 cols</div>
+                </div>
+            </div>
+            
+            <h3>Flexible Grid (Auto)</h3>
+            <div class="preview">
+                <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                    <div class="grid-item">Item 1</div>
+                    <div class="grid-item">Item 2</div>
+                    <div class="grid-item">Item 3</div>
+                </div>
+            </div>
+            
+            <h3>2-Column Layout</h3>
+            <div class="preview">
+                <div class="grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="grid-item">Sidebar</div>
+                    <div class="grid-item">Main Content</div>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Spacing Rules</h2>
+            <p>Consistent spacing patterns for content organization.</p>
+            
+            <h3>Section Spacing</h3>
+            <div class="layout-example">
+                <div class="spacing-box">
+                    <p style="margin: 0; color: #333;"><strong>Section 1</strong></p>
+                    <p style="margin: 8px 0 0 0; color: #666; font-size: 14px;">Content goes here</p>
+                </div>
+                <p style="font-size: 12px; color: #999; text-align: center; margin: 24px 0;">32px spacing between sections</p>
+                <div class="spacing-box">
+                    <p style="margin: 0; color: #333;"><strong>Section 2</strong></p>
+                    <p style="margin: 8px 0 0 0; color: #666; font-size: 14px;">Content goes here</p>
+                </div>
+            </div>
+            
+            <h3>Component Spacing</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Internal Padding</th>
+                        <th>Bottom Margin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Card</td>
+                        <td>16px</td>
+                        <td>24px</td>
+                    </tr>
+                    <tr>
+                        <td>Button</td>
+                        <td>12px 24px</td>
+                        <td>0px</td>
+                    </tr>
+                    <tr>
+                        <td>Form Field</td>
+                        <td>12px</td>
+                        <td>12px</td>
+                    </tr>
+                    <tr>
+                        <td>Heading (H2)</td>
+                        <td>0px</td>
+                        <td>16px</td>
+                    </tr>
+                    <tr>
+                        <td>Paragraph</td>
+                        <td>0px</td>
+                        <td>16px</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <section>
+            <h2>Responsive Breakpoints</h2>
+            <p>Standard breakpoints for responsive design.</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Device</th>
+                        <th>Breakpoint</th>
+                        <th>Usage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Mobile (Small)</td>
+                        <td>< 640px</td>
+                        <td>1-column layout, large touch targets</td>
+                    </tr>
+                    <tr>
+                        <td>Tablet (Medium)</td>
+                        <td>640px - 1024px</td>
+                        <td>2-column layout, balanced spacing</td>
+                    </tr>
+                    <tr>
+                        <td>Desktop (Large)</td>
+                        <td>> 1024px</td>
+                        <td>3+ column layout, full features</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <section>
+            <h2>Common Layouts</h2>
+            
+            <h3>Header + Content</h3>
+            <div class="preview">
+                <div style="background: #1B5C3A; color: white; padding: 16px; border-radius: 4px; margin-bottom: 16px;">Header (64px height)</div>
+                <div style="display: grid; grid-template-columns: 200px 1fr; gap: 16px;">
+                    <div style="background: #f0f0f0; padding: 16px; border-radius: 4px; min-height: 300px;">Sidebar</div>
+                    <div style="background: #f0f0f0; padding: 16px; border-radius: 4px; min-height: 300px;">Main Content</div>
+                </div>
+            </div>
+            
+            <h3>Card Grid (Responsive)</h3>
+            <div class="preview">
+                <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+                    <div style="background: white; border: 1px solid #eee; border-radius: 8px; padding: 16px; min-height: 200px;">Card 1</div>
+                    <div style="background: white; border: 1px solid #eee; border-radius: 8px; padding: 16px; min-height: 200px;">Card 2</div>
+                    <div style="background: white; border: 1px solid #eee; border-radius: 8px; padding: 16px; min-height: 200px;">Card 3</div>
+                </div>
+            </div>
+            
+            <h3>Hero + Content</h3>
+            <div class="preview">
+                <div style="background: linear-gradient(135deg, #1B5C3A 0%, #10B981 100%); color: white; padding: 48px 16px; text-align: center; border-radius: 8px; margin-bottom: 24px;">
+                    <h2 style="margin: 0; border: none; font-size: 32px;">Hero Section</h2>
+                    <p style="margin: 8px 0 0 0; opacity: 0.9;">Subtitle or supporting text</p>
+                </div>
+                <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                    <div style="background: white; padding: 16px; border: 1px solid #eee; border-radius: 6px;">Feature 1</div>
+                    <div style="background: white; padding: 16px; border: 1px solid #eee; border-radius: 6px;">Feature 2</div>
+                    <div style="background: white; padding: 16px; border: 1px solid #eee; border-radius: 6px;">Feature 3</div>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Alignment & Centering</h2>
+            
+            <h3>Horizontal Centering</h3>
+            <div class="layout-example">
+                <div style="max-width: 400px; margin: 0 auto; background: #f0f0f0; padding: 16px; text-align: center; border-radius: 6px;">
+                    Centered content (max-width: 400px)
+                </div>
+            </div>
+            
+            <h3>Vertical & Horizontal Centering</h3>
+            <div class="layout-example">
+                <div style="display: flex; align-items: center; justify-content: center; min-height: 200px; background: #f0f0f0; border-radius: 6px;">
+                    Centered both ways
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>White Space Guidelines</h2>
+            
+            <div class="spacing-box">
+                <p><strong>✓ Do:</strong></p>
+                <ul style="margin: 8px 0 0 20px;">
+                    <li>Use consistent spacing from the spacing scale</li>
+                    <li>Add breathing room around headings (24px below)</li>
+                    <li>Separate sections with 32px vertical space</li>
+                    <li>Use white space to guide visual hierarchy</li>
+                </ul>
+            </div>
+            
+            <div class="spacing-box">
+                <p><strong>✗ Don't:</strong></p>
+                <ul style="margin: 8px 0 0 20px;">
+                    <li>Crowd content with no breathing room</li>
+                    <li>Use arbitrary spacing values</li>
+                    <li>Mix inconsistent gaps between components</li>
+                    <li>Ignore white space for visual balance</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p><strong>Community Carpool Layout & Composition</strong></p>
+        <p>Grid System, Spacing Rules, and Responsive Patterns | March 2026</p>
+    </footer>
+</body>
+</html>

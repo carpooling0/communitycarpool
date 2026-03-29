@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Community Carpool Brand Guidelines - Professional design system and visual identity">
+    <title>Community Carpool — Brand Guidelines</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%231B5C3A'/><text x='50' y='60' font-size='60' font-weight='bold' fill='white' text-anchor='middle' font-family='Arial'>🌍</text></svg>">
+    <style>
+        :root {
+            --dark-green: #1B5C3A;
+            --bright-green: #B4E035;
+            --button-green: #10B981;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --text-light: #9CA3AF;
+            --bg-light: #F9FAFB;
+            --bg-white: #FFFFFF;
+            --border: #E5E7EB;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-light);
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        nav .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark-green);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        nav .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--button-green);
+        }
+
+        nav .btn {
+            padding: 8px 20px;
+            background: var(--button-green);
+            color: white;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        nav .btn:hover {
+            background: var(--dark-green);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--dark-green) 0%, var(--button-green) 100%);
+            color: white;
+            padding: 160px 40px 120px;
+            text-align: center;
+            margin-top: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -20%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .hero .content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 56px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            opacity: 0.95;
+            margin-bottom: 40px;
+            line-height: 1.7;
+        }
+
+        .hero .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--dark-green);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* Section */
+        section {
+            padding: 100px 0;
+        }
+
+        section h2 {
+            font-size: 44px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--dark-green);
+        }
+
+        section .intro {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 60px;
+            max-width: 700px;
+            line-height: 1.8;
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            margin: 60px 0;
+        }
+
+        /* Card */
+        .card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-sm);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--button-green);
+        }
+
+        .card .icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+            line-height: 1;
+        }
+
+        .card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .card p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            flex-grow: 1;
+            margin-bottom: 24px;
+        }
+
+        .card a {
+            color: var(--button-green);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: color 0.2s;
+            align-self: flex-start;
+        }
+
+        .card a:hover {
+            color: var(--dark-green);
+        }
+
+        /* Color Palette */
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 24px;
+            margin: 60px 0;
+        }
+
+        .color-item {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            background: var(--bg-white);
+            transition: transform 0.2s;
+        }
+
+        .color-item:hover {
+            transform: translateY(-4px);
+        }
+
+        .color-swatch {
+            height: 140px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            padding: 12px;
+        }
+
+        .color-info {
+            padding: 16px;
+        }
+
+        .color-name {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .color-code {
+            color: var(--text-light);
+            font-family: 'Monaco', 'Courier', monospace;
+            font-size: 11px;
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin: 80px 0;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--button-green);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Highlight */
+        .highlight {
+            background: linear-gradient(135deg, rgba(27, 92, 58, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 80px 40px;
+            text-align: center;
+            margin: 80px 0;
+        }
+
+        .highlight h3 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--dark-green);
+        }
+
+        .highlight p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 32px;
+            line-height: 1.8;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark-green);
+            color: white;
+            padding: 80px 40px 40px;
+            margin-top: 100px;
+        }
+
+        footer .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        footer h4 {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            opacity: 0.8;
+        }
+
+        footer a {
+            display: block;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 8px;
+            transition: color 0.2s;
+        }
+
+        footer a:hover {
+            color: white;
+        }
+
+        footer .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 40px;
+            text-align: center;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav .container { padding: 12px 20px; }
+            nav .nav-links { gap: 16px; }
+            nav .nav-links a { font-size: 12px; display: none; }
+            nav .btn { display: none; }
+            
+            .hero { padding: 120px 20px 80px; margin-top: 50px; }
+            .hero h1 { font-size: 36px; }
+            .hero p { font-size: 16px; }
+            
+            section { padding: 60px 0; }
+            section h2 { font-size: 32px; }
+            .container { padding: 0 20px; }
+            
+            .grid { gap: 20px; }
+            .card { padding: 24px; }
+            
+            .highlight { padding: 40px 20px; }
+            .color-palette { grid-template-columns: repeat(2, 1fr); }
+            .stats { gap: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <a href="/" class="logo">🌍 Community Carpool</a>
+            <div class="nav-links">
+                <a href="#brand">Brand</a>
+                <a href="#system">System</a>
+                <a href="#resources">Resources</a>
+                <a href="pages/all-pages.html" class="btn">View All</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="content">
+            <h1>Brand Guidelines</h1>
+            <p>Professional visual identity system and design standards for Community Carpool</p>
+            <div class="cta-buttons">
+                <a href="#brand" class="btn btn-primary">Explore Brand</a>
+                <a href="pages/all-pages.html" class="btn btn-secondary">View All Guidelines</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Brand Section -->
+    <section id="brand">
+        <div class="container">
+            <h2>Our Brand</h2>
+            <p class="intro">Community Carpool brings neighbors together to share sustainable journeys. Our brand reflects trust, optimism, and responsibility.</p>
+            
+            <div class="grid">
+                <div class="card">
+                    <div class="icon">🎯</div>
+                    <h3>Brand Essence</h3>
+                    <p>"We can do this. Together. It is all our responsibility to cut emissions wherever we can."</p>
+                    <a href="pages/foundation.html">Learn More →</a>
+                </div>
+
+                <div class="card">
+                    <div class="icon">💬</div>
+                    <h3>Voice & Tone</h3>
+                    <p>Optimistic, trusted, and human. We speak like a helpful neighbor who understands commute challenges.</p>
+                    <a href="pages/voice.html">Read Guide →</a>
+                </div>
+
+                <div class="card">
+                    <div class="icon">🎨</div>
+                    <h3>Visual Identity</h3>
+                    <p>Clean, modern, purposeful. Colors, typography, and imagery reflect sustainability and connection.</p>
+                    <a href="pages/visual.html">View Identity →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Color Palette -->
+    <section>
+        <div class="container">
+            <h2>Color System</h2>
+            <p class="intro">Carefully selected colors that convey trust, sustainability, and optimism.</p>
+            
+            <div class="color-palette">
+                <div class="color-item">
+                    <div class="color-swatch" style="background-color: #1B5C3A;">#1B5C3A</div>
+                    <div class="color-info">
+                        <div class="color-name">Dark Green</div>
+                        <div class="color-code">Trust & Stability</div>
+                    </div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-swatch" style="background-color: #B4E035;">#B4E035</div>
+                    <div class="color-info">
+                        <div class="color-name">Chartreuse</div>
+                        <div class="color-code">Energy & Growth</div>
+                    </div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-swatch" style="background-color: #10B981;">#10B981</div>
+                    <div class="color-info">
+                        <div class="color-name">Button Green</div>
+                        <div class="color-code">Action & Connection</div>
+                    </div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-swatch" style="background-color: #1F2937;">#1F2937</div>
+                    <div class="color-info">
+                        <div class="color-name">Text Primary</div>
+                        <div class="color-code">Readability</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Design System -->
+    <section id="system">
+        <div class="container">
+            <h2>Design System</h2>
+            <p class="intro">Complete component library and design specifications for consistent, accessible interfaces.</p>
+            
+            <div class="grid">
+                <div class="card">
+                    <div class="icon">🔘</div>
+                    <h3>Components</h3>
+                    <p>60+ buttons, forms, cards, alerts, badges, and navigation patterns with full specifications.</p>
+                    <a href="pages/components.html">View Library →</a>
+                </div>
+
+                <div class="card">
+                    <div class="icon">✨</div>
+                    <h3>Typography</h3>
+                    <p>Montserrat for headings, Inter for body. Complete type scale, hierarchy, and usage guidelines.</p>
+                    <a href="pages/visual.html#typography">View Typography →</a>
+                </div>
+
+                <div class="card">
+                    <div class="icon">📱</div>
+                    <h3>Responsive</h3>
+                    <p>Mobile-first design patterns, breakpoints, and adaptive layouts for all screen sizes.</p>
+                    <a href="pages/components.html#responsive">View Guidelines →</a>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div>
+                    <div class="stat-number">60+</div>
+                    <div class="stat-label">Components</div>
+                </div>
+                <div>
+                    <div class="stat-number">400+</div>
+                    <div class="stat-label">Variations</div>
+                </div>
+                <div>
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Accessible</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resources -->
+    <section id="resources">
+        <div class="container">
+            <h2>Resources & Downloads</h2>
+            <p class="intro">Everything you need to build with the Community Carpool brand.</p>
+            
+            <div class="grid">
+                <div class="card">
+                    <div class="icon">📥</div>
+                    <h3>Assets</h3>
+                    <p>Logos, icons, color swatches, and design files in all formats.</p>
+                    <a href="pages/assets.html">Download →</a>
+                </div>
+
+                <div class="card">
+                    <div class="icon">📸</div>
+                    <h3>Photography</h3>
+                    <p>Photo guidelines, styles, and best practices for brand imagery.</p>
+                    <a href="pages/photography.html">Learn More →</a>
+                </div>
+
+                <div class="card">
+                    <div class="icon">📋</div>
+                    <h3>Applications</h3>
+                    <p>Real-world examples across web, mobile, email, and print.</p>
+                    <a href="pages/applications.html">View Examples →</a>
+                </div>
+            </div>
+
+            <div class="highlight">
+                <h3>Access All Guidelines</h3>
+                <p>Complete documentation with detailed specifications, best practices, and implementation guides.</p>
+                <a href="pages/all-pages.html" class="btn btn-primary">Browse Complete Guidelines</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <h4>Brand</h4>
+                    <a href="pages/foundation.html">Foundation</a>
+                    <a href="pages/voice.html">Voice & Tone</a>
+                    <a href="pages/visual.html">Visual Identity</a>
+                </div>
+                <div>
+                    <h4>System</h4>
+                    <a href="pages/components.html">Components</a>
+                    <a href="pages/assets.html">Assets</a>
+                    <a href="pages/all-pages.html">All Pages</a>
+                </div>
+                <div>
+                    <h4>Resources</h4>
+                    <a href="pages/photography.html">Photography</a>
+                    <a href="pages/applications.html">Applications</a>
+                    <a href="pages/all-pages.html">Documentation</a>
+                </div>
+                <div>
+                    <h4>More</h4>
+                    <a href="https://communitycarpool.org">Website</a>
+                    <a href="https://communitycarpool.org/support">Support</a>
+                    <a href="https://github.com/communitycarpool/brand">GitHub</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Community Carpool Brand Guidelines © 2026 | Made with ❤️ for our community</p>
+        </div>
+    </footer>
+</body>
+</html>

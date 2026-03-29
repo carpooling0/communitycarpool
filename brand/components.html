@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Carpool - Components System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --dark-green: #1B5C3A; --bright-green: #B4E035; --button-green: #10B981; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.8; color: #333; background: #f9f9f9; }
+        header { background: linear-gradient(135deg, #1B5C3A 0%, #10B981 100%); color: white; padding: 60px 40px; }
+        header h1 { font-size: 40px; margin-bottom: 8px; }
+        nav { background: #f5f5f5; padding: 16px 40px; border-bottom: 1px solid #eee; }
+        nav a { color: #10B981; text-decoration: none; font-weight: 600; margin-right: 20px; }
+        main { max-width: 1200px; margin: 0 auto; padding: 60px 40px; }
+        h2 { font-size: 36px; color: #2C3E50; margin: 60px 0 24px 0; border-bottom: 3px solid #10B981; padding-bottom: 12px; }
+        h3 { font-size: 22px; color: #2C3E50; margin: 40px 0 20px 0; }
+        .preview { background: white; padding: 32px; margin: 24px 0; border: 1px solid #eee; border-radius: 8px; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin: 24px 0; }
+        .box { background: white; border: 1px solid #eee; border-radius: 8px; padding: 24px; margin: 24px 0; }
+        button { cursor: pointer; transition: all 0.2s; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; }
+        .primary { background: #10B981; color: white; padding: 12px 24px; }
+        .primary:hover { background: #059669; }
+        .primary:active { transform: scale(0.98); }
+        .primary:disabled { background: #ccc; cursor: not-allowed; }
+        .secondary { background: #1B5C3A; color: white; padding: 12px 24px; }
+        .secondary:hover { background: #0d3a24; }
+        .text-btn { background: transparent; color: #10B981; padding: 12px 0; text-decoration: underline; }
+        .text-btn:hover { color: #059669; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; font-family: inherit; margin-bottom: 12px; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #10B981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
+        .card { background: white; border: 1px solid #eee; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .card-header { padding: 16px; border-bottom: 1px solid #eee; }
+        .card-body { padding: 16px; }
+        .label { font-size: 14px; font-weight: 600; display: block; margin-bottom: 6px; color: #333; }
+        .hint { font-size: 12px; color: #666; margin-top: 4px; }
+        .error { color: #EF4444; }
+        .success { color: #10B981; }
+        .state-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin: 16px 0; }
+        footer { background: #f5f5f5; padding: 50px 40px; text-align: center; margin-top: 80px; font-size: 14px; color: #999; border-top: 2px solid #eee; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Community Carpool</h1>
+        <p>Components System</p>
+    </header>
+    
+    <nav>
+        <a href="01_Brand_Guidelines_Site_Map.html">← Site Map</a>
+        <a href="08_Typography_System.html">← Typography</a>
+    </nav>
+    
+    <main>
+        <section>
+            <h2>Buttons</h2>
+            
+            <h3>Primary Button</h3>
+            <div class="preview">
+                <div class="state-row">
+                    <button class="primary">Default</button>
+                    <button class="primary" style="background: #059669;">Hover</button>
+                    <button class="primary" style="opacity: 0.7;">Active</button>
+                    <button class="primary" disabled>Disabled</button>
+                </div>
+            </div>
+            
+            <h3>Secondary Button</h3>
+            <div class="preview">
+                <div class="state-row">
+                    <button class="secondary">Default</button>
+                    <button class="secondary" style="background: #0d3a24;">Hover</button>
+                    <button class="secondary" style="opacity: 0.7;">Active</button>
+                    <button class="secondary" disabled>Disabled</button>
+                </div>
+            </div>
+            
+            <h3>Text Button</h3>
+            <div class="preview">
+                <div class="state-row">
+                    <button class="text-btn">Default</button>
+                    <button class="text-btn" style="color: #059669;">Hover</button>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Form Elements</h2>
+            
+            <h3>Text Input</h3>
+            <div class="preview">
+                <label class="label">Email Address</label>
+                <input type="email" placeholder="you@example.com">
+                <div class="hint">We'll never share your email</div>
+                
+                <label class="label" style="margin-top: 24px;">With Error</label>
+                <input type="email" placeholder="you@example.com" style="border-color: #EF4444;">
+                <div class="hint error">Please enter a valid email</div>
+            </div>
+            
+            <h3>Select Dropdown</h3>
+            <div class="preview">
+                <label class="label">Select Your Route</label>
+                <select>
+                    <option>-- Choose a route --</option>
+                    <option>Downtown to Suburb (Daily)</option>
+                    <option>Suburb to Downtown (Daily)</option>
+                    <option>Airport Route (Weekly)</option>
+                </select>
+            </div>
+            
+            <h3>Textarea</h3>
+            <div class="preview">
+                <label class="label">Additional Notes</label>
+                <textarea rows="4" placeholder="Tell us about your commute..."></textarea>
+            </div>
+            
+            <h3>Checkbox & Radio</h3>
+            <div class="preview">
+                <div style="margin-bottom: 16px;">
+                    <input type="checkbox" id="check1"> <label for="check1" style="display: inline; margin: 0;">I agree to the terms</label>
+                </div>
+                <div>
+                    <input type="radio" name="freq" id="daily"> <label for="daily" style="display: inline; margin: 0;">Daily</label>
+                </div>
+                <div>
+                    <input type="radio" name="freq" id="weekly"> <label for="weekly" style="display: inline; margin: 0;">Weekly</label>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Cards</h2>
+            
+            <h3>Basic Card</h3>
+            <div class="preview">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="margin: 0;">Found a Match!</h4>
+                    </div>
+                    <div class="card-body">
+                        <p>You matched with 2 people on your route. Check your inbox to connect.</p>
+                        <button class="primary" style="width: 100%; margin-top: 12px;">View Matches</button>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>Match Card</h3>
+            <div class="preview">
+                <div class="card">
+                    <div class="card-body">
+                        <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                            <div style="width: 48px; height: 48px; background: #B4E035; border-radius: 50%;"></div>
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0 0 4px 0;">Sarah</h4>
+                                <p style="margin: 0; font-size: 14px; color: #666;">Downtown → Airport, Daily</p>
+                            </div>
+                        </div>
+                        <p style="font-size: 14px; margin-bottom: 12px;">Leaves at 7:30 AM. Looking for a carpool buddy!</p>
+                        <button class="primary" style="width: 100%;">Connect</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>States & Feedback</h2>
+            
+            <h3>Success State</h3>
+            <div class="preview">
+                <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10B981; border-radius: 6px; padding: 16px;">
+                    <p style="color: #10B981; margin: 0;"><strong>✓ Success!</strong> Your profile has been updated.</p>
+                </div>
+            </div>
+            
+            <h3>Error State</h3>
+            <div class="preview">
+                <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #EF4444; border-radius: 6px; padding: 16px;">
+                    <p style="color: #EF4444; margin: 0;"><strong>✕ Error!</strong> Please check your email and try again.</p>
+                </div>
+            </div>
+            
+            <h3>Warning State</h3>
+            <div class="preview">
+                <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid #F59E0B; border-radius: 6px; padding: 16px;">
+                    <p style="color: #F59E0B; margin: 0;"><strong>⚠ Warning!</strong> Your email wasn't confirmed. Check spam folder.</p>
+                </div>
+            </div>
+            
+            <h3>Info State</h3>
+            <div class="preview">
+                <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3B82F6; border-radius: 6px; padding: 16px;">
+                    <p style="color: #3B82F6; margin: 0;"><strong>ℹ Info:</strong> We match rides based on route overlap and timing.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Loading & Disabled States</h2>
+            
+            <div class="preview">
+                <h3 style="margin-top: 0;">Disabled Button</h3>
+                <button class="primary" disabled>Processing...</button>
+                
+                <h3>Disabled Input</h3>
+                <input type="text" value="View only" disabled>
+                
+                <h3>Loading Spinner</h3>
+                <div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #f0f0f0; border-top: 3px solid #10B981; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p><strong>Community Carpool Components System</strong></p>
+        <p>Buttons, Forms, Cards, and Interactive States | March 2026</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .pin-dark { fill: #1B5C3A; }
+      .pin-bright { fill: #B4E035; }
+      .circle-white { fill: #FFFFFF; }
+      .text-community { font-family: 'Arial', 'Helvetica', sans-serif; font-size: 90px; font-weight: 900; fill: #A4D65E; letter-spacing: 2px; }
+      .text-carpool { font-family: 'Arial', 'Helvetica', sans-serif; font-size: 90px; font-weight: 900; fill: #1B5C3A; letter-spacing: 1px; }
+      .text-tagline { font-family: 'Georgia', serif; font-size: 28px; font-style: italic; fill: #555555; }
+      .swoosh-dark { fill: none; stroke: #1B5C3A; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; }
+      .swoosh-bright { fill: none; stroke: #B4E035; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; opacity: 0.75; }
+    </style>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- LEFT PIN - Dark Green -->
+  <g id="pin-left" filter="url(#shadow)">
+    <!-- Main pin teardrop shape -->
+    <path class="pin-dark" d="M 240 120 C 200 120 170 155 170 220 C 170 300 240 360 240 360 C 240 360 310 300 310 220 C 310 155 280 120 240 120 Z"/>
+    <!-- White circle inside -->
+    <circle class="circle-white" cx="240" cy="190" r="42"/>
+  </g>
+
+  <!-- RIGHT PIN - Bright Green -->
+  <g id="pin-right" filter="url(#shadow)">
+    <!-- Main pin teardrop shape -->
+    <path class="pin-bright" d="M 410 120 C 370 120 340 155 340 220 C 340 300 410 360 410 360 C 410 360 480 300 480 220 C 480 155 450 120 410 120 Z"/>
+    <!-- White circle inside -->
+    <circle class="circle-white" cx="410" cy="190" r="42"/>
+  </g>
+
+  <!-- INTERSECTION ARC - Extended and full coverage -->
+  <g id="intersection" opacity="0.85">
+    <!-- Full convex arc covering complete intersection -->
+    <path d="M 340 220 Q 375 280 410 220 Q 375 255 340 220" class="pin-bright"/>
+    <!-- Dark green overlay for depth and dimensionality -->
+    <path d="M 355 230 Q 375 265 395 230 Q 375 250 355 230" class="pin-dark" opacity="0.6"/>
+  </g>
+
+  <!-- SWOOSH - Curved lines beneath pins -->
+  <g id="swoosh">
+    <!-- Dark green main swoosh -->
+    <path d="M 180 310 Q 325 380 460 310" class="swoosh-dark"/>
+    <!-- Bright green secondary swoosh -->
+    <path d="M 195 328 Q 325 395 445 328" class="swoosh-bright"/>
+  </g>
+
+  <!-- TEXT: COMMUNITY (Bright Green) -->
+  <text class="text-community" x="540" y="175" dominant-baseline="middle">COMMUNITY</text>
+
+  <!-- TEXT: CARPOOL (Dark Green) -->
+  <text class="text-carpool" x="540" y="275" dominant-baseline="middle">CARPOOL</text>
+
+  <!-- TAGLINE: Share rides. Cut emissions. -->
+  <text class="text-tagline" x="325" y="355" text-anchor="middle">Share rides. Cut emissions.</text>
+</svg>

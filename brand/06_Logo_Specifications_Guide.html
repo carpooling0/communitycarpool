@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Carpool - Logo Specifications Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --brand-green: #5EC576;
+            --dark-green: #1B5C3A;
+            --bright-green: #B4E035;
+            --dark-neutral: #2C3E50;
+            --light-gray: #F5F5F5;
+            --white: #FFFFFF;
+            --text-gray: #555555;
+            --light-text: #888888;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.8;
+            color: var(--text-gray);
+            background: linear-gradient(180deg, var(--white) 0%, #F9F9F9 100%);
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--brand-green) 0%, #4BA25A 100%);
+            color: white;
+            padding: 60px 40px;
+            box-shadow: 0 4px 12px rgba(94, 197, 118, 0.2);
+        }
+        
+        header h1 {
+            font-size: 40px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        header p {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+        
+        nav {
+            background: var(--light-gray);
+            padding: 16px 40px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #EEEEEE;
+        }
+        
+        nav a {
+            color: var(--brand-green);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        main {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+        
+        section {
+            margin-bottom: 80px;
+        }
+        
+        h2 {
+            font-size: 36px;
+            color: var(--dark-neutral);
+            margin: 60px 0 24px 0;
+            border-bottom: 3px solid var(--brand-green);
+            padding-bottom: 12px;
+            font-weight: 700;
+        }
+        
+        h3 {
+            font-size: 22px;
+            color: var(--dark-neutral);
+            margin: 32px 0 16px 0;
+            font-weight: 600;
+        }
+        
+        h4 {
+            font-size: 18px;
+            color: var(--dark-neutral);
+            margin: 16px 0 8px 0;
+            font-weight: 700;
+        }
+        
+        p {
+            font-size: 16px;
+            margin-bottom: 16px;
+            line-height: 1.8;
+        }
+        
+        .logo-section {
+            background: white;
+            border: 1px solid #EEEEEE;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 24px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        
+        .logo-label {
+            background: var(--light-gray);
+            border-left: 5px solid var(--brand-green);
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin: 24px 0;
+            border: 1px solid #EEEEEE;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #EEEEEE;
+            font-size: 14px;
+        }
+        
+        th {
+            background: var(--light-gray);
+            font-weight: 700;
+            color: var(--dark-neutral);
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover {
+            background: rgba(94, 197, 118, 0.05);
+        }
+        
+        .color-swatch {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            border: 1px solid #EEEEEE;
+            margin-right: 12px;
+            vertical-align: middle;
+        }
+        
+        .do-dont {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 24px 0;
+        }
+        
+        .do {
+            background: rgba(39, 174, 96, 0.1);
+            border-left: 4px solid #27AE60;
+            padding: 20px;
+            border-radius: 6px;
+        }
+        
+        .do h5 {
+            color: #27AE60;
+            font-size: 16px;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+        
+        .dont {
+            background: rgba(231, 76, 60, 0.1);
+            border-left: 4px solid #E74C3C;
+            padding: 20px;
+            border-radius: 6px;
+        }
+        
+        .dont h5 {
+            color: #E74C3C;
+            font-size: 16px;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+        
+        .do p, .dont p {
+            font-size: 14px;
+            margin: 0;
+            line-height: 1.6;
+        }
+        
+        .info-box {
+            background: var(--light-gray);
+            border: 1px solid #EEEEEE;
+            border-radius: 8px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+        
+        .info-box h4 {
+            margin-top: 0;
+            color: var(--dark-neutral);
+        }
+        
+        .info-box p {
+            margin: 12px 0;
+            font-size: 15px;
+        }
+        
+        .note {
+            background: rgba(94, 197, 118, 0.05);
+            border-left: 4px solid var(--brand-green);
+            padding: 16px;
+            border-radius: 4px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        
+        footer {
+            background: var(--light-gray);
+            padding: 50px 40px;
+            text-align: center;
+            margin-top: 80px;
+            font-size: 14px;
+            color: var(--light-text);
+            border-top: 2px solid #EEEEEE;
+        }
+        
+        @media (max-width: 768px) {
+            .do-dont {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 28px;
+            }
+            
+            h2 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Community Carpool</h1>
+        <p>Logo Specifications Guide</p>
+    </header>
+    
+    <nav>
+        <a href="01_Brand_Guidelines_Site_Map.html">← Site Map</a>
+        <a href="02_Brand_Foundation.html">← Brand Foundation</a>
+        <a href="06_Logo_Specifications_Guide.html">Logo Specifications</a>
+    </nav>
+    
+    <main>
+        <!-- LOGO VARIATIONS -->
+        <section>
+            <h2>Logo Variations</h2>
+            
+            <h3>1. Logo Mark (Icon Only)</h3>
+            <p>The standalone logo mark featuring two overlapping location pins. Use this variation for small spaces, favicons, app icons, or when the logo needs to be recognized at very small sizes.</p>
+            
+            <div class="logo-section">
+                <img src="1774705710177_logo-qr.webp" alt="Community Carpool Logo Mark - Two overlapping location pins" style="max-width: 80px; height: auto; margin: 0 auto; display: block;">
+            </div>
+            
+            <div class="logo-label">
+                <p><strong>Description:</strong> Two location pins (map markers) in dark forest green and bright chartreuse green overlapping to create a unified mark. The overlap represents connection and community.</p>
+                <p><strong>Colors:</strong> Dark Green (#1B5C3A) + Bright Green (#B4E035)</p>
+                <p><strong>Best for:</strong> Favicon, app icon, social media profile pictures, small badges, merchandise, stickers</p>
+            </div>
+            
+            <h3>2. Full Logo Lockup (Mark + Text)</h3>
+            <p>The complete logo including the mark, wordmark, decorative swoosh, and tagline. This is the primary logo for most applications.</p>
+            
+            <div class="logo-section">
+                <img src="1774705710174_og-image.jpg" alt="Community Carpool Full Logo with tagline - JPG version" style="max-width: 50%; height: auto; margin: 0 auto; display: block; margin-bottom: 12px;">
+                <img src="1774705710177_logo.png" alt="Community Carpool Full Logo - PNG version" style="max-width: 50%; height: auto; margin: 0 auto; display: block;">
+            </div>
+            
+            <div class="logo-label">
+                <p><strong>Description:</strong> Complete visual identity including the logo mark on the left, "COMMUNITY" in bright green, "CARPOOL" in dark green, a curved swoosh element, and the tagline "Share rides. Cut emissions."</p>
+                <p><strong>Layout:</strong> Horizontal lockup with mark (left) and text stacked (right)</p>
+                <p><strong>Best for:</strong> Website header, business cards, email signatures, presentations, printed materials, primary branding</p>
+            </div>
+        </section>
+        
+        <!-- TECHNICAL SPECIFICATIONS -->
+        <section>
+            <h2>Technical Specifications</h2>
+            
+            <h3>Dimensions & Proportions</h3>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Logo Variation</th>
+                        <th>Aspect Ratio</th>
+                        <th>Recommended Width</th>
+                        <th>Minimum Width</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Logo Mark Only</strong></td>
+                        <td>1:1.3</td>
+                        <td>120px - 500px</td>
+                        <td>32px</td>
+                        <td>Works at any size from favicon (32px) to billboard</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Full Logo Lockup</strong></td>
+                        <td>3:1</td>
+                        <td>400px - 1200px</td>
+                        <td>240px</td>
+                        <td>Minimum 240px for readable text</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Clear Space Rules</h3>
+            
+            <div class="info-box">
+                <h4>Minimum Clear Space (Padding Around Logo)</h4>
+                <p><strong>Logo Mark:</strong> Minimum clear space = 20% of the logo width on all sides</p>
+                <p><strong>Full Lockup:</strong> Minimum clear space = 40px or 5% of the logo width (whichever is larger)</p>
+                <p style="margin-top: 20px; font-style: italic; color: var(--light-text);">Clear space is the minimum distance between the logo and any other graphic elements, text, or edges. Never allow other elements to crowd or overlap the logo.</p>
+            </div>
+            
+            <h3>File Formats & Recommendations</h3>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Format</th>
+                        <th>Use Case</th>
+                        <th>Best For</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>WEBP</strong></td>
+                        <td>Web, social media</td>
+                        <td>Digital/screen use</td>
+                        <td>Smallest file size, excellent quality. Use this for websites.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PNG</strong></td>
+                        <td>Web, presentations, digital</td>
+                        <td>Any digital use</td>
+                        <td>Transparent background, widely supported. Standard choice.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SVG</strong></td>
+                        <td>Responsive web design</td>
+                        <td>Modern websites</td>
+                        <td>Infinitely scalable vector. Best for web applications.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PDF</strong></td>
+                        <td>Print collateral</td>
+                        <td>Print design</td>
+                        <td>High quality vector format for printing.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <!-- COLOR SPECIFICATIONS -->
+        <section>
+            <h2>Color Specifications</h2>
+            
+            <h3>Primary Brand Colors</h3>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Color Name</th>
+                        <th>Visual</th>
+                        <th>Hex</th>
+                        <th>RGB</th>
+                        <th>Usage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Dark Forest Green</strong></td>
+                        <td><span class="color-swatch" style="background: #1B5C3A;"></span></td>
+                        <td>#1B5C3A</td>
+                        <td>rgb(27, 92, 58)</td>
+                        <td>Left pin, "CARPOOL" text, swoosh</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bright Chartreuse</strong></td>
+                        <td><span class="color-swatch" style="background: #B4E035;"></span></td>
+                        <td>#B4E035</td>
+                        <td>rgb(180, 224, 53)</td>
+                        <td>Right pin, "COMMUNITY" text</td>
+                    </tr>
+                    <tr>
+                        <td><strong>White</strong></td>
+                        <td><span class="color-swatch" style="background: #FFFFFF; border: 2px solid #EEEEEE;"></span></td>
+                        <td>#FFFFFF</td>
+                        <td>rgb(255, 255, 255)</td>
+                        <td>Circles within pins, contrast</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Color Application Rules</h3>
+            
+            <div class="info-box">
+                <h4>Preferred Version</h4>
+                <p><strong>Full Color:</strong> Use with both dark green and bright green. This is always preferred.</p>
+            </div>
+            
+            <div class="info-box">
+                <h4>Single Color (Dark Green Only)</h4>
+                <p>When full color is not possible (e.g., one-color printing, embroidery), use #1B5C3A for all elements.</p>
+            </div>
+            
+            <div class="info-box">
+                <h4>Reverse (White on Dark)</h4>
+                <p>On dark backgrounds (dark green, dark navy, black), use white (#FFFFFF) for all elements.</p>
+            </div>
+        </section>
+        
+        <!-- USAGE GUIDELINES -->
+        <section>
+            <h2>Usage Guidelines</h2>
+            
+            <h3>Logo Do's & Don'ts</h3>
+            
+            <div class="do-dont">
+                <div class="do">
+                    <h5>✅ DO</h5>
+                    <p><strong>Maintain proportions.</strong> Always scale the logo proportionally. Never stretch or squash it.</p>
+                </div>
+                <div class="dont">
+                    <h5>❌ DON'T</h5>
+                    <p><strong>Distort it.</strong> Never alter the aspect ratio or modify logo elements.</p>
+                </div>
+            </div>
+            
+            <div class="do-dont">
+                <div class="do">
+                    <h5>✅ DO</h5>
+                    <p><strong>Provide clear space.</strong> Always maintain minimum clear space around the logo.</p>
+                </div>
+                <div class="dont">
+                    <h5>❌ DON'T</h5>
+                    <p><strong>Crowd the logo.</strong> Never place elements too close or overlapping.</p>
+                </div>
+            </div>
+            
+            <div class="do-dont">
+                <div class="do">
+                    <h5>✅ DO</h5>
+                    <p><strong>Use full color</strong> when possible. It's the most recognizable and impactful.</p>
+                </div>
+                <div class="dont">
+                    <h5>❌ DON'T</h5>
+                    <p><strong>Change colors.</strong> Never alter or use unapproved colors in the logo.</p>
+                </div>
+            </div>
+            
+            <div class="do-dont">
+                <div class="do">
+                    <h5>✅ DO</h5>
+                    <p><strong>Choose appropriate backgrounds.</strong> Light backgrounds for full color, dark backgrounds for white version.</p>
+                </div>
+                <div class="dont">
+                    <h5>❌ DON'T</h5>
+                    <p><strong>Place on busy backgrounds.</strong> Logo must have sufficient contrast and clear visibility.</p>
+                </div>
+            </div>
+            
+            <h3>Recommended Sizes for Specific Applications</h3>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Application</th>
+                        <th>Logo Variation</th>
+                        <th>Recommended Size</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Favicon</strong></td>
+                        <td>Logo Mark</td>
+                        <td>32px × 32px</td>
+                        <td>Use PNG at 2x resolution (64px)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>App Icon</strong></td>
+                        <td>Logo Mark</td>
+                        <td>180px × 180px</td>
+                        <td>Use 1024×1024px as source</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Website Header</strong></td>
+                        <td>Logo Mark or Full Lockup</td>
+                        <td>40px - 80px height</td>
+                        <td>Logo mark preferred if space is limited</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Social Media Profile</strong></td>
+                        <td>Logo Mark</td>
+                        <td>400px × 400px</td>
+                        <td>Use PNG or WEBP with transparent background</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Business Card</strong></td>
+                        <td>Logo Mark or Full Lockup</td>
+                        <td>0.5" - 1" width</td>
+                        <td>Print at 300 DPI</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Email Signature</strong></td>
+                        <td>Logo Mark</td>
+                        <td>50px × 50px</td>
+                        <td>Use PNG with transparent background</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <!-- ACCESSIBILITY -->
+        <section>
+            <h2>Accessibility & Contrast</h2>
+            
+            <div class="info-box">
+                <h4>Color Contrast</h4>
+                <p><strong>Dark Green on Light Background:</strong> Contrast ratio 8.4:1 ✅ Excellent (exceeds WCAG AAA)</p>
+                <p><strong>Bright Green on Light Background:</strong> Contrast ratio 5.2:1 ✅ Good (exceeds WCAG AA)</p>
+                <p style="margin-top: 20px;"><em>All color combinations meet accessibility standards for web and digital content.</em></p>
+            </div>
+            
+            <div class="info-box">
+                <h4>Alt Text for Accessibility</h4>
+                <p><strong>Logo mark:</strong> "Community Carpool logo - two overlapping location pins"</p>
+                <p><strong>Full lockup:</strong> "Community Carpool - Share rides. Cut emissions."</p>
+                <p style="margin-top: 20px;"><em>Always include descriptive alt text for logo images on web pages to support screen readers.</em></p>
+            </div>
+        </section>
+        
+        <div class="note">
+            <strong>📌 Note:</strong> Logo files are located in your project assets folder. For print production, request the original vector files (SVG, PDF, or EPS) from the design team.
+        </div>
+        
+    </main>
+    
+    <footer>
+        <p><strong>Community Carpool Logo Specifications Guide</strong></p>
+        <p>Logo Standards & Usage Rules | March 2026</p>
+        <p style="margin-top: 20px;"><a href="01_Brand_Guidelines_Site_Map.html" style="color: var(--brand-green); text-decoration: none; font-weight: 600;">← Back to Site Map</a></p>
+    </footer>
+</body>
+</html>

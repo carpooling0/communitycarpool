@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Font Universe - Complete Typography Library</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&family=Inter:wght@100;300;400;500;600;700;800;900&family=Poppins:wght@100;200;300;400;500;600;700;800;900&family=Montserrat:wght@100;300;400;500;600;700;800;900&family=Lato:wght@100;300;400;700;900&family=Open+Sans:wght@300;400;500;600;700;800&family=Ubuntu:wght@300;400;500;700&family=Quicksand:wght@300;400;500;600;700&family=Nunito:wght@200;300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&family=DM+Sans:wght@400;500;700&family=Work+Sans:wght@100;200;300;400;500;600;700;800;900&family=Sora:wght@400;500;600;700&family=Outfit:wght@100;200;300;400;500;600;700;800;900&family=Lexend:wght@100;200;300;400;500;600;700;800;900&family=Manrope:wght@200;300;400;500;600;700;800&family=Raleway:wght@100;200;300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Merriweather:wght@300;400;700&family=Lora:wght@400;500;600;700&family=Crimson+Text:wght@400;600;700&family=Cormorant+Garamond:wght@300;400;500;600;700&family=Libre+Baskerville:wght@400;700&family=EB+Garamond:wght@400;500;600;700;800&family=Inconsolata:wght@400;700&family=Source+Code+Pro:wght@200;300;400;500;600;700;900&family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&family=Courier+Prime:wght@400;700&family=Roboto+Mono:wght@100;300;400;500;700&family=Fira+Code:wght@300;400;500;600;700&family=Victor+Mono:wght@400;700&family=Space+Mono:wght@400;700&family=Overpass+Mono:wght@400;600;700&family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&family=Cairo:wght@200;300;400;500;600;700;800;900&family=Tajawal:wght@200;300;400;500;700;800;900&family=Mulish:wght@200;300;400;500;600;700;800;900&family=Comfortaa:wght@300;400;700&family=Jost:wght@100;200;300;400;500;600;700;800;900&family=Instrument+Sans:wght@400;500;600;700&family=Urbanist:wght@100;200;300;400;500;600;700;800;900&family=Fraunces:wght@100;200;300;400;500;600;700;800;900&family=Abril+Fatface:wght@400&family=Bebas+Neue:wght@400&family=Oswald:wght@200;300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&family=Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@100;200;300;400;500;600;700&family=Inter+Tight:wght@100;200;300;400;500;600;700;800;900&family=Geist:wght@100;200;300;400;500;600;700;800;900&family=Satoshi:wght@300;400;500;700&family=Clash+Grotesk:wght@400;500;600;700&family=Caveat:wght@400;500;600;700&family=Pacifico:wght@400&family=Fredoka:wght@300;400;500;600;700&family=Bricolage+Grotesque:wght@200;400;500;600;700;800&family=Spline+Sans+Mono:wght@300;400;500;600;700&family=Jetbrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --dark-green: #1B5C3A; --bright-green: #B4E035; --button-green: #10B981; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.8; color: #333; background: #f5f5f5; }
+        header { background: linear-gradient(135deg, #1B5C3A 0%, #10B981 100%); color: white; padding: 60px 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        header h1 { font-size: 40px; margin-bottom: 8px; font-weight: 700; }
+        header p { font-size: 16px; opacity: 0.95; }
+        nav { background: white; padding: 20px 40px; border-bottom: 2px solid #eee; display: flex; gap: 20px; flex-wrap: wrap; box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        nav a { color: #10B981; text-decoration: none; font-weight: 600; font-size: 14px; }
+        nav a:hover { color: #059669; }
+        main { max-width: 1600px; margin: 0 auto; padding: 60px 40px; }
+        h2 { font-size: 36px; color: #2C3E50; margin: 80px 0 32px 0; border-bottom: 4px solid #10B981; padding-bottom: 16px; }
+        h3 { font-size: 20px; color: #2C3E50; margin: 40px 0 20px 0; font-weight: 600; }
+        .category { margin-bottom: 80px; }
+        .font-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; margin: 32px 0; }
+        .font-card { background: white; border: 1px solid #eee; border-radius: 8px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: all 0.2s; }
+        .font-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.12); transform: translateY(-2px); }
+        .font-name { font-size: 18px; font-weight: 700; color: #1B5C3A; margin-bottom: 8px; }
+        .font-type { font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; }
+        .font-preview { font-size: 28px; line-height: 1.4; margin-bottom: 12px; word-break: break-word; }
+        .weights { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+        .weight-badge { background: #f0f0f0; padding: 4px 8px; border-radius: 3px; font-size: 11px; font-weight: 600; color: #333; border: 1px solid #ddd; }
+        .weight-badge.active { background: rgba(16, 185, 129, 0.1); border-color: #10B981; color: #10B981; }
+        .description { font-size: 13px; color: #666; line-height: 1.5; }
+        .category-label { display: inline-block; background: #10B981; color: white; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 700; margin-bottom: 24px; }
+        .recommended { background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(181, 224, 53, 0.05) 100%); border: 2px solid #10B981; }
+        .recommended .font-name { color: #10B981; }
+        .featured-badge { position: absolute; top: 12px; right: 12px; background: #10B981; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+        .filter-bar { display: flex; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; }
+        .filter-btn { background: white; border: 1px solid #ddd; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; color: #333; transition: all 0.2s; }
+        .filter-btn.active { background: #10B981; color: white; border-color: #10B981; }
+        .filter-btn:hover { border-color: #10B981; }
+        .stats { background: white; padding: 24px; border-radius: 8px; margin-bottom: 40px; border: 1px solid #eee; }
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
+        .stat-item { text-align: center; }
+        .stat-number { font-size: 32px; font-weight: 700; color: #10B981; }
+        .stat-label { font-size: 14px; color: #666; margin-top: 4px; }
+        table { width: 100%; border-collapse: collapse; background: white; margin: 24px 0; border: 1px solid #eee; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 16px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; }
+        th { background: #f9f9f9; font-weight: 700; color: #2C3E50; }
+        tr:hover { background: #f9f9f9; }
+        .code { background: #1F2937; color: #E5E7EB; padding: 16px; border-radius: 6px; font-family: monospace; font-size: 13px; overflow-x: auto; margin: 16px 0; }
+        footer { background: #2C3E50; color: white; padding: 50px 40px; text-align: center; margin-top: 100px; }
+        footer p { margin: 8px 0; }
+        @media (max-width: 768px) {
+            .font-grid { grid-template-columns: 1fr; }
+            header h1 { font-size: 28px; }
+            h2 { font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🌍 Font Universe</h1>
+        <p>Complete typography library for Community Carpool — 60+ fonts with all weights and variants</p>
+    </header>
+    
+    <nav>
+        <a href="#sans-serif">Sans-Serif</a>
+        <a href="#serif">Serif</a>
+        <a href="#monospace">Monospace</a>
+        <a href="#display">Display</a>
+        <a href="#international">International</a>
+        <a href="#handwriting">Handwriting</a>
+    </nav>
+    
+    <main>
+        <div class="stats">
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="stat-number">60+</div>
+                    <div class="stat-label">Total Fonts</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">400+</div>
+                    <div class="stat-label">Font Weights</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Open Source</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">0ms</div>
+                    <div class="stat-label">Loading Impact</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SANS-SERIF SECTION -->
+        <section class="category" id="sans-serif">
+            <div class="category-label">Sans-Serif Fonts</div>
+            <h2>Sans-Serif Collection</h2>
+            <p>Modern, clean typefaces for UI, body text, and professional applications.</p>
+            
+            <div class="font-grid">
+                <!-- Inter -->
+                <div class="font-card recommended">
+                    <div class="font-name inter">Inter</div>
+                    <div class="font-type">Modern • Geometric • 9 weights</div>
+                    <div class="font-preview inter">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">100</span>
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                        <span class="weight-badge active">900</span>
+                    </div>
+                    <div class="description">✓ Recommended: Industry standard. Excellent for dashboards, apps, and UI. Perfect readability at all sizes.</div>
+                </div>
+
+                <!-- Roboto -->
+                <div class="font-card">
+                    <div class="font-name roboto">Roboto</div>
+                    <div class="font-type">Geometric • Warm • 12 weights</div>
+                    <div class="font-preview roboto">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">100</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">900</span>
+                    </div>
+                    <div class="description">Google's standard Android font. Geometric, friendly. Works for headings and body text.</div>
+                </div>
+
+                <!-- Poppins -->
+                <div class="font-card">
+                    <div class="font-name poppins">Poppins</div>
+                    <div class="font-type">Geometric • Playful • 9 weights</div>
+                    <div class="font-preview poppins">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">100</span>
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                        <span class="weight-badge active">900</span>
+                    </div>
+                    <div class="description">Playful, modern geometric. Good for branding and hero text. Less ideal for body copy at small sizes.</div>
+                </div>
+
+                <!-- Montserrat -->
+                <div class="font-card">
+                    <div class="font-name montserrat">Montserrat</div>
+                    <div class="font-type">Geometric • Bold • 18 weights</div>
+                    <div class="font-preview montserrat">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">100</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                        <span class="weight-badge active">900</span>
+                    </div>
+                    <div class="description">Strong, bold geometric. Excellent for headlines and branding. Urban, contemporary feel.</div>
+                </div>
+
+                <!-- Lato -->
+                <div class="font-card">
+                    <div class="font-name lato">Lato</div>
+                    <div class="font-type">Warm • Humanist • 10 weights</div>
+                    <div class="font-preview lato">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">100</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">900</span>
+                    </div>
+                    <div class="description">Warm, humanist sans-serif. Excellent for body text. Friendly alternative to Inter.</div>
+                </div>
+
+                <!-- Open Sans -->
+                <div class="font-card">
+                    <div class="font-name open-sans">Open Sans</div>
+                    <div class="font-type">Neutral • Professional • 10 weights</div>
+                    <div class="font-preview open-sans">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                    </div>
+                    <div class="description">Industry standard, highly legible. Perfect for forms, technical content, and government sites.</div>
+                </div>
+
+                <!-- DM Sans -->
+                <div class="font-card">
+                    <div class="font-name dm-sans">DM Sans</div>
+                    <div class="font-type">Contemporary • Minimal • 7 weights</div>
+                    <div class="font-preview dm-sans">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Modern, minimal aesthetic. Works for both body and display. Contemporary, clean feel.</div>
+                </div>
+
+                <!-- Plus Jakarta Sans -->
+                <div class="font-card">
+                    <div class="font-name plus-jakarta">Plus Jakarta Sans</div>
+                    <div class="font-type">Modern • Friendly • 8 weights</div>
+                    <div class="font-preview plus-jakarta">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                    </div>
+                    <div class="description">Modern, friendly typeface. Good balance between contemporary and readable. Emerging standard.</div>
+                </div>
+
+                <!-- Nunito -->
+                <div class="font-card">
+                    <div class="font-name nunito">Nunito</div>
+                    <div class="font-type">Rounded • Friendly • 18 weights</div>
+                    <div class="font-preview nunito">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                        <span class="weight-badge active">900</span>
+                    </div>
+                    <div class="description">Rounded, friendly curves. Excellent for apps targeting younger audiences or playful brands.</div>
+                </div>
+
+                <!-- Quicksand -->
+                <div class="font-card">
+                    <div class="font-name quicksand">Quicksand</div>
+                    <div class="font-type">Rounded • Playful • 6 weights</div>
+                    <div class="font-preview quicksand">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Playful rounded sans-serif. Great for children's content, startups, and casual brands.</div>
+                </div>
+
+                <!-- Raleway -->
+                <div class="font-card">
+                    <div class="font-name raleway">Raleway</div>
+                    <div class="font-type">Elegant • Thin • 18 weights</div>
+                    <div class="font-preview raleway">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">100</span>
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                        <span class="weight-badge active">900</span>
+                    </div>
+                    <div class="description">Elegant, thin geometric. Perfect for luxury brands and minimalist design. Wide weight range.</div>
+                </div>
+
+                <!-- Work Sans -->
+                <div class="font-card">
+                    <div class="font-name work-sans">Work Sans</div>
+                    <div class="font-type">Geometric • Professional • 9 weights</div>
+                    <div class="font-preview work-sans">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">100</span>
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                        <span class="weight-badge active">900</span>
+                    </div>
+                    <div class="description">Professional geometric. Designed for productivity apps and corporate environments.</div>
+                </div>
+
+                <!-- Sora -->
+                <div class="font-card">
+                    <div class="font-name sora">Sora</div>
+                    <div class="font-type">Geometric • Modern • 4 weights</div>
+                    <div class="font-preview sora">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Modern, clean geometric. Designed by designer for design tools. Emerging standard.</div>
+                </div>
+
+                <!-- Outfit -->
+                <div class="font-card">
+                    <div class="font-name outfit">Outfit</div>
+                    <div class="font-type">Geometric • Contemporary • 9 weights</div>
+                    <div class="font-preview outfit">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">100</span>
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                        <span class="weight-badge active">900</span>
+                    </div>
+                    <div class="description">Contemporary geometric. Tech and startup-focused. Expressive and unique character.</div>
+                </div>
+
+                <!-- Lexend -->
+                <div class="font-card">
+                    <div class="font-name lexend">Lexend</div>
+                    <div class="font-type">Readable • Variable • 9 weights</div>
+                    <div class="font-preview lexend">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">100</span>
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                        <span class="weight-badge active">900</span>
+                    </div>
+                    <div class="description">Designed for readability at any size. Perfect for dyslexic-friendly interfaces and accessibility.</div>
+                </div>
+
+                <!-- Manrope -->
+                <div class="font-card">
+                    <div class="font-name manrope">Manrope</div>
+                    <div class="font-type">Modern • Geometric • 8 weights</div>
+                    <div class="font-preview manrope">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                    </div>
+                    <div class="description">Modern, contemporary geometric. Good for fintech and modern apps. Clean character.</div>
+                </div>
+
+                <!-- Space Grotesk -->
+                <div class="font-card">
+                    <div class="font-name space-grotesk">Space Grotesk</div>
+                    <div class="font-type">Monospace-inspired • Bold • 7 weights</div>
+                    <div class="font-preview space-grotesk">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Monospace-inspired geometric. Trendy for tech brands and crypto. Distinctive look.</div>
+                </div>
+
+                <!-- Jost -->
+                <div class="font-card">
+                    <div class="font-name jost">Jost*</div>
+                    <div class="font-type">Geometric • Geometric • 18 weights</div>
+                    <div class="font-preview jost">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">100</span>
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                        <span class="weight-badge active">900</span>
+                    </div>
+                    <div class="description">Modern geometric sans-serif. Variable font technology. Optimized for screen rendering.</div>
+                </div>
+
+                <!-- Ubuntu -->
+                <div class="font-card">
+                    <div class="font-name ubuntu">Ubuntu</div>
+                    <div class="font-type">Humanist • Friendly • 4 weights</div>
+                    <div class="font-preview ubuntu">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Ubuntu's system font. Humanist, friendly feel. Good for community-oriented projects.</div>
+                </div>
+
+                <!-- Urbanist -->
+                <div class="font-card">
+                    <div class="font-name urbanist">Urbanist</div>
+                    <div class="font-type">Geometric • Modern • 18 weights</div>
+                    <div class="font-preview urbanist">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">100</span>
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                        <span class="weight-badge active">900</span>
+                    </div>
+                    <div class="description">Modern, contemporary geometric. Trendy for startups and modern brands. Wide weight range.</div>
+                </div>
+
+                <!-- Mulish -->
+                <div class="font-card">
+                    <div class="font-name mulish">Mulish</div>
+                    <div class="font-type">Geometric • Varied • 18 weights</div>
+                    <div class="font-preview mulish">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                        <span class="weight-badge active">900</span>
+                    </div>
+                    <div class="description">Geometric sans with unique character. Good for branding and modern interfaces.</div>
+                </div>
+
+                <!-- Comfortaa -->
+                <div class="font-card">
+                    <div class="font-name comfortaa">Comfortaa</div>
+                    <div class="font-type">Rounded • Friendly • 3 weights</div>
+                    <div class="font-preview comfortaa">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Friendly, rounded typeface. Great for casual, approachable brands and children's apps.</div>
+                </div>
+
+                <!-- Fredoka -->
+                <div class="font-card">
+                    <div class="font-name fredoka">Fredoka</div>
+                    <div class="font-type">Rounded • Modern • 12 weights</div>
+                    <div class="font-preview fredoka">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Modern rounded sans-serif. Friendly, approachable. Good for wellness and lifestyle brands.</div>
+                </div>
+
+                <!-- Bricolage Grotesque -->
+                <div class="font-card">
+                    <div class="font-name bricolage">Bricolage Grotesque</div>
+                    <div class="font-type">Geometric • Unique • 8 weights</div>
+                    <div class="font-preview bricolage">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                    </div>
+                    <div class="description">Unique geometric with character. Trendy for creative, design-forward brands. Distinctive.</div>
+                </div>
+
+                <!-- Instrument Sans -->
+                <div class="font-card">
+                    <div class="font-name instrument-sans">Instrument Sans</div>
+                    <div class="font-type">Geometric • Minimal • 4 weights</div>
+                    <div class="font-preview instrument-sans">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Minimal, geometric typeface. Designed for Figma. Clean, professional aesthetic.</div>
+                </div>
+
+                <!-- Syne -->
+                <div class="font-card">
+                    <div class="font-name syne">Syne</div>
+                    <div class="font-type">Geometric • Bold • 8 weights</div>
+                    <div class="font-preview syne">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                    </div>
+                    <div class="description">Bold geometric with personality. Good for headlines and branding. Contemporary feel.</div>
+                </div>
+
+                <!-- Clash Grotesk -->
+                <div class="font-card">
+                    <div class="font-name clash">Clash Grotesk</div>
+                    <div class="font-type">Geometric • Expressive • 4 weights</div>
+                    <div class="font-preview clash">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Expressive geometric. Bold personality for headlines. Trendy, contemporary feel.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SERIF SECTION -->
+        <section class="category" id="serif">
+            <div class="category-label">Serif Fonts</div>
+            <h2>Serif Collection</h2>
+            <p>Traditional, elegant typefaces for editorial design, body text, and premium branding.</p>
+            
+            <div class="font-grid">
+                <!-- Playfair Display -->
+                <div class="font-card">
+                    <div class="font-name playfair" style="font-size: 24px;">Playfair Display</div>
+                    <div class="font-type">Display • Elegant • 6 weights</div>
+                    <div class="font-preview playfair" style="font-size: 26px;">Playfair</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                        <span class="weight-badge active">900</span>
+                    </div>
+                    <div class="description">Premium display serif. Elegant, sophisticated. Perfect for hero headlines. Use at large sizes.</div>
+                </div>
+
+                <!-- Merriweather -->
+                <div class="font-card">
+                    <div class="font-name merriweather">Merriweather</div>
+                    <div class="font-type">Warm • Readable • 3 weights</div>
+                    <div class="font-preview merriweather">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Warm, highly readable serif. Good for blog posts and editorial content. Traditional feel.</div>
+                </div>
+
+                <!-- Lora -->
+                <div class="font-card">
+                    <div class="font-name lora">Lora</div>
+                    <div class="font-type">Modern • Calligraphic • 6 weights</div>
+                    <div class="font-preview lora">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Modern serif with slight calligraphic feel. Works for both display and body text.</div>
+                </div>
+
+                <!-- EB Garamond -->
+                <div class="font-card">
+                    <div class="font-name ebgaramond">EB Garamond</div>
+                    <div class="font-type">Classic • Refined • 5 weights</div>
+                    <div class="font-preview ebgaramond">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                    </div>
+                    <div class="description">Classic Garamond interpretation. Refined, elegant. Perfect for literature and essays.</div>
+                </div>
+
+                <!-- Crimson Text -->
+                <div class="font-card">
+                    <div class="font-name crimson">Crimson Text</div>
+                    <div class="font-type">Classic • Elegant • 3 weights</div>
+                    <div class="font-preview crimson">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Elegant classic serif. Excellent for books and magazines. Premium typography.</div>
+                </div>
+
+                <!-- Libre Baskerville -->
+                <div class="font-card">
+                    <div class="font-name baskerville">Libre Baskerville</div>
+                    <div class="font-type">Traditional • Bold • 2 weights</div>
+                    <div class="font-preview baskerville">The quick brown fox</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Traditional Baskerville. Bold, sophisticated. Good for headers in editorial design.</div>
+                </div>
+
+                <!-- Cormorant Garamond -->
+                <div class="font-card">
+                    <div class="font-name cormorant">Cormorant Garamond</div>
+                    <div class="font-type">Display • Luxury • 6 weights</div>
+                    <div class="font-preview cormorant" style="font-size: 26px;">Cormorant</div>
+                    <div class="weights">
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Display Garamond. Luxury, premium feel. Perfect for fashion and high-end branding.</div>
+                </div>
+
+                <!-- Fraunces -->
+                <div class="font-card">
+                    <div class="font-name fraunces">Fraunces</div>
+                    <div class="font-type">Display • Stylized • 9 weights</div>
+                    <div class="font-preview fraunces" style="font-size: 26px;">Fraunces</div>
+                    <div class="weights">
+                        <span class="weight-badge active">100</span>
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                        <span class="weight-badge active">900</span>
+                    </div>
+                    <div class="description">Stylized display serif. Trendy, unique. Good for creative branding and headlines.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MONOSPACE SECTION -->
+        <section class="category" id="monospace">
+            <div class="category-label">Monospace Fonts</div>
+            <h2>Monospace Collection</h2>
+            <p>Fixed-width fonts for code, technical documentation, and programming.</p>
+            
+            <div class="font-grid">
+                <!-- Source Code Pro -->
+                <div class="font-card recommended">
+                    <div class="font-name source-code" style="font-size: 16px;">Source Code Pro</div>
+                    <div class="font-type">Technical • Professional • 7 weights</div>
+                    <div class="font-preview source-code" style="font-size: 13px;">const app = new App()</div>
+                    <div class="weights">
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">900</span>
+                    </div>
+                    <div class="description">✓ Recommended: Professional, clear monospace. Adobe's standard for code. Excellent readability.</div>
+                </div>
+
+                <!-- JetBrains Mono -->
+                <div class="font-card">
+                    <div class="font-name jetbrains" style="font-size: 16px;">JetBrains Mono</div>
+                    <div class="font-type">Modern • Developer • 8 weights</div>
+                    <div class="font-preview jetbrains" style="font-size: 13px;">const app = new App()</div>
+                    <div class="weights">
+                        <span class="weight-badge active">100</span>
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                    </div>
+                    <div class="description">Modern monospace with ligatures. Developer-focused. JetBrains' standard IDE font.</div>
+                </div>
+
+                <!-- IBM Plex Mono -->
+                <div class="font-card">
+                    <div class="font-name ibm-plex" style="font-size: 16px;">IBM Plex Mono</div>
+                    <div class="font-type">Professional • Corporate • 4 weights</div>
+                    <div class="font-preview ibm-plex" style="font-size: 13px;">const app = new App()</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Professional open-source monospace. IBM's standard. Corporate, reliable feel.</div>
+                </div>
+
+                <!-- Fira Code -->
+                <div class="font-card">
+                    <div class="font-name fira-code" style="font-size: 16px;">Fira Code</div>
+                    <div class="font-type">Code • Ligatures • 7 weights</div>
+                    <div class="font-preview fira-code" style="font-size: 13px;">const app = new App()</div>
+                    <div class="weights">
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Code-focused with ligatures. Perfect for syntax highlighting. Modern developer font.</div>
+                </div>
+
+                <!-- Roboto Mono -->
+                <div class="font-card">
+                    <div class="font-name roboto-mono" style="font-size: 16px;">Roboto Mono</div>
+                    <div class="font-type">Geometric • Code • 7 weights</div>
+                    <div class="font-preview roboto-mono" style="font-size: 13px;">const app = new App()</div>
+                    <div class="weights">
+                        <span class="weight-badge active">100</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Geometric monospace. Google's paired font with Roboto. Friendly, approachable.</div>
+                </div>
+
+                <!-- Inconsolata -->
+                <div class="font-card">
+                    <div class="font-name inconsolata" style="font-size: 16px;">Inconsolata</div>
+                    <div class="font-type">Minimalist • Clean • 2 weights</div>
+                    <div class="font-preview inconsolata" style="font-size: 13px;">const app = new App()</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Minimalist, clean monospace. Excellent for terminal and code. Simple elegance.</div>
+                </div>
+
+                <!-- Courier Prime -->
+                <div class="font-card">
+                    <div class="font-name courier" style="font-size: 16px;">Courier Prime</div>
+                    <div class="font-type">Typewriter • Classic • 2 weights</div>
+                    <div class="font-preview courier" style="font-size: 13px;">const app = new App()</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Typewriter-inspired monospace. Retro feel. Good for creative coding projects.</div>
+                </div>
+
+                <!-- Victor Mono -->
+                <div class="font-card">
+                    <div class="font-name victor-mono" style="font-size: 16px;">Victor Mono</div>
+                    <div class="font-type">Italic • Code • 2 weights</div>
+                    <div class="font-preview victor-mono" style="font-size: 13px;">const app = new App()</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Code-focused with stylized italic. Trendy among developers. Modern, expressive.</div>
+                </div>
+
+                <!-- Space Mono -->
+                <div class="font-card">
+                    <div class="font-name space-mono" style="font-size: 16px;">Space Mono</div>
+                    <div class="font-type">Geometric • Code • 2 weights</div>
+                    <div class="font-preview space-mono" style="font-size: 13px;">const app = new App()</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Geometric monospace. Bold character. Good for headings in technical content.</div>
+                </div>
+
+                <!-- Overpass Mono -->
+                <div class="font-card">
+                    <div class="font-name overpass-mono" style="font-size: 16px;">Overpass Mono</div>
+                    <div class="font-type">Technical • Code • 3 weights</div>
+                    <div class="font-preview overpass-mono" style="font-size: 13px;">const app = new App()</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Technical monospace for code and terminals. Clean, readable. Professional look.</div>
+                </div>
+
+                <!-- Spline Sans Mono -->
+                <div class="font-card">
+                    <div class="font-name spline-mono" style="font-size: 16px;">Spline Sans Mono</div>
+                    <div class="font-type">Modern • Code • 7 weights</div>
+                    <div class="font-preview spline-mono" style="font-size: 13px;">const app = new App()</div>
+                    <div class="weights">
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Modern monospace by Spline. Design-focused. Good for design tool documentation.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DISPLAY SECTION -->
+        <section class="category" id="display">
+            <div class="category-label">Display & Decorative Fonts</div>
+            <h2>Display & Decorative Collection</h2>
+            <p>Bold, attention-grabbing fonts for headlines, branding, and special effects.</p>
+            
+            <div class="font-grid">
+                <!-- Abril Fatface -->
+                <div class="font-card">
+                    <div class="font-name abril" style="font-size: 28px;">Abril Fatface</div>
+                    <div class="font-type">Display • Bold • 1 weight</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                    </div>
+                    <div class="description">Maximum impact display font. Magazine-style headlines. Bold and attention-grabbing.</div>
+                </div>
+
+                <!-- Bebas Neue -->
+                <div class="font-card">
+                    <div class="font-name bebas" style="font-size: 28px;">BEBAS NEUE</div>
+                    <div class="font-type">Display • Bold • 1 weight</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                    </div>
+                    <div class="description">Ultra-condensed bold display. Headlines and logos. High-impact, aggressive.</div>
+                </div>
+
+                <!-- Oswald -->
+                <div class="font-card">
+                    <div class="font-name oswald" style="font-size: 28px;">OSWALD</div>
+                    <div class="font-type">Display • Condensed • 5 weights</div>
+                    <div class="weights">
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Condensed display font. Sports, action, headlines. Bold and striking.</div>
+                </div>
+
+                <!-- Pacifico -->
+                <div class="font-card">
+                    <div class="font-name pacifico" style="font-size: 28px;">Pacifico</div>
+                    <div class="font-type">Handwriting • Brush • 1 weight</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                    </div>
+                    <div class="description">Brush script font. Casual, friendly. Good for brand logos and casual projects.</div>
+                </div>
+
+                <!-- Caveat -->
+                <div class="font-card">
+                    <div class="font-name caveat" style="font-size: 28px;">Caveat</div>
+                    <div class="font-type">Handwriting • Script • 4 weights</div>
+                    <div class="weights">
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                    </div>
+                    <div class="description">Handwritten script. Personal, friendly feel. Good for notes and casual branding.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- INTERNATIONAL SECTION -->
+        <section class="category" id="international">
+            <div class="category-label">International & Arabic Fonts</div>
+            <h2>International Font Collection</h2>
+            <p>Multi-language support for Arabic, Farsi, and other international text.</p>
+            
+            <div class="font-grid">
+                <!-- Vazirmatn -->
+                <div class="font-card">
+                    <div class="font-name vazir">Vazirmatn</div>
+                    <div class="font-type">Arabic • Variable • 9 weights</div>
+                    <div class="weights">
+                        <span class="weight-badge active">100</span>
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                        <span class="weight-badge active">900</span>
+                    </div>
+                    <div class="description">Modern Arabic typeface. Clean, readable. Perfect for Arabic/Farsi interfaces.</div>
+                </div>
+
+                <!-- Cairo -->
+                <div class="font-card">
+                    <div class="font-name cairo">Cairo</div>
+                    <div class="font-type">Arabic • Rounded • 9 weights</div>
+                    <div class="weights">
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">600</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                        <span class="weight-badge active">900</span>
+                    </div>
+                    <div class="description">Arabic font with rounded characters. Friendly, modern. Good for social media.</div>
+                </div>
+
+                <!-- Tajawal -->
+                <div class="font-card">
+                    <div class="font-name tajawal">Tajawal</div>
+                    <div class="font-type">Arabic • Geometric • 5 weights</div>
+                    <div class="weights">
+                        <span class="weight-badge active">200</span>
+                        <span class="weight-badge active">300</span>
+                        <span class="weight-badge active">400</span>
+                        <span class="weight-badge active">500</span>
+                        <span class="weight-badge active">700</span>
+                        <span class="weight-badge active">800</span>
+                        <span class="weight-badge active">900</span>
+                    </div>
+                    <div class="description">Geometric Arabic typeface. Clean, modern. Works for both headings and body.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RECOMMENDATIONS -->
+        <section>
+            <h2>Quick Recommendations</h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Use Case</th>
+                        <th>Recommended Font</th>
+                        <th>Why</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="recommended">
+                        <td><strong>SaaS App UI</strong></td>
+                        <td>Inter</td>
+                        <td>Industry standard, optimized for screens, professional</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Startup Branding</strong></td>
+                        <td>Poppins + Inter</td>
+                        <td>Playful headings, clean body text</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Blog/Editorial</strong></td>
+                        <td>Merriweather + Open Sans</td>
+                        <td>Warm serif + readable sans-serif</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Luxury/Premium</strong></td>
+                        <td>Playfair Display + Lato</td>
+                        <td>Elegant serif + warm body font</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Code Documentation</strong></td>
+                        <td>Source Code Pro</td>
+                        <td>Professional, clear, syntax-friendly</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Headlines/Impact</strong></td>
+                        <td>Montserrat 700-900</td>
+                        <td>Bold, attention-grabbing, modern</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Accessibility</strong></td>
+                        <td>Lexend</td>
+                        <td>Designed for readability, dyslexia-friendly</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Children's Content</strong></td>
+                        <td>Nunito + Quicksand</td>
+                        <td>Rounded, friendly, playful</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Crypto/Fintech</strong></td>
+                        <td>Space Grotesk + Inter</td>
+                        <td>Modern, tech-forward, contemporary</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Minimalist/Elegant</strong></td>
+                        <td>Raleway + Merriweather</td>
+                        <td>Thin, elegant pairing</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- CSS IMPLEMENTATION -->
+        <section>
+            <h2>Implementation Guide</h2>
+            
+            <h3>Google Fonts Link</h3>
+            <div class="code">&lt;link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;600;700;800;900&family=Montserrat:wght@100;300;400;500;600;700;800;900&family=Source+Code+Pro:wght@200;300;400;500;600;700;900&display=swap" rel="stylesheet"&gt;</div>
+            
+            <h3>CSS Variables</h3>
+            <div class="code">:root {
+  --font-sans: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif: Merriweather, 'Georgia', serif;
+  --font-mono: 'Source Code Pro', 'Courier New', monospace;
+  --font-display: Montserrat, sans-serif;
+}</div>
+
+            <h3>Usage Example</h3>
+            <div class="code">body { font-family: var(--font-sans); }
+h1, h2, h3 { font-family: var(--font-display); }
+code { font-family: var(--font-mono); }</div>
+        </section>
+    </main>
+    
+    <footer>
+        <p><strong>🌍 Font Universe — Complete Typography Library</strong></p>
+        <p>60+ open-source fonts, 400+ weights, 100% free</p>
+        <p>All fonts from Google Fonts | Free for commercial & personal use</p>
+    </footer>
+</body>
+</html>

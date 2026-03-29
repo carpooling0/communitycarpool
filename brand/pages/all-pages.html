@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Brand Guidelines Pages</title>
+    <style>
+        :root {
+            --dark-green: #1B5C3A;
+            --bright-green: #B4E035;
+            --button-green: #10B981;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --bg-light: #F9FAFB;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-light);
+        }
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-bottom: 1px solid #E5E7EB;
+            z-index: 1000;
+            padding: 16px 40px;
+        }
+        nav a { color: var(--dark-green); text-decoration: none; font-weight: 600; }
+        main { max-width: 1200px; margin: 0 auto; padding: 100px 40px 60px; }
+        h1 { font-size: 48px; margin-bottom: 24px; color: var(--dark-green); }
+        .intro { font-size: 18px; color: var(--text-secondary); margin-bottom: 60px; max-width: 700px; }
+        .pages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 80px;
+        }
+        .page-card {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 32px;
+            transition: all 0.3s;
+        }
+        .page-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .page-card h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: var(--dark-green);
+        }
+        .page-card p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+        .page-card a {
+            color: var(--button-green);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        footer {
+            background: var(--dark-green);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">← Back to Brand Home</a>
+    </nav>
+    
+    <main>
+        <h1>Brand Guidelines</h1>
+        <p class="intro">Complete documentation of the Community Carpool brand system. Choose a guide below to explore specific aspects of our visual identity and design standards.</p>
+        
+        <div class="pages-grid">
+            <div class="page-card">
+                <h3>🎯 Brand Foundation</h3>
+                <p>Our story, values, brand personality, and the principles that guide Community Carpool.</p>
+                <a href="foundation.html">Read Foundation →</a>
+            </div>
+
+            <div class="page-card">
+                <h3>💬 Voice & Tone</h3>
+                <p>How to write in the Community Carpool voice across channels, with examples and best practices.</p>
+                <a href="voice.html">Read Voice Guide →</a>
+            </div>
+
+            <div class="page-card">
+                <h3>🎨 Visual Identity</h3>
+                <p>Complete color system, typography, design tokens, and layout guidelines.</p>
+                <a href="visual.html">View Visual System →</a>
+            </div>
+
+            <div class="page-card">
+                <h3>🧩 Components</h3>
+                <p>Design system library with 60+ components, specifications, and accessibility guidelines.</p>
+                <a href="components.html">View Components →</a>
+            </div>
+
+            <div class="page-card">
+                <h3>📥 Assets & Downloads</h3>
+                <p>Logos, icons, color swatches, design files, and brand assets in all formats.</p>
+                <a href="assets.html">Download Assets →</a>
+            </div>
+
+            <div class="page-card">
+                <h3>📸 Photography & Imagery</h3>
+                <p>Guidelines for selecting, capturing, and using brand photography.</p>
+                <a href="photography.html">View Photography →</a>
+            </div>
+
+            <div class="page-card">
+                <h3>🚀 Applications</h3>
+                <p>Real-world examples of the brand in action across web, mobile, email, and print.</p>
+                <a href="applications.html">View Applications →</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>Community Carpool Brand Guidelines © 2026</p>
+    </footer>
+</body>
+</html>
