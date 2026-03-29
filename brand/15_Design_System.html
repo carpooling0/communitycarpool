@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Carpool - Design System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --dark-green: #1B5C3A; --bright-green: #B4E035; --button-green: #10B981; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.8; color: #333; background: #f9f9f9; }
+        header { background: linear-gradient(135deg, #1B5C3A 0%, #10B981 100%); color: white; padding: 60px 40px; }
+        header h1 { font-size: 40px; margin-bottom: 8px; }
+        header p { font-size: 16px; opacity: 0.95; }
+        nav { background: white; padding: 16px 40px; border-bottom: 1px solid #eee; display: flex; gap: 20px; flex-wrap: wrap; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #10B981; text-decoration: none; font-weight: 600; font-size: 14px; }
+        main { max-width: 1200px; margin: 0 auto; padding: 60px 40px; }
+        h2 { font-size: 36px; color: #2C3E50; margin: 60px 0 24px 0; border-bottom: 3px solid #10B981; padding-bottom: 12px; }
+        h3 { font-size: 22px; color: #2C3E50; margin: 40px 0 20px 0; }
+        h4 { font-size: 16px; color: #2C3E50; margin: 24px 0 12px 0; font-weight: 600; }
+        .component-section { background: white; border: 1px solid #eee; border-radius: 8px; padding: 32px; margin-bottom: 40px; }
+        .component-preview { background: #f5f5f5; padding: 32px; border-radius: 8px; margin: 20px 0; display: flex; flex-direction: column; gap: 16px; align-items: flex-start; }
+        .component-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+        .component-item { background: white; border: 1px solid #eee; padding: 16px; border-radius: 6px; }
+        .component-label { font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; font-weight: 600; }
+        .specs-table { width: 100%; border-collapse: collapse; background: white; margin: 20px 0; border: 1px solid #eee; border-radius: 6px; overflow: hidden; }
+        .specs-table th, .specs-table td { padding: 14px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; }
+        .specs-table th { background: #f5f5f5; font-weight: 700; color: #2C3E50; }
+        .specs-table tr:hover { background: #f9f9f9; }
+        .specs-table td code { background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-family: monospace; }
+        button { padding: 12px 24px; border-radius: 6px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: #10B981; color: white; }
+        .btn-primary:hover { background: #059669; }
+        .btn-secondary { background: #1B5C3A; color: white; }
+        .btn-secondary:hover { background: #0d3a24; }
+        .btn-outline { background: transparent; border: 2px solid #10B981; color: #10B981; }
+        .btn-outline:hover { background: #f0f0f0; }
+        .btn-text { background: transparent; color: #10B981; padding: 8px 0; text-decoration: underline; }
+        .btn-text:hover { color: #059669; }
+        .btn-small { padding: 8px 16px; font-size: 13px; }
+        .btn-large { padding: 16px 32px; font-size: 16px; }
+        .btn-disabled { background: #ccc; cursor: not-allowed; }
+        .state-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 16px 0; }
+        .state-example { text-align: center; padding: 12px; background: white; border: 1px solid #eee; border-radius: 6px; }
+        .state-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 8px; font-weight: 600; }
+        input, select, textarea { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; width: 100%; margin: 12px 0; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #10B981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
+        label { display: block; font-weight: 600; margin-bottom: 6px; color: #333; }
+        .form-group { margin-bottom: 20px; }
+        .helper-text { font-size: 12px; color: #666; margin-top: 4px; }
+        .error { color: #EF4444; }
+        .success { color: #10B981; }
+        .code-block { background: #1F2937; color: #E5E7EB; padding: 16px; border-radius: 6px; font-family: monospace; font-size: 12px; overflow-x: auto; margin: 16px 0; line-height: 1.5; }
+        .grid-visual { display: grid; gap: 12px; margin: 16px 0; }
+        .grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-4 { grid-template-columns: repeat(4, 1fr); }
+        .card { background: white; border: 1px solid #eee; border-radius: 8px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: all 0.2s; }
+        .card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.12); transform: translateY(-2px); }
+        .card-header { border-bottom: 1px solid #eee; margin-bottom: 12px; padding-bottom: 12px; font-weight: 600; }
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .badge-success { background: rgba(16, 185, 129, 0.1); color: #10B981; }
+        .badge-warning { background: rgba(245, 158, 11, 0.1); color: #F59E0B; }
+        .badge-error { background: rgba(239, 68, 68, 0.1); color: #EF4444; }
+        .badge-info { background: rgba(59, 130, 246, 0.1); color: #3B82F6; }
+        .alert { padding: 16px; border-radius: 6px; margin: 16px 0; border-left: 4px solid; }
+        .alert-success { background: rgba(16, 185, 129, 0.1); border-color: #10B981; color: #10B981; }
+        .alert-warning { background: rgba(245, 158, 11, 0.1); border-color: #F59E0B; color: #F59E0B; }
+        .alert-error { background: rgba(239, 68, 68, 0.1); border-color: #EF4444; color: #EF4444; }
+        .alert-info { background: rgba(59, 130, 246, 0.1); border-color: #3B82F6; color: #3B82F6; }
+        .checkbox, .radio { margin: 8px 0; display: flex; align-items: center; }
+        .checkbox input, .radio input { margin: 0 8px 0 0; cursor: pointer; }
+        .tab-nav { display: flex; gap: 0; border-bottom: 2px solid #eee; margin: 20px 0; }
+        .tab-btn { background: transparent; border: none; padding: 12px 20px; color: #666; font-weight: 600; border-bottom: 2px solid transparent; cursor: pointer; margin-bottom: -2px; }
+        .tab-btn.active { color: #10B981; border-bottom-color: #10B981; }
+        .pagination { display: flex; gap: 8px; margin: 20px 0; }
+        .pagination button { padding: 8px 12px; font-size: 13px; border: 1px solid #ddd; }
+        .pagination button.active { background: #10B981; color: white; border-color: #10B981; }
+        .breadcrumb { display: flex; gap: 8px; margin: 16px 0; font-size: 13px; }
+        .breadcrumb a { color: #10B981; text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb span { color: #999; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: #10B981; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+        .avatar-lg { width: 60px; height: 60px; font-size: 18px; }
+        .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+        .status-indicator { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+        .status-online { background: #10B981; }
+        .status-away { background: #F59E0B; }
+        .status-offline { background: #999; }
+        footer { background: #f5f5f5; padding: 50px 40px; text-align: center; margin-top: 80px; font-size: 14px; color: #999; border-top: 2px solid #eee; }
+        @media (max-width: 768px) {
+            .component-grid { grid-template-columns: 1fr; }
+            .state-grid { grid-template-columns: repeat(2, 1fr); }
+            .grid-2 { grid-template-columns: 1fr; }
+            .grid-3 { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Community Carpool</h1>
+        <p>Design System & Component Library</p>
+    </header>
+    
+    <nav>
+        <a href="01_Brand_Guidelines_Site_Map.html">← Site Map</a>
+        <a href="14_Brand_Assets.html">← Brand Assets</a>
+        <a href="#buttons">Buttons</a>
+        <a href="#forms">Forms</a>
+        <a href="#cards">Cards</a>
+        <a href="#alerts">Alerts</a>
+        <a href="#badges">Badges</a>
+    </nav>
+    
+    <main>
+        <section>
+            <h2>Design System Overview</h2>
+            <p>Complete component library with specifications, variants, and implementation patterns for Community Carpool.</p>
+            
+            <div class="component-section">
+                <h3 style="margin-top: 0;">Component Categories</h3>
+                <table class="specs-table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Components</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Buttons</strong></td>
+                            <td>Primary, Secondary, Text, Disabled</td>
+                            <td>User interactions and CTAs</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Forms</strong></td>
+                            <td>Input, Select, Textarea, Checkbox, Radio</td>
+                            <td>Data entry and user input</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cards</strong></td>
+                            <td>Basic, Elevated, Interactive</td>
+                            <td>Content containers</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Alerts</strong></td>
+                            <td>Success, Warning, Error, Info</td>
+                            <td>User feedback and notifications</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Badges</strong></td>
+                            <td>Status indicators and labels</td>
+                            <td>Inline status information</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Navigation</strong></td>
+                            <td>Tabs, Breadcrumbs, Pagination</td>
+                            <td>User navigation</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Avatars</strong></td>
+                            <td>User profiles and indicators</td>
+                            <td>User identification</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- BUTTONS -->
+        <section class="component-section" id="buttons">
+            <h3>Buttons</h3>
+            
+            <h4>Primary Button</h4>
+            <p>Use for main actions and calls-to-action.</p>
+            <div class="component-preview">
+                <button class="btn-primary">Primary Button</button>
+                <button class="btn-primary">Hover State</button>
+                <button class="btn-primary btn-disabled">Disabled</button>
+            </div>
+            
+            <table class="specs-table">
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Background</strong></td>
+                        <td>#10B981 (Button Green)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Text Color</strong></td>
+                        <td>#FFFFFF (White)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Padding</strong></td>
+                        <td>12px 24px</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Border Radius</strong></td>
+                        <td>6px</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Font Weight</strong></td>
+                        <td>600 (Semibold)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Hover Background</strong></td>
+                        <td>#059669 (Darker)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Secondary Button</h4>
+            <p>Use for alternative actions.</p>
+            <div class="component-preview">
+                <button class="btn-secondary">Secondary Button</button>
+                <button class="btn-secondary">Hover State</button>
+            </div>
+
+            <h4>Text Button</h4>
+            <p>Use for navigation and secondary links.</p>
+            <div class="component-preview">
+                <button class="btn-text">Text Link</button>
+                <button class="btn-text">Cancel</button>
+            </div>
+
+            <h4>Button Sizes</h4>
+            <div class="state-grid">
+                <div class="state-example">
+                    <button class="btn-primary btn-small">Small</button>
+                    <div class="state-label">12px × 16px 24px</div>
+                </div>
+                <div class="state-example">
+                    <button class="btn-primary">Regular</button>
+                    <div class="state-label">14px × 12px 24px</div>
+                </div>
+                <div class="state-example">
+                    <button class="btn-primary btn-large">Large</button>
+                    <div class="state-label">16px × 16px 32px</div>
+                </div>
+            </div>
+
+            <h4>Button HTML</h4>
+            <div class="code-block">&lt;button class="btn btn-primary"&gt;Primary Button&lt;/button&gt;
+&lt;button class="btn btn-secondary"&gt;Secondary Button&lt;/button&gt;
+&lt;button class="btn btn-outline"&gt;Outline Button&lt;/button&gt;
+&lt;button class="btn btn-text"&gt;Text Button&lt;/button&gt;
+&lt;button class="btn btn-primary btn-disabled" disabled&gt;Disabled&lt;/button&gt;</div>
+        </section>
+
+        <!-- FORMS -->
+        <section class="component-section" id="forms">
+            <h3>Form Components</h3>
+            
+            <h4>Text Input</h4>
+            <div class="component-preview">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" placeholder="you@example.com">
+                    <div class="helper-text">We'll never share your email</div>
+                </div>
+            </div>
+
+            <h4>Input States</h4>
+            <div class="component-grid">
+                <div class="component-item">
+                    <label>Default</label>
+                    <input type="text" placeholder="Placeholder text" style="margin: 8px 0;">
+                </div>
+                <div class="component-item">
+                    <label>Focused</label>
+                    <input type="text" placeholder="Placeholder text" style="margin: 8px 0; border-color: #10B981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);">
+                </div>
+                <div class="component-item">
+                    <label>Error</label>
+                    <input type="text" placeholder="Placeholder text" style="margin: 8px 0; border-color: #EF4444;">
+                </div>
+                <div class="component-item">
+                    <label>Disabled</label>
+                    <input type="text" placeholder="Disabled" disabled style="margin: 8px 0;">
+                </div>
+            </div>
+
+            <h4>Select Dropdown</h4>
+            <div class="component-preview">
+                <div class="form-group">
+                    <label>Select Route</label>
+                    <select>
+                        <option>-- Choose a route --</option>
+                        <option>Downtown to Airport</option>
+                        <option>Suburb to Downtown</option>
+                        <option>Campus Route</option>
+                    </select>
+                </div>
+            </div>
+
+            <h4>Textarea</h4>
+            <div class="component-preview">
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea rows="4" placeholder="Tell us about your commute..."></textarea>
+                </div>
+            </div>
+
+            <h4>Checkbox</h4>
+            <div class="component-preview">
+                <div class="checkbox">
+                    <input type="checkbox" id="agree" checked>
+                    <label for="agree" style="margin: 0;">I agree to the terms and conditions</label>
+                </div>
+                <div class="checkbox">
+                    <input type="checkbox" id="newsletter">
+                    <label for="newsletter" style="margin: 0;">Subscribe to our newsletter</label>
+                </div>
+            </div>
+
+            <h4>Radio Button</h4>
+            <div class="component-preview">
+                <div class="radio">
+                    <input type="radio" id="daily" name="frequency" checked>
+                    <label for="daily" style="margin: 0;">Daily</label>
+                </div>
+                <div class="radio">
+                    <input type="radio" id="weekly" name="frequency">
+                    <label for="weekly" style="margin: 0;">Weekly</label>
+                </div>
+                <div class="radio">
+                    <input type="radio" id="monthly" name="frequency">
+                    <label for="monthly" style="margin: 0;">Monthly</label>
+                </div>
+            </div>
+
+            <h4>Form HTML</h4>
+            <div class="code-block">&lt;div class="form-group"&gt;
+  &lt;label&gt;Email Address&lt;/label&gt;
+  &lt;input type="email" placeholder="<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7b02140e3b1e031a160b171e55181416">[email&#160;protected]</a>"&gt;
+  &lt;div class="helper-text"&gt;Helper text&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class="checkbox"&gt;
+  &lt;input type="checkbox" id="agree"&gt;
+  &lt;label for="agree"&gt;I agree&lt;/label&gt;
+&lt;/div&gt;</div>
+        </section>
+
+        <!-- CARDS -->
+        <section class="component-section" id="cards">
+            <h3>Cards</h3>
+            
+            <h4>Basic Card</h4>
+            <div class="component-preview">
+                <div class="card">
+                    <div class="card-header">Card Title</div>
+                    <p style="margin: 0; font-size: 14px; color: #666;">This is a basic card with header and body content. Cards are used to group related content.</p>
+                </div>
+            </div>
+
+            <h4>Match Card</h4>
+            <div class="component-preview">
+                <div class="card" style="max-width: 300px;">
+                    <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                        <div class="avatar">SA</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; margin: 0;">Sarah</div>
+                            <div style="font-size: 12px; color: #666; margin: 4px 0;">Downtown → Airport</div>
+                        </div>
+                    </div>
+                    <p style="margin: 12px 0 16px 0; font-size: 13px; color: #666;">Leaves at 7:30 AM. Looking for a carpool buddy!</p>
+                    <button class="btn-primary" style="width: 100%;">Connect</button>
+                </div>
+            </div>
+
+            <h4>Card with Actions</h4>
+            <div class="component-preview">
+                <div class="card" style="max-width: 300px;">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border: none; margin: 0 0 12px 0;">
+                        Journey Details
+                        <span style="font-size: 12px; color: #999;">3 hours ago</span>
+                    </div>
+                    <p style="margin: 0 0 12px 0; font-size: 13px; color: #666;">From: Downtown Station<br>To: Airport Terminal 3<br>Time: 7:30 AM</p>
+                </div>
+            </div>
+
+            <h4>Card HTML</h4>
+            <div class="code-block">&lt;div class="card"&gt;
+  &lt;div class="card-header"&gt;Card Title&lt;/div&gt;
+  &lt;p&gt;Card body content goes here.&lt;/p&gt;
+  &lt;button class="btn btn-primary"&gt;Action&lt;/button&gt;
+&lt;/div&gt;</div>
+        </section>
+
+        <!-- ALERTS -->
+        <section class="component-section" id="alerts">
+            <h3>Alerts & Notifications</h3>
+            
+            <h4>Success Alert</h4>
+            <div class="component-preview">
+                <div class="alert alert-success">
+                    <strong>✓ Success!</strong> Your profile has been updated.
+                </div>
+            </div>
+
+            <h4>Warning Alert</h4>
+            <div class="component-preview">
+                <div class="alert alert-warning">
+                    <strong>⚠ Warning:</strong> Your email wasn't confirmed. Check spam folder.
+                </div>
+            </div>
+
+            <h4>Error Alert</h4>
+            <div class="component-preview">
+                <div class="alert alert-error">
+                    <strong>✕ Error:</strong> Please check your email and try again.
+                </div>
+            </div>
+
+            <h4>Info Alert</h4>
+            <div class="component-preview">
+                <div class="alert alert-info">
+                    <strong>ℹ Info:</strong> We match rides based on route overlap and timing.
+                </div>
+            </div>
+
+            <h4>Alert HTML</h4>
+            <div class="code-block">&lt;div class="alert alert-success"&gt;
+  &lt;strong&gt;✓ Success!&lt;/strong&gt; Your profile has been updated.
+&lt;/div&gt;
+
+&lt;div class="alert alert-error"&gt;
+  &lt;strong&gt;✕ Error:&lt;/strong&gt; Something went wrong.
+&lt;/div&gt;</div>
+        </section>
+
+        <!-- BADGES -->
+        <section class="component-section" id="badges">
+            <h3>Badges & Status Indicators</h3>
+            
+            <h4>Status Badges</h4>
+            <div class="component-preview" style="flex-direction: row; gap: 12px;">
+                <span class="badge badge-success">✓ Active</span>
+                <span class="badge badge-warning">⚠ Pending</span>
+                <span class="badge badge-error">✕ Inactive</span>
+                <span class="badge badge-info">ℹ Info</span>
+            </div>
+
+            <h4>Status Indicators</h4>
+            <div class="component-preview">
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="status-indicator status-online"></span>
+                        <span style="font-size: 13px;">Online</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="status-indicator status-away"></span>
+                        <span style="font-size: 13px;">Away</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="status-indicator status-offline"></span>
+                        <span style="font-size: 13px;">Offline</span>
+                    </div>
+                </div>
+            </div>
+
+            <h4>Badge HTML</h4>
+            <div class="code-block">&lt;span class="badge badge-success"&gt;Active&lt;/span&gt;
+&lt;span class="badge badge-warning"&gt;Pending&lt;/span&gt;
+&lt;span class="badge badge-error"&gt;Inactive&lt;/span&gt;
+
+&lt;span class="status-indicator status-online"&gt;&lt;/span&gt;
+&lt;span class="status-indicator status-offline"&gt;&lt;/span&gt;</div>
+        </section>
+
+        <!-- NAVIGATION -->
+        <section class="component-section">
+            <h3>Navigation Components</h3>
+            
+            <h4>Tabs</h4>
+            <div class="component-preview">
+                <div class="tab-nav">
+                    <button class="tab-btn active">Active Matches</button>
+                    <button class="tab-btn">Messages</button>
+                    <button class="tab-btn">Settings</button>
+                </div>
+            </div>
+
+            <h4>Breadcrumbs</h4>
+            <div class="component-preview">
+                <div class="breadcrumb">
+                    <a href="#">Dashboard</a>
+                    <span>/</span>
+                    <a href="#">My Journeys</a>
+                    <span>/</span>
+                    <span>Downtown Route</span>
+                </div>
+            </div>
+
+            <h4>Pagination</h4>
+            <div class="component-preview">
+                <div class="pagination">
+                    <button>← Previous</button>
+                    <button>1</button>
+                    <button class="active">2</button>
+                    <button>3</button>
+                    <button>4</button>
+                    <button>Next →</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- AVATARS -->
+        <section class="component-section">
+            <h3>Avatars</h3>
+            
+            <h4>Avatar Sizes</h4>
+            <div class="component-preview" style="flex-direction: row; gap: 20px; align-items: center;">
+                <div style="text-align: center;">
+                    <div class="avatar avatar-sm">SA</div>
+                    <div style="font-size: 12px; color: #999; margin-top: 8px;">Small</div>
+                </div>
+                <div style="text-align: center;">
+                    <div class="avatar">SA</div>
+                    <div style="font-size: 12px; color: #999; margin-top: 8px;">Regular</div>
+                </div>
+                <div style="text-align: center;">
+                    <div class="avatar avatar-lg">SA</div>
+                    <div style="font-size: 12px; color: #999; margin-top: 8px;">Large</div>
+                </div>
+            </div>
+
+            <h4>Avatar Variations</h4>
+            <div class="component-preview" style="flex-direction: row; gap: 12px; align-items: center;">
+                <div class="avatar" style="background: #1B5C3A;">JS</div>
+                <div class="avatar" style="background: #B4E035; color: #333;">SA</div>
+                <div class="avatar" style="background: #3B82F6;">MK</div>
+                <div class="avatar" style="background: #F59E0B;">AR</div>
+            </div>
+
+            <h4>Avatar HTML</h4>
+            <div class="code-block">&lt;div class="avatar"&gt;SA&lt;/div&gt;
+&lt;div class="avatar avatar-sm"&gt;SA&lt;/div&gt;
+&lt;div class="avatar avatar-lg"&gt;SA&lt;/div&gt;</div>
+        </section>
+
+        <!-- ACCESSIBILITY -->
+        <section class="component-section">
+            <h3>Accessibility Guidelines</h3>
+            
+            <h4>Keyboard Navigation</h4>
+            <table class="specs-table">
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Key</th>
+                        <th>Behavior</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Tab Through</strong></td>
+                        <td>Tab</td>
+                        <td>Move focus to next interactive element</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Reverse Tab</strong></td>
+                        <td>Shift + Tab</td>
+                        <td>Move focus to previous interactive element</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Activate Button</strong></td>
+                        <td>Enter / Space</td>
+                        <td>Click the focused button</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Toggle Checkbox</strong></td>
+                        <td>Space</td>
+                        <td>Toggle checkbox state</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Open Select</strong></td>
+                        <td>Space / Arrow Down</td>
+                        <td>Open dropdown menu</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Color Contrast</h4>
+            <table class="specs-table">
+                <thead>
+                    <tr>
+                        <th>Element</th>
+                        <th>Foreground</th>
+                        <th>Background</th>
+                        <th>Ratio</th>
+                        <th>WCAG</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Body Text</strong></td>
+                        <td>#1F2937</td>
+                        <td>#FFFFFF</td>
+                        <td>13.6:1</td>
+                        <td>✓ AAA</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Button Text</strong></td>
+                        <td>#FFFFFF</td>
+                        <td>#10B981</td>
+                        <td>5.8:1</td>
+                        <td>✓ AA</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Secondary Text</strong></td>
+                        <td>#6B7280</td>
+                        <td>#FFFFFF</td>
+                        <td>7.3:1</td>
+                        <td>✓ AAA</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Best Practices</h4>
+            <div class="alert alert-info">
+                <strong>✓ Always provide:</strong> Meaningful labels for form inputs, Alt text for images, ARIA labels for icons, Sufficient color contrast (4.5:1 minimum)
+            </div>
+        </section>
+
+        <!-- RESPONSIVE -->
+        <section class="component-section">
+            <h3>Responsive Design</h3>
+            
+            <h4>Breakpoints</h4>
+            <table class="specs-table">
+                <thead>
+                    <tr>
+                        <th>Breakpoint</th>
+                        <th>Width</th>
+                        <th>Device</th>
+                        <th>Layout</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Mobile</strong></td>
+                        <td>&lt; 640px</td>
+                        <td>Phone</td>
+                        <td>Single column, full width</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tablet</strong></td>
+                        <td>640px - 1024px</td>
+                        <td>Tablet</td>
+                        <td>2-3 columns</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Desktop</strong></td>
+                        <td>&gt; 1024px</td>
+                        <td>Desktop</td>
+                        <td>3+ columns, full features</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Responsive Utilities</h4>
+            <div class="code-block">/* Mobile First */
+.component { display: block; }
+
+/* Tablet and up */
+@media (min-width: 640px) {
+  .component { display: grid; grid-template-columns: 2fr 1fr; }
+}
+
+/* Desktop and up */
+@media (min-width: 1024px) {
+  .component { grid-template-columns: 3fr 1fr 1fr; }
+}</div>
+        </section>
+
+        <!-- IMPLEMENTATION -->
+        <section class="component-section">
+            <h3>Implementation Guide</h3>
+            
+            <h4>CSS Class Structure</h4>
+            <div class="code-block">/* Buttons */
+.btn { /* base styles */ }
+.btn-primary { /* primary variant */ }
+.btn-secondary { /* secondary variant */ }
+.btn-small { /* size variant */ }
+.btn-large { /* size variant */ }
+.btn-disabled { /* disabled state */ }
+
+/* Forms */
+input, select, textarea { /* base styles */ }
+input:focus { /* focus state */ }
+input:disabled { /* disabled state */ }
+input.error { /* error state */ }
+.form-group { /* wrapper */ }
+.helper-text { /* helper text */ }</div>
+
+            <h4>Component Library Structure</h4>
+            <div class="code-block">components/
+├── buttons/
+│   ├── button.html
+│   ├── button.css
+│   └── button.js
+├── forms/
+│   ├── input.html
+│   ├── select.html
+│   └── forms.css
+├── cards/
+│   ├── card.html
+│   └── card.css
+├── alerts/
+│   ├── alert.html
+│   └── alert.css
+└── shared/
+    ├── colors.css
+    ├── typography.css
+    └── spacing.css</div>
+
+            <h4>Figma Component Naming</h4>
+            <div class="code-block">Button / Primary / Default
+Button / Primary / Hover
+Button / Primary / Disabled
+Button / Secondary / Default
+Button / Secondary / Hover
+
+Form / Input / Default
+Form / Input / Focused
+Form / Input / Error
+
+Card / Default
+Card / Elevated
+Card / Match</div>
+        </section>
+    </main>
+    
+    <footer>
+        <p><strong>Community Carpool Design System</strong></p>
+        <p>Complete component library with specifications and implementation patterns</p>
+        <p style="margin-top: 

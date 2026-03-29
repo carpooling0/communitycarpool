@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Carpool - Quick Reference Cards</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --brand-green: #5EC576;
+            --dark-neutral: #2C3E50;
+            --light-gray: #F5F5F5;
+            --white: #FFFFFF;
+            --text-gray: #555555;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-gray);
+            background: linear-gradient(180deg, var(--white) 0%, #F9F9F9 100%);
+            padding: 40px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            background: linear-gradient(135deg, var(--brand-green) 0%, #4BA25A 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        header p {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: white;
+            border: 2px solid var(--brand-green);
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            page-break-inside: avoid;
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            box-shadow: 0 4px 16px rgba(94, 197, 118, 0.2);
+            transform: translateY(-2px);
+        }
+        .card-badge {
+            display: inline-block;
+            background: var(--brand-green);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .card h3 {
+            font-size: 20px;
+            color: var(--dark-neutral);
+            margin-bottom: 16px;
+        }
+        .card-section {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        .card-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        .section-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--brand-green);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .section-content {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .dos {
+            padding: 8px;
+            background: rgba(39, 174, 96, 0.1);
+            border-left: 3px solid #27AE60;
+            margin: 8px 0;
+        }
+        .donts {
+            padding: 8px;
+            background: rgba(231, 76, 60, 0.1);
+            border-left: 3px solid #E74C3C;
+            margin: 8px 0;
+        }
+        .dos strong, .donts strong {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+        .download-section {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 2px solid var(--light-gray);
+        }
+        .btn-download {
+            background: var(--brand-green);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 8px;
+        }
+        .btn-download:hover {
+            background: #4BA25A;
+            box-shadow: 0 4px 12px rgba(94, 197, 118, 0.3);
+        }
+        @media print {
+            body { padding: 0; background: white; }
+            .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+            .download-section { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📋 Channel Voice Quick Reference</h1>
+            <p>1-Page Cheat Sheets for All 8 Channels</p>
+        </header>
+        <div class="cards-grid">
+            <div class="card">
+                <span class="channel-badge">🌐 WEBSITE</span>
+                <h3>Website & Landing Pages</h3>
+                <div class="card-section">
+                    <div class="section-label">Tone</div>
+                    <div class="section-content">Warm, confident, clear</div>
+                </div>
+                <div class="card-section">
+                    <div class="section-label">Key Metrics</div>
+                    <div class="section-content">• Formality: 50/100<br>• Seriousness: 40/100<br>• Frequency: Always available</div>
+                </div>
+                <div class="card-section">
+                    <div class="dos"><strong>✅ Do</strong>Focus on human benefit. Use "you" language.</div>
+                    <div class="donts"><strong>❌ Don't</strong>Use corporate jargon. Make unsupported claims.</div>
+                </div>
+                <div class="card-section">
+                    <div class="section-label">Example</div>
+                    <div class="section-content">"Share your commute. Save money. Reduce carbon."</div>
+                </div>
+            </div>
+            <div class="card">
+                <span class="channel-badge">🔴 REDDIT</span>
+                <h3>Reddit & Communities</h3>
+                <div class="card-section">
+                    <div class="section-label">Tone</div>
+                    <div class="section-content">Conversational, honest, like a peer</div>
+                </div>
+                <div class="card-section">
+                    <div class="section-label">Key Metrics</div>
+                    <div class="section-content">• Formality: 20/100<br>• Seriousness: 40/100<br>• Frequency: Respond to comments</div>
+                </div>
+                <div class="card-section">
+                    <div class="dos"><strong>✅ Do</strong>Answer questions genuinely. Be helpful.</div>
+                    <div class="donts"><strong>❌ Don't</strong>Post promotional content. Sound like a corporation.</div>
+                </div>
+                <div class="card-section">
+                    <div class="section-label">Communities</div>
+                    <div class="section-content">r/bangalore, r/mumbai, r/delhi, r/sustainability</div>
+                </div>
+            </div>
+            <div class="card">
+                <span class="channel-badge">💼 LINKEDIN</span>
+                <h3>LinkedIn (Professional)</h3>
+                <div class="card-section">
+                    <div class="section-label">Tone</div>
+                    <div class="section-content">Thoughtful, impact-focused, professional</div>
+                </div>
+                <div class="card-section">
+                    <div class="section-label">Key Metrics</div>
+                    <div class="section-content">• Formality: 75/100<br>• Seriousness: 70/100<br>• Frequency: 1-2x per week</div>
+                </div>
+                <div class="card-section">
+                    <div class="dos"><strong>✅ Do</strong>Show business value. Share impact data.</div>
+                    <div class="donts"><strong>❌ Don't</strong>Sound like a startup cliché. Use hype.</div>
+                </div>
+                <div class="card-section">
+                    <div class="section-label">Best Times</div>
+                    <div class="section-content">Tue-Thu, 9-11am</div>
+                </div>
+            </div>
+            <div class="card">
+                <span class="channel-badge">🐦 TWITTER</span>
+                <h3>Twitter/X (Sharp & Punchy)</h3>
+                <div class="card-section">
+                    <div class="section-label">Tone</div>
+                    <div class="section-content">Witty, sharp, conversational</div>
+                </div>
+                <div class="card-section">
+                    <div class="section-label">Key Metrics</div>
+                    <div class="section-content">• Formality: 25/100<br>• Seriousness: 35/100<br>• Frequency: 3-5x per week</div>
+                </div>
+                <div class="card-section">
+                    <div class="dos"><strong>✅ Do</strong>React to news. Share quick wins. Engage.</div>
+                    <div class="donts"><strong>❌ Don't</strong>Use corporate speak. Make unfounded claims.</div>
+                </div>
+                <div class="card-section">
+                    <div class="section-label">Max Length</div>
+                    <div class="section-content">280 characters. Punchy beats perfect.</div>
+                </div>
+            </div>
+            <div class="card">
+                <span class="channel-badge">📧 EMAIL</span>
+                <h3>Email & Newsletters</h3>
+                <div class="card-section">
+                    <div class="section-label">Tone</div>
+                    <div class="section-content">Warm, personal, like a trusted friend</div>
+                </div>
+                <div class="card-section">
+                    <div class="section-label">Key Metrics</div>
+                    <div class="section-content">• Formality: 40/100<br>• Seriousness: 50/100<br>• Frequency: 1x per week</div>
+                </div>
+                <div class="card-section">
+                    <div class="dos"><strong>✅ Do</strong>Lead with value. Use contractions. Be conversational.</div>
+                    <div class="donts"><strong>❌ Don't</strong>Send too often. Use excessive exclamation points.</div>
+                </div>
+                <div class="card-section">
+                    <div class="section-label">Subject Line</div>
+                    <div class="section-content">Benefit + Curiosity + Personal</div>
+                </div>
+            </div>
+            <div class="card">
+                <span class="channel-badge">📝 BLOG</span>
+                <h3>Blog & Long-Form Content</h3>
+                <div class="card-section">
+                    <div class="section-label">Tone</div>
+                    <div class="section-content">Educational, narrative, authentic</div>
+                </div>
+                <div class="card-section">
+                    <div class="section-label">Key Metrics</div>
+                    <div class="section-content">• Formality: 60/100<br>• Seriousness: 65/100<br>• Frequency: 2x per month</div>
+                </div>
+                <div class="card-section">
+                    <div class="dos"><strong>✅ Do</strong>Tell stories. Use data. Show original research.</div>
+                    <div class="donts"><strong>❌ Don't</strong>Write thinly veiled marketing. Promote aggressively.</div>
+                </div>
+                <div class="card-section">
+                    <div class="section-label">Ideal Length</div>
+                    <div class="section-content">1000-2000 words. Scannable with headers.</div>
+                </div>
+            </div>
+            <div class="card">
+                <span class="channel-badge">📱 IN-APP</span>
+                <h3>In-App UI Copy</h3>
+                <div class="card-section">
+                    <div class="section-label">Tone</div>
+                    <div class="section-content">Clear, actionable, encouraging</div>
+                </div>
+                <div class="card-section">
+                    <div class="section-label">Key Metrics</div>
+                    <div class="section-content">• Formality: 35/100<br>• Seriousness: 45/100<br>• Frequency: Contextual</div>
+                </div>
+                <div class="card-section">
+                    <div class="dos"><strong>✅ Do</strong>Focus on benefit. Use action verbs. Keep it short.</div>
+                    <div class="donts"><strong>❌ Don't</strong>Use jargon. Overexplain. Use corporate words.</div>
+                </div>
+                <div class="card-section">
+                    <div class="section-label">Button Example</div>
+                    <div class="section-content">"Share your route" not "Submit transportation data"</div>
+                </div>
+            </div>
+            <div class="card">
+                <span class="channel-badge">🎯 CORPORATE PITCH</span>
+                <h3>Corporate & School Pitches</h3>
+                <div class="card-section">
+                    <div class="section-label">Tone</div>
+                    <div class="section-content">Professional, data-backed, collaborative</div>
+                </div>
+                <div class="card-section">
+                    <div class="section-label">Key Metrics</div>
+                    <div class="section-content">• Formality: 90/100<br>• Seriousness: 85/100<br>• Frequency: As scheduled</div>
+                </div>
+                <div class="card-section">
+                    <div class="dos"><strong>✅ Do</strong>Show ROI. Address pain points. Lead with their goal.</div>
+                    <div class="donts"><strong>❌ Don't</strong>Oversell. Make unsupported claims. Ignore objections.</div>
+                </div>
+                <div class="card-section">
+                    <div class="section-label">Key Data</div>
+                    <div class="section-content">56.5% match rate | 0 cost | Free to deploy</div>
+                </div>
+            </div>
+        </div>
+        <div class="download-section">
+            <h3>Download All Cards</h3>
+            <p>Get all 8 quick reference cards in one PDF:</p>
+            <button class="btn-download" onclick="downloadAllCards()">📥 Download as PDF</button>
+            <button class="btn-download" onclick="window.print()">🖨️ Print This Page</button>
+        </div>
+    </div>
+    <script>
+        function downloadAllCards() {
+            const element = document.querySelector('.cards-grid');
+            const opt = {
+                margin: 10,
+                filename: 'Community_Carpool_Voice_Quick_Reference.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
+</body>
+</html>

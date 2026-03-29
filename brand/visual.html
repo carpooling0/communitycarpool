@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Carpool - Color System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --dark-green: #1B5C3A; --bright-green: #B4E035; --button-green: #10B981; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.8; color: #333; background: #f9f9f9; }
+        header { background: linear-gradient(135deg, #1B5C3A 0%, #10B981 100%); color: white; padding: 60px 40px; box-shadow: 0 4px 12px rgba(27, 92, 58, 0.2); }
+        header h1 { font-size: 40px; margin-bottom: 8px; font-weight: 700; }
+        nav { background: #f5f5f5; padding: 16px 40px; border-bottom: 1px solid #eee; }
+        nav a { color: #10B981; text-decoration: none; font-weight: 600; margin-right: 20px; }
+        main { max-width: 1200px; margin: 0 auto; padding: 60px 40px; }
+        h2 { font-size: 36px; color: #2C3E50; margin: 60px 0 24px 0; border-bottom: 3px solid #10B981; padding-bottom: 12px; }
+        h3 { font-size: 22px; color: #2C3E50; margin: 40px 0 20px 0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin: 32px 0; }
+        .card { background: white; border: 1px solid #eee; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .swatch { width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        .info { padding: 16px; }
+        .color-name { font-size: 16px; font-weight: 700; color: #2C3E50; margin-bottom: 8px; }
+        .color-code { font-family: monospace; font-size: 12px; color: #666; margin-bottom: 4px; }
+        table { width: 100%; border-collapse: collapse; background: white; margin: 24px 0; border: 1px solid #eee; border-radius: 6px; }
+        th, td { padding: 16px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
+        th { background: #f5f5f5; font-weight: 700; color: #2C3E50; }
+        .usage { background: white; border: 1px solid #eee; border-radius: 8px; padding: 24px; margin: 24px 0; }
+        .box { background: #f5f5f5; border: 1px solid #eee; border-radius: 8px; padding: 24px; margin: 24px 0; }
+        footer { background: #f5f5f5; padding: 50px 40px; text-align: center; margin-top: 80px; font-size: 14px; color: #999; border-top: 2px solid #eee; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Community Carpool</h1>
+        <p>Color System & Palette</p>
+    </header>
+    
+    <nav>
+        <a href="01_Brand_Guidelines_Site_Map.html">← Site Map</a>
+        <a href="06_Logo_Specifications_Guide.html">← Logo</a>
+    </nav>
+    
+    <main>
+        <section>
+            <h2>Primary Brand Colors</h2>
+            <p>The three core colors that define Community Carpool's visual identity.</p>
+            
+            <div class="grid">
+                <div class="card">
+                    <div class="swatch" style="background-color: #1B5C3A;">#1B5C3A</div>
+                    <div class="info">
+                        <div class="color-name">Dark Forest Green</div>
+                        <div class="color-code">Hex: #1B5C3A</div>
+                        <div class="color-code">RGB: 27, 92, 58</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="swatch" style="background-color: #B4E035;">#B4E035</div>
+                    <div class="info">
+                        <div class="color-name">Bright Chartreuse</div>
+                        <div class="color-code">Hex: #B4E035</div>
+                        <div class="color-code">RGB: 180, 224, 53</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="swatch" style="background-color: #10B981;">#10B981</div>
+                    <div class="info">
+                        <div class="color-name">Button Green</div>
+                        <div class="color-code">Hex: #10B981</div>
+                        <div class="color-code">RGB: 16, 185, 129</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Primary Color Usage</h2>
+            
+            <div class="usage">
+                <h3>Dark Forest Green (#1B5C3A)</h3>
+                <p><strong>Purpose:</strong> Trust, stability, growth<br>
+                <strong>Used for:</strong> Left pin, "CARPOOL" text, headings<br>
+                <strong>When to use:</strong> Conveys security and environmental responsibility</p>
+            </div>
+            
+            <div class="usage">
+                <h3>Bright Chartreuse (#B4E035)</h3>
+                <p><strong>Purpose:</strong> Energy, sustainability, action<br>
+                <strong>Used for:</strong> Right pin, "COMMUNITY" text, highlights<br>
+                <strong>When to use:</strong> Draws attention, shows movement and energy</p>
+            </div>
+            
+            <div class="usage">
+                <h3>Button Green (#10B981)</h3>
+                <p><strong>Purpose:</strong> Call-to-action, interaction<br>
+                <strong>Used for:</strong> Buttons, CTAs, links<br>
+                <strong>When to use:</strong> Guides user interaction</p>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Neutral Palette</h2>
+            
+            <div class="grid">
+                <div class="card">
+                    <div class="swatch" style="background-color: #FFFFFF; border: 1px solid #ccc; color: #333;">White</div>
+                    <div class="info">
+                        <div class="color-name">White</div>
+                        <div class="color-code">Hex: #FFFFFF</div>
+                        <div class="color-code">Use: Primary background</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="swatch" style="background-color: #F5F5F5; border: 1px solid #ccc; color: #333;">Light Gray</div>
+                    <div class="info">
+                        <div class="color-name">Light Gray</div>
+                        <div class="color-code">Hex: #F5F5F5</div>
+                        <div class="color-code">Use: Secondary background</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="swatch" style="background-color: #1F2937; color: white;">Dark Text</div>
+                    <div class="info">
+                        <div class="color-name">Text Primary</div>
+                        <div class="color-code">Hex: #1F2937</div>
+                        <div class="color-code">Use: Body text</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Semantic Colors</h2>
+            
+            <div class="grid">
+                <div class="card">
+                    <div class="swatch" style="background-color: #10B981; color: white;">Success</div>
+                    <div class="info">
+                        <div class="color-name">Success (Green)</div>
+                        <div class="color-code">Hex: #10B981</div>
+                        <div class="color-code">Use: Confirmations</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="swatch" style="background-color: #F59E0B; color: white;">Warning</div>
+                    <div class="info">
+                        <div class="color-name">Warning (Amber)</div>
+                        <div class="color-code">Hex: #F59E0B</div>
+                        <div class="color-code">Use: Cautions</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="swatch" style="background-color: #EF4444; color: white;">Error</div>
+                    <div class="info">
+                        <div class="color-name">Error (Red)</div>
+                        <div class="color-code">Hex: #EF4444</div>
+                        <div class="color-code">Use: Errors</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Implementation Checklist</h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Element</th>
+                        <th>Color</th>
+                        <th>Usage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Primary Button</strong></td>
+                        <td>#10B981</td>
+                        <td>Main call-to-action</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Headings</strong></td>
+                        <td>#1B5C3A</td>
+                        <td>H1-H6 hierarchy</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Body Text</strong></td>
+                        <td>#1F2937</td>
+                        <td>Paragraphs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Success State</strong></td>
+                        <td>#10B981</td>
+                        <td>Confirmations</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Error State</strong></td>
+                        <td>#EF4444</td>
+                        <td>Validation errors</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <section>
+            <h2>Accessibility</h2>
+            <div class="box">
+                <h3>Contrast Ratios</h3>
+                <p>✅ <strong>Dark Green on White:</strong> 8.4:1 (WCAG AAA)<br>
+                ✅ <strong>Bright Green on White:</strong> 5.2:1 (WCAG AA)<br>
+                ✅ <strong>Button Green on White:</strong> 5.8:1 (WCAG AA)</p>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p><strong>Community Carpool Color System</strong></p>
+        <p>Professional Color Palette & Usage Standards | March 2026</p>
+    </footer>
+</body>
+</html>

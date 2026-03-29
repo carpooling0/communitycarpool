@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Carpool - Complete Font Library</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&family=Montserrat:wght@300;400;500;600;700;800;900&family=Lato:wght@300;400;700;900&family=Open+Sans:wght@300;400;500;600;700;800&family=Ubuntu:wght@300;400;500;700&family=Source+Code+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Quicksand:wght@300;400;500;600;700&family=Nunito:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Sans:wght@400;500;700&family=Work+Sans:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --dark-green: #1B5C3A; --bright-green: #B4E035; --button-green: #10B981; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.8; color: #333; background: #f9f9f9; }
+        header { background: linear-gradient(135deg, #1B5C3A 0%, #10B981 100%); color: white; padding: 60px 40px; }
+        header h1 { font-size: 40px; margin-bottom: 8px; font-weight: 700; }
+        header p { font-size: 16px; opacity: 0.95; }
+        nav { background: #f5f5f5; padding: 16px 40px; border-bottom: 1px solid #eee; display: flex; gap: 20px; flex-wrap: wrap; }
+        nav a { color: #10B981; text-decoration: none; font-weight: 600; font-size: 14px; }
+        main { max-width: 1400px; margin: 0 auto; padding: 60px 40px; }
+        h2 { font-size: 36px; color: #2C3E50; margin: 60px 0 24px 0; border-bottom: 3px solid #10B981; padding-bottom: 12px; }
+        h3 { font-size: 22px; color: #2C3E50; margin: 40px 0 20px 0; }
+        .font-family { background: white; border: 1px solid #eee; border-radius: 8px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .font-name { font-size: 18px; font-weight: 700; color: #1B5C3A; margin-bottom: 12px; }
+        .font-type { font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; }
+        .preview { margin-bottom: 16px; }
+        .preview-text { font-size: 24px; margin-bottom: 8px; line-height: 1.4; }
+        .weights { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+        .weight-badge { background: #f0f0f0; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; color: #333; border: 1px solid #ddd; }
+        .weight-badge.available { background: rgba(16, 185, 129, 0.1); border-color: #10B981; color: #10B981; }
+        .usage { font-size: 13px; color: #666; margin-top: 12px; line-height: 1.6; }
+        .usage strong { color: #333; }
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 24px; margin: 24px 0; }
+        .font-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin: 24px 0; }
+        .roboto { font-family: 'Roboto', sans-serif; }
+        .inter { font-family: 'Inter', sans-serif; }
+        .poppins { font-family: 'Poppins', sans-serif; }
+        .montserrat { font-family: 'Montserrat', sans-serif; }
+        .lato { font-family: 'Lato', sans-serif; }
+        .open-sans { font-family: 'Open Sans', sans-serif; }
+        .ubuntu { font-family: 'Ubuntu', sans-serif; }
+        .quicksand { font-family: 'Quicksand', sans-serif; }
+        .nunito { font-family: 'Nunito', sans-serif; }
+        .dm-sans { font-family: 'DM Sans', sans-serif; }
+        .work-sans { font-family: 'Work Sans', sans-serif; }
+        .plus-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .playfair { font-family: 'Playfair Display', serif; }
+        .merriweather { font-family: 'Merriweather', serif; }
+        .source-code { font-family: 'Source Code Pro', monospace; }
+        .jetbrains { font-family: 'JetBrains Mono', monospace; }
+        .ibm-plex { font-family: 'IBM Plex Mono', monospace; }
+        .comparison { background: white; border: 1px solid #eee; border-radius: 8px; padding: 24px; margin: 24px 0; }
+        .comparison-row { display: grid; grid-template-columns: 150px 1fr; gap: 24px; margin-bottom: 24px; align-items: center; }
+        .comparison-row:last-child { margin-bottom: 0; }
+        .comparison-label { font-weight: 600; color: #333; }
+        table { width: 100%; border-collapse: collapse; background: white; margin: 24px 0; border: 1px solid #eee; }
+        th, td { padding: 16px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
+        th { background: #f5f5f5; font-weight: 700; }
+        .recommended { background: rgba(16, 185, 129, 0.05); border-left: 4px solid #10B981; }
+        footer { background: #f5f5f5; padding: 50px 40px; text-align: center; margin-top: 80px; font-size: 14px; color: #999; border-top: 2px solid #eee; }
+        @media (max-width: 768px) {
+            .font-grid { grid-template-columns: 1fr; }
+            .category-grid { grid-template-columns: 1fr; }
+            .comparison-row { grid-template-columns: 1fr; gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Community Carpool</h1>
+        <p>Complete Font Library & Typography Options</p>
+    </header>
+    
+    <nav>
+        <a href="01_Brand_Guidelines_Site_Map.html">← Site Map</a>
+        <a href="08_Typography_System.html">← Typography System</a>
+    </nav>
+    
+    <main>
+        <section>
+            <h2>Sans-Serif Fonts (Primary)</h2>
+            <p>Clean, modern, and highly readable sans-serif typefaces for body text and UI.</p>
+            
+            <div class="font-grid">
+                <!-- Inter -->
+                <div class="font-family recommended">
+                    <div class="font-name inter">Inter</div>
+                    <div class="font-type">Sans-Serif • Modern • Open Source</div>
+                    <div class="preview">
+                        <div class="preview-text inter">The quick brown fox jumps</div>
+                        <div class="weights">
+                            <span class="weight-badge available">300</span>
+                            <span class="weight-badge available">400</span>
+                            <span class="weight-badge available">500</span>
+                            <span class="weight-badge available">600</span>
+                            <span class="weight-badge available">700</span>
+                            <span class="weight-badge available">800</span>
+                            <span class="weight-badge available">900</span>
+                        </div>
+                    </div>
+                    <div class="usage"><strong>✓ Recommended:</strong> Primary system font. Excellent for UI, buttons, labels. Perfect for dashboards and technical interfaces.</div>
+                </div>
+                
+                <!-- Roboto -->
+                <div class="font-family">
+                    <div class="font-name roboto">Roboto</div>
+                    <div class="font-type">Sans-Serif • Modern • Google Fonts</div>
+                    <div class="preview">
+                        <div class="preview-text roboto">The quick brown fox jumps</div>
+                        <div class="weights">
+                            <span class="weight-badge available">300</span>
+                            <span class="weight-badge available">400</span>
+                            <span class="weight-badge available">500</span>
+                            <span class="weight-badge available">700</span>
+                            <span class="weight-badge available">900</span>
+                        </div>
+                    </div>
+                    <div class="usage"><strong>Alternative:</strong> Geometric, friendly feel. Works well for headings and large text. Slightly warmer than Inter.</div>
+                </div>
+                
+                <!-- Poppins -->
+                <div class="font-family">
+                    <div class="font-name poppins">Poppins</div>
+                    <div class="font-type">Sans-Serif • Geometric • Google Fonts</div>
+                    <div class="preview">
+                        <div class="preview-text poppins">The quick brown fox jumps</div>
+                        <div class="weights">
+                            <span class="weight-badge available">300</span>
+                            <span class="weight-badge available">400</span>
+                            <span class="weight-badge available">500</span>
+                            <span class="weight-badge available">600</span>
+                            <span class="weight-badge available">700</span>
+                            <span class="weight-badge available">800</span>
+                            <span class="weight-badge available">900</span>
+                        </div>
+                    </div>
+                    <div class="usage">Playful, modern geometric. Good for branding and hero text. Less ideal for body copy.</div>
+                </div>
+                
+                <!-- Montserrat -->
+                <div class="font-family">
+                    <div class="font-name montserrat">Montserrat</div>
+                    <div class="font-type">Sans-Serif • Geometric • Google Fonts</div>
+                    <div class="preview">
+                        <div class="preview-text montserrat">The quick brown fox jumps</div>
+                        <div class="weights">
+                            <span class="weight-badge available">300</span>
+                            <span class="weight-badge available">400</span>
+                            <span class="weight-badge available">500</span>
+                            <span class="weight-badge available">600</span>
+                            <span class="weight-badge available">700</span>
+                            <span class="weight-badge available">800</span>
+                            <span class="weight-badge available">900</span>
+                        </div>
+                    </div>
+                    <div class="usage">Strong, bold character. Excellent for headlines and branding. Can feel heavy at small sizes.</div>
+                </div>
+                
+                <!-- Lato -->
+                <div class="font-family">
+                    <div class="font-name lato">Lato</div>
+                    <div class="font-type">Sans-Serif • Warm • Google Fonts</div>
+                    <div class="preview">
+                        <div class="preview-text lato">The quick brown fox jumps</div>
+                        <div class="weights">
+                            <span class="weight-badge available">300</span>
+                            <span class="weight-badge available">400</span>
+                            <span class="weight-badge available">700</span>
+                            <span class="weight-badge available">900</span>
+                        </div>
+                    </div>
+                    <div class="usage">Warm, humanist feel. Good for body text and accessible reading. Friendly alternative to Inter.</div>
+                </div>
+                
+                <!-- Open Sans -->
+                <div class="font-family">
+                    <div class="font-name open-sans">Open Sans</div>
+                    <div class="font-type">Sans-Serif • Neutral • Google Fonts</div>
+                    <div class="preview">
+                        <div class="preview-text open-sans">The quick brown fox jumps</div>
+                        <div class="weights">
+                            <span class="weight-badge available">300</span>
+                            <span class="weight-badge available">400</span>
+                            <span class="weight-badge available">500</span>
+                            <span class="weight-badge available">600</span>
+                            <span class="weight-badge available">700</span>
+                            <span class="weight-badge available">800</span>
+                        </div>
+                    </div>
+                    <div class="usage">Highly legible, neutral. Industry standard. Perfect for forms and technical content.</div>
+                </div>
+                
+                <!-- DM Sans -->
+                <div class="font-family">
+                    <div class="font-name dm-sans">DM Sans</div>
+                    <div class="font-type">Sans-Serif • Contemporary • Google Fonts</div>
+                    <div class="preview">
+                        <div class="preview-text dm-sans">The quick brown fox jumps</div>
+                        <div class="weights">
+                            <span class="weight-badge available">400</span>
+                            <span class="weight-badge available">500</span>
+                            <span class="weight-badge available">700</span>
+                        </div>
+                    </div>
+                    <div class="usage">Modern, minimal aesthetic. Works for both body and display text. Contemporary feel.</div>
+                </div>
+                
+                <!-- Plus Jakarta Sans -->
+                <div class="font-family">
+                    <div class="font-name plus-jakarta">Plus Jakarta Sans</div>
+                    <div class="font-type">Sans-Serif • Modern • Google Fonts</div>
+                    <div class="preview">
+                        <div class="preview-text plus-jakarta">The quick brown fox jumps</div>
+                        <div class="weights">
+                            <span class="weight-badge available">300</span>
+                            <span class="weight-badge available">400</span>
+                            <span class="weight-badge available">500</span>
+                            <span class="weight-badge available">600</span>
+                            <span class="weight-badge available">700</span>
+                            <span class="weight-badge available">800</span>
+                        </div>
+                    </div>
+                    <div class="usage">Modern, friendly. Good balance between contemporary and readable. Emerging standard.</div>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Display & Heading Fonts</h2>
+            <p>Special purpose fonts for headlines, branding, and visual emphasis.</p>
+            
+            <div class="font-grid">
+                <!-- Playfair Display -->
+                <div class="font-family">
+                    <div class="font-name playfair">Playfair Display</div>
+                    <div class="font-type">Serif • Elegant • Google Fonts</div>
+                    <div class="preview">
+                        <div class="preview-text playfair" style="font-size: 32px;">Playfair Display</div>
+                        <div class="weights">
+                            <span class="weight-badge available">400</span>
+                            <span class="weight-badge available">500</span>
+                            <span class="weight-badge available">600</span>
+                            <span class="weight-badge available">700</span>
+                            <span class="weight-badge available">800</span>
+                            <span class="weight-badge available">900</span>
+                        </div>
+                    </div>
+                    <div class="usage">Elegant serif for hero headlines. Premium, sophisticated feel. Use at large sizes only.</div>
+                </div>
+                
+                <!-- Merriweather -->
+                <div class="font-family">
+                    <div class="font-name merriweather">Merriweather</div>
+                    <div class="font-type">Serif • Warm • Google Fonts</div>
+                    <div class="preview">
+                        <div class="preview-text merriweather" style="font-size: 28px;">Merriweather</div>
+                        <div class="weights">
+                            <span class="weight-badge available">300</span>
+                            <span class="weight-badge available">400</span>
+                            <span class="weight-badge available">700</span>
+                        </div>
+                    </div>
+                    <div class="usage">Warm, readable serif. Good for body text and blog posts. Traditional but friendly.</div>
+                </div>
+                
+                <!-- Montserrat Bold -->
+                <div class="font-family">
+                    <div class="font-name montserrat" style="font-size: 28px; font-weight: 900;">Montserrat Bold</div>
+                    <div class="font-type">Sans-Serif • Impact • Google Fonts</div>
+                    <div class="preview">
+                        <div class="preview-text montserrat" style="font-size: 32px; font-weight: 900;">COMMUNITY</div>
+                        <div class="weights">
+                            <span class="weight-badge available">700</span>
+                            <span class="weight-badge available">800</span>
+                            <span class="weight-badge available">900</span>
+                        </div>
+                    </div>
+                    <div class="usage">Maximum impact. Use for main headline, branding, logo text. Grabs attention.</div>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Monospace Fonts (Code & Technical)</h2>
+            <p>Fixed-width fonts for code blocks, API documentation, and technical content.</p>
+            
+            <div class="font-grid">
+                <!-- Source Code Pro -->
+                <div class="font-family">
+                    <div class="font-name source-code">Source Code Pro</div>
+                    <div class="font-type">Monospace • Technical • Adobe/Google Fonts</div>
+                    <div class="preview">
+                        <div class="preview-text source-code" style="font-size: 14px;">const user = { name: 'Sarah' }</div>
+                        <div class="weights">
+                            <span class="weight-badge available">400</span>
+                            <span class="weight-badge available">500</span>
+                            <span class="weight-badge available">600</span>
+                            <span class="weight-badge available">700</span>
+                        </div>
+                    </div>
+                    <div class="usage"><strong>✓ Recommended:</strong> Code blocks, API docs. Professional, clear monospace.</div>
+                </div>
+                
+                <!-- JetBrains Mono -->
+                <div class="font-family">
+                    <div class="font-name jetbrains">JetBrains Mono</div>
+                    <div class="font-type">Monospace • Modern • JetBrains/Google Fonts</div>
+                    <div class="preview">
+                        <div class="preview-text jetbrains" style="font-size: 14px;">const user = { name: 'Sarah' }</div>
+                        <div class="weights">
+                            <span class="weight-badge available">400</span>
+                            <span class="weight-badge available">500</span>
+                            <span class="weight-badge available">600</span>
+                            <span class="weight-badge available">700</span>
+                        </div>
+                    </div>
+                    <div class="usage">Modern monospace with ligatures. Great for developers. Contemporary look.</div>
+                </div>
+                
+                <!-- IBM Plex Mono -->
+                <div class="font-family">
+                    <div class="font-name ibm-plex">IBM Plex Mono</div>
+                    <div class="font-type">Monospace • Professional • IBM/Google Fonts</div>
+                    <div class="preview">
+                        <div class="preview-text ibm-plex" style="font-size: 14px;">const user = { name: 'Sarah' }</div>
+                        <div class="weights">
+                            <span class="weight-badge available">400</span>
+                            <span class="weight-badge available">500</span>
+                            <span class="weight-badge available">600</span>
+                            <span class="weight-badge available">700</span>
+                        </div>
+                    </div>
+                    <div class="usage">Professional, open-source monospace. Corporate feel. Excellent legibility.</div>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Recommended Combinations</h2>
+            <p>Tested font pairings that work well together for Community Carpool.</p>
+            
+            <!-- Option 1 -->
+            <div class="comparison recommended">
+                <h3 style="margin-top: 0;">Option 1: Modern & Clean (Recommended)</h3>
+                <div class="comparison-row">
+                    <div class="comparison-label">Headings</div>
+                    <div class="preview-text inter" style="font-size: 32px; font-weight: 700; margin: 0;">Build a Sustainable Community</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-label">Body Text</div>
+                    <div class="preview-text inter" style="font-size: 16px; margin: 0; line-height: 1.6;">Find carpool matches on your exact commute route. Our smart matching algorithm connects you with neighbors heading the same way.</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-label">Code</div>
+                    <div class="preview-text source-code" style="font-size: 13px; margin: 0;">const match = findCarpool(user.route)</div>
+                </div>
+                <p style="margin-top: 16px; color: #666;"><strong>Why:</strong> Inter is the industry standard for SaaS. Consistent, modern, highly legible. Source Code Pro provides good contrast for technical content.</p>
+            </div>
+            
+            <!-- Option 2 -->
+            <div class="comparison">
+                <h3 style="margin-top: 0;">Option 2: Friendly & Approachable</h3>
+                <div class="comparison-row">
+                    <div class="comparison-label">Headings</div>
+                    <div class="preview-text poppins" style="font-size: 32px; font-weight: 700; margin: 0;">Build a Sustainable Community</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-label">Body Text</div>
+                    <div class="preview-text lato" style="font-size: 16px; margin: 0; line-height: 1.6;">Find carpool matches on your exact commute route. Our smart matching algorithm connects you with neighbors heading the same way.</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-label">Code</div>
+                    <div class="preview-text jetbrains" style="font-size: 13px; margin: 0;">const match = findCarpool(user.route)</div>
+                </div>
+                <p style="margin-top: 16px; color: #666;"><strong>Why:</strong> Poppins + Lato creates a warm, approachable feel. Better for community-focused messaging. JetBrains Mono adds modern technical touch.</p>
+            </div>
+            
+            <!-- Option 3 -->
+            <div class="comparison">
+                <h3 style="margin-top: 0;">Option 3: Contemporary & Premium</h3>
+                <div class="comparison-row">
+                    <div class="comparison-label">Headings</div>
+                    <div class="preview-text montserrat" style="font-size: 32px; font-weight: 800; margin: 0;">Build a Sustainable Community</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-label">Body Text</div>
+                    <div class="preview-text dm-sans" style="font-size: 16px; margin: 0; line-height: 1.6;">Find carpool matches on your exact commute route. Our smart matching algorithm connects you with neighbors heading the same way.</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-label">Code</div>
+                    <div class="preview-text ibm-plex" style="font-size: 13px; margin: 0;">const match = findCarpool(user.route)</div>
+                </div>
+                <p style="margin-top: 16px; color: #666;"><strong>Why:</strong> Modern, minimalist approach. Contemporary aesthetic. IBM Plex Mono adds professional enterprise touch.</p>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Font Usage Guide</h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Context</th>
+                        <th>Font</th>
+                        <th>Size</th>
+                        <th>Weight</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="recommended">
+                        <td><strong>Page Title (H1)</strong></td>
+                        <td>Inter / Roboto</td>
+                        <td>40px</td>
+                        <td>700</td>
+                        <td>Build a Sustainable Community</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Section Heading (H2)</strong></td>
+                        <td>Inter / Roboto</td>
+                        <td>32px</td>
+                        <td>700</td>
+                        <td>How Community Carpool Works</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Subheading (H3)</strong></td>
+                        <td>Inter</td>
+                        <td>24px</td>
+                        <td>700</td>
+                        <td>Find Your Perfect Match</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Card Title (H4)</strong></td>
+                        <td>Inter</td>
+                        <td>18px</td>
+                        <td>600</td>
+                        <td>Sarah - Downtown Route</td>
+                    </tr>
+                    <tr class="recommended">
+                        <td><strong>Body Text</strong></td>
+                        <td>Inter</td>
+                        <td>16px</td>
+                        <td>400</td>
+                        <td>Find carpool matches on your exact commute route.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Small Text / Label</strong></td>
+                        <td>Inter</td>
+                        <td>14px</td>
+                        <td>500</td>
+                        <td>Email Address</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Button Text</strong></td>
+                        <td>Inter</td>
+                        <td>16px</td>
+                        <td>600</td>
+                        <td>Get Started</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Code Block</strong></td>
+                        <td>Source Code Pro</td>
+                        <td>13px</td>
+                        <td>400</td>
+                        <td>const match = findCarpool()</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <section>
+            <h2>System Stack (Fallback Fonts)</h2>
+            <p>If custom fonts fail to load, these system fonts provide excellent fallbacks.</p>
+            
+            <div class="comparison">
+                <h3 style="margin-top: 0;">Primary Stack</h3>
+                <div class="code-block" style="background: #1F2937; color: #E5E7EB; padding: 16px; border-radius: 6px; font-family: monospace; font-size: 13px; overflow-x: auto;">font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+             'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;</div>
+                <p style="margin-top: 12px; color: #666;"><strong>Benefits:</strong> Uses native system fonts for optimal performance. Looks native on each platform (iOS, Android, Windows, Mac).</p>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Font Performance Tips</h2>
+            
+            <div style="background: #f5f5f5; padding: 24px; border-radius: 8px; margin: 24px 0;">
+                <h3 style="margin-top: 0; font-size: 18px;">Best Practices</h3>
+                <ul style="margin: 16px 0 0 20px; line-height: 1.8;">
+                    <li><strong>Limit fonts to 2-3 typefaces</strong> — One serif/sans-serif for body, one for headings, one monospace for code</li>
+                    <li><strong>Use font-display: swap</strong> — Shows system font immediately, swaps when custom loads</li>
+                    <li><strong>Limit weights</strong> — Only load 400, 600, 700 weights unless specific need</li>
+                    <li><strong>Preload critical fonts</strong> — Improve perceived performance</li>
+                    <li><strong>Use Google Fonts</strong> — Excellent CDN performance, cached globally</li>
+                    <li><strong>Test at different sizes</strong> — Make sure fonts are legible at 12px, 14px, 16px, etc.</li>
+                    <li><strong>Consider accessibility</strong> — Avoid very thin weights (< 300) for small text</li>
+                    <li><strong>Match letter-spacing</strong> — Some fonts need tighter/looser spacing</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p><strong>Community Carpool Complete Font Library</strong></p>
+        <p>All Typography Options, Weights, and Combinations | March 2026</p>
+    </footer>
+</body>
+</html>
