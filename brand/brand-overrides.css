@@ -129,7 +129,7 @@ code, pre, .code, .code-block {
   margin: 8px 0 !important;
 }
 
-/* ── GRIDS ── tighter gaps */
+/* ── GRIDS ── tighter gaps AND margins */
 .grid, .cards, .cards-grid,
 .color-grid, .font-grid, .font-family,
 .component-grid, .token-grid,
@@ -138,7 +138,17 @@ code, pre, .code, .code-block {
 .state-grid, .nav-grid, .logo-grid,
 .promise-grid, .footer-grid {
   gap: 12px !important;
+  margin-top: 12px !important;
+  margin-bottom: 12px !important;
 }
+
+/* ── CARD INTERNALS ── reduce icon/text spacing */
+.icon, .card-icon, .card img, .card > img {
+  margin-bottom: 8px !important;
+  margin-top: 0 !important;
+}
+.card p, .card-body p { margin-bottom: 8px !important; }
+.card h3, .card h4 { margin-bottom: 4px !important; margin-top: 6px !important; }
 
 /* ── TABLES ── */
 table { margin: 8px 0 !important; }
