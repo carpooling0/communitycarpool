@@ -215,8 +215,6 @@
       <button class="btn btn-save" id="saveBtn" onclick="savePrefs()">Save Preferences</button>
       <button class="btn btn-unsub-all" id="unsubAllBtn" onclick="unsubscribeAll()">Unsubscribe from all emails</button>
 
-      <hr class="divider" />
-      <a href="#" id="backLink" class="btn-back">↩ Back to My Matches</a>
     </div>
   </div>
 
@@ -242,9 +240,7 @@
     async function init() {
       if (!token) { show('stateNoToken'); return }
 
-      $('backLink').href = `https://communitycarpool.org/matches.html?token=${token}`
-
-      try {
+try {
         const res  = await fetch(`${SUPABASE_URL}/functions/v1/update-email-prefs?token=${encodeURIComponent(token)}`, {
           headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
         })
