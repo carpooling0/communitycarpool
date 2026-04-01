@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SEO &amp; Search Management | Super-Admin Docs</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="../favicon.png" type="image/png">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔧</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="sa-style.css">
+  <style>
+    .sa-badge { display:inline-flex;align-items:center;gap:5px;background:#fef2f2;color:#991b1b;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:3px 10px;border-radius:20px;border:1px solid #fecaca;margin-bottom:18px; }
+    code { background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:1px 6px;font-size:13px;font-family:monospace; }
+    pre { background:#1e293b;color:#e2e8f0;border-radius:8px;padding:16px 20px;font-size:13px;line-height:1.6;overflow-x:auto;margin:14px 0; }
+    pre code { background:none;border:none;padding:0;color:inherit;font-size:inherit; }
+    table { width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px; }
+    th { background:#f8fafc;font-weight:700;text-align:left;padding:10px 14px;border:1px solid var(--border); }
+    td { padding:9px 14px;border:1px solid var(--border);vertical-align:top; }
+    tr:nth-child(even) td { background:#fafafa; }
+    .tag { display:inline-flex;align-items:center;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700; }
+    .tag-green { background:#dcfce7;color:#15803d; }
+    .tag-amber { background:#fef9c3;color:#92400e; }
+    .tag-red { background:#fef2f2;color:#991b1b; }
+    .tag-blue { background:#eff6ff;color:#1d4ed8; }
+    .tag-gray { background:#f3f4f6;color:#374151; }
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <a class="topnav-logo" href="../../index.html"><picture><source srcset="../../logo.webp" type="image/webp"><img src="../../logo.png" alt="CCP"></picture></a>
+  <div class="topnav-divider"></div>
+  <span class="topnav-section">Super-Admin Docs</span>
+  <div class="topnav-spacer"></div>
+  <a class="topnav-home" href="index.html">← SA Docs home</a>
+</nav>
+
+<div class="article-shell">
+  <aside class="sidebar">
+    <nav id="sidebar-nav">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Platform Infrastructure</div>
+        <a class="sidebar-link" href="supabase.html">Supabase dashboards</a>
+        <a class="sidebar-link" href="github.html">GitHub &amp; deployment</a>
+        <a class="sidebar-link" href="dev-vs-prod.html">Dev vs Prod environments</a>
+        <a class="sidebar-link" href="cost-billing.html">Cost &amp; billing</a>
+        <a class="sidebar-link" href="architecture.html">System architecture</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Integrations &amp; APIs</div>
+        <a class="sidebar-link" href="email-providers.html">Email — Resend &amp; SES</a>
+        <a class="sidebar-link" href="maps.html">Google Maps &amp; Mapbox</a>
+        <a class="sidebar-link" href="dns.html">DNS records</a>
+        <a class="sidebar-link" href="apis-connections.html">All APIs &amp; connections</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Database</div>
+        <a class="sidebar-link" href="database-tables.html">Tables reference</a>
+        <a class="sidebar-link" href="database-migrations.html">Database migrations</a>
+        <a class="sidebar-link" href="database-backup.html">Backup &amp; recovery</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Edge Functions &amp; Automation</div>
+        <a class="sidebar-link" href="edge-functions.html">Edge functions reference</a>
+        <a class="sidebar-link" href="cron-jobs.html">Cron jobs &amp; scheduled tasks</a>
+        <a class="sidebar-link" href="deploying-edge-functions.html">Deploying edge functions</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Configuration</div>
+        <a class="sidebar-link" href="config-table.html">Config table</a>
+        <a class="sidebar-link" href="secrets.html">Secrets &amp; API keys</a>
+        <a class="sidebar-link" href="rotating-secrets.html">Rotating secrets</a>
+        <a class="sidebar-link" href="testing-mode.html">Testing mode</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Operations</div>
+        <a class="sidebar-link" href="managing-team.html">Managing team access</a>
+        <a class="sidebar-link" href="support-tickets.html">Support tickets</a>
+        <a class="sidebar-link" href="blacklist.html">Blacklist &amp; moderation</a>
+        <a class="sidebar-link" href="organisations.html">Organisations</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Processes</div>
+        <a class="sidebar-link" href="terms-conditions.html">T&amp;C process</a>
+        <a class="sidebar-link" href="campaign-management.html">Campaign management</a>
+        <a class="sidebar-link" href="email-templates.html">Email templates</a>
+        <a class="sidebar-link active" href="seo.html">SEO &amp; search management</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Compliance &amp; Incidents</div>
+        <a class="sidebar-link" href="monitoring-logs.html">Monitoring &amp; logs</a>
+        <a class="sidebar-link" href="data-subject-requests.html">Data subject requests</a>
+        <a class="sidebar-link" href="incident-runbook.html">Incident runbook</a>
+        <a class="sidebar-link" href="security.html">Security hardening</a>
+      </div>
+    </nav>
+  </aside>
+  <main class="article-main">
+    <div class="breadcrumb">
+      <a href="index.html">SA Docs</a><span class="breadcrumb-sep">/</span>
+      <span>Processes</span>
+    </div>
+    <div class="sa-badge">🔒 Super-Admin Only</div>
+    <div class="article-eyebrow">🔍 Processes</div>
+    <h1 class="article-title">SEO &amp; Search Management</h1>
+    <p class="article-lead">This document covers all SEO assets on the platform — Open Graph tags, Google Search Console, robots.txt, sitemap.xml, and GA4 — including what each does, how to update it, and how often.</p>
+
+    <div class="article-toc">
+      <div class="article-toc-title">On this page</div>
+      <a href="#og-tags">Open Graph tags</a>
+      <a href="#search-console">Google Search Console</a>
+      <a href="#robots">robots.txt</a>
+      <a href="#sitemap">sitemap.xml</a>
+      <a href="#ga4">Google Analytics 4</a>
+      <a href="#schema">Schema.org structured data</a>
+      <a href="#checklist">New page checklist</a>
+    </div>
+
+    <!-- OG TAGS -->
+    <h2 id="og-tags">Open Graph tags</h2>
+    <p>Open Graph (OG) tags control how pages appear when shared on WhatsApp, LinkedIn, Twitter/X, and other platforms — the title, description, and image shown in the preview card.</p>
+
+    <h3>Where they live</h3>
+    <p>In the <code>&lt;head&gt;</code> of each HTML file:</p>
+    <pre><code>&lt;meta property="og:title" content="Community Carpool | Find Your Carpool Match" /&gt;
+&lt;meta property="og:description" content="Match with people on similar routes. Contact shared only after a match." /&gt;
+&lt;meta property="og:image" content="https://communitycarpool.org/og-image.jpg" /&gt;
+&lt;meta property="og:url" content="https://communitycarpool.org/" /&gt;
+&lt;meta name="twitter:card" content="summary_large_image" /&gt;</code></pre>
+
+    <h3>What each tag does</h3>
+    <table>
+      <tr><th>Tag</th><th>Purpose</th><th>Notes</th></tr>
+      <tr><td><code>og:title</code></td><td>Bold headline in the share card</td><td>Keep under 60 characters</td></tr>
+      <tr><td><code>og:description</code></td><td>Subtitle text below the headline</td><td>Keep under 160 characters</td></tr>
+      <tr><td><code>og:image</code></td><td>Thumbnail image in the card</td><td>Must be 1200×630px, use <code>og-image.jpg</code></td></tr>
+      <tr><td><code>og:url</code></td><td>Canonical URL for the page</td><td>Always use full https:// URL</td></tr>
+      <tr><td><code>twitter:card</code></td><td>Controls Twitter/X card type</td><td><code>summary_large_image</code> for big image</td></tr>
+    </table>
+
+    <h3>Which pages have OG tags</h3>
+    <p>OG tags are set on <strong>public-facing pages only</strong>. Private pages (matches, admin, unsubscribe, docs/admin, docs/super-admin) use <code>&lt;meta name="robots" content="noindex, nofollow"&gt;</code> instead and do not need OG tags.</p>
+    <p>The <strong>OG image</strong> (<code>og-image.jpg</code> — 1200×630px) is shared across all public pages. It is generated from the logo file <code>Car_Pool_with slogan.png</code> using a Python script.</p>
+
+    <h3>How to verify OG tags</h3>
+    <p>Use <strong><a href="https://opengraph.xyz" target="_blank">opengraph.xyz</a></strong> — paste any URL to see exactly how it will appear on WhatsApp, LinkedIn, Facebook, and Twitter/X.</p>
+    <ol>
+      <li>Go to <a href="https://opengraph.xyz" target="_blank">opengraph.xyz</a></li>
+      <li>Paste the full URL (e.g. <code>https://communitycarpool.org</code>)</li>
+      <li>Check the preview for each platform</li>
+      <li>Use the "Technical OG Tag Inspector" tab for the raw tag values</li>
+    </ol>
+
+    <h3>When to update OG tags</h3>
+    <table>
+      <tr><th>Trigger</th><th>Action</th></tr>
+      <tr><td>New public landing page added</td><td>Add <code>og:title</code>, <code>og:description</code>, <code>og:url</code> to that page. <code>og:image</code> stays as <code>og-image.jpg</code>.</td></tr>
+      <tr><td>Brand refresh or new tagline</td><td>Regenerate <code>og-image.jpg</code> and update <code>og:title</code> / <code>og:description</code> on <code>index.html</code></td></tr>
+      <tr><td>Homepage title or description changes</td><td>Update <code>og:title</code> and <code>og:description</code> on <code>index.html</code> only</td></tr>
+    </table>
+
+    <!-- SEARCH CONSOLE -->
+    <h2 id="search-console">Google Search Console</h2>
+    <p>Google Search Console (GSC) shows how the site performs in Google Search — which queries bring traffic, how pages rank, and any indexing issues.</p>
+
+    <h3>Access</h3>
+    <p>Go to <a href="https://search.google.com/search-console" target="_blank">search.google.com/search-console</a> and sign in with the Community Carpool Google account. The property is verified via DNS TXT record on Cloudflare (domain-level verification — covers all subdomains).</p>
+
+    <h3>Key reports to check monthly</h3>
+    <table>
+      <tr><th>Report</th><th>Where</th><th>What to look for</th></tr>
+      <tr><td>Performance</td><td>Search results → Queries</td><td>Top queries driving clicks; any dropping in position</td></tr>
+      <tr><td>Coverage</td><td>Indexing → Pages</td><td>Any pages with errors or excluded unexpectedly</td></tr>
+      <tr><td>Sitemaps</td><td>Indexing → Sitemaps</td><td>Sitemap status — should show Success</td></tr>
+      <tr><td>Core Web Vitals</td><td>Experience → Core Web Vitals</td><td>Any pages flagged as Poor</td></tr>
+    </table>
+
+    <h3>How to request indexing for a new page</h3>
+    <ol>
+      <li>In GSC, use the URL inspection tool (top search bar)</li>
+      <li>Paste the full URL of the new page</li>
+      <li>Click <strong>Request Indexing</strong></li>
+      <li>Google typically crawls within 24–72 hours</li>
+    </ol>
+
+    <!-- ROBOTS.TXT -->
+    <h2 id="robots">robots.txt</h2>
+    <p><code>robots.txt</code> tells search engine crawlers which pages they are allowed to index. It lives at the root of the repo: <code>communitycarpool.org/robots.txt</code>.</p>
+
+    <h3>Current configuration</h3>
+    <pre><code>User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /matches.html
+Disallow: /unsubscribe.html
+Disallow: /confirm-deletion.html
+Disallow: /docs/admin/
+Disallow: /docs/super-admin/
+
+Sitemap: https://communitycarpool.org/sitemap.xml</code></pre>
+
+    <h3>Rules</h3>
+    <ul>
+      <li><strong>Public pages</strong> (index, support, terms, docs user articles, landing pages) → Allow</li>
+      <li><strong>Private pages</strong> (matches, admin, unsubscribe, confirm-deletion, admin docs, super-admin docs) → Disallow</li>
+    </ul>
+
+    <h3>When to update robots.txt</h3>
+    <table>
+      <tr><th>Trigger</th><th>Action</th><th>Frequency</th></tr>
+      <tr><td>New private page added</td><td>Add <code>Disallow:</code> entry for that path</td><td>As needed</td></tr>
+      <tr><td>New public page added</td><td>No change needed — <code>Allow: /</code> covers all pages by default</td><td>—</td></tr>
+      <tr><td>Routine review</td><td>Check that all private pages are still disallowed</td><td>Quarterly</td></tr>
+    </table>
+    <p><strong>robots.txt does not need regular updates</strong> — only when the page structure changes (new private page added or a page changes from private to public).</p>
+
+    <!-- SITEMAP -->
+    <h2 id="sitemap">sitemap.xml</h2>
+    <p><code>sitemap.xml</code> lists all public URLs on the site so Google can discover and crawl them efficiently. It lives at <code>communitycarpool.org/sitemap.xml</code> and is already submitted to Google Search Console.</p>
+
+    <h3>When to update sitemap.xml</h3>
+    <table>
+      <tr><th>Trigger</th><th>Action</th><th>Frequency</th></tr>
+      <tr><td>New public page added</td><td>Add a <code>&lt;url&gt;</code> entry with <code>&lt;loc&gt;</code>, <code>&lt;lastmod&gt;</code>, and <code>&lt;priority&gt;</code></td><td>Every time a new page goes live</td></tr>
+      <tr><td>Page removed or made private</td><td>Remove its <code>&lt;url&gt;</code> entry</td><td>As needed</td></tr>
+      <tr><td>Significant content update</td><td>Update the <code>&lt;lastmod&gt;</code> date for that URL</td><td>As needed</td></tr>
+      <tr><td>Routine review</td><td>Verify all URLs return 200 and are still public</td><td>Quarterly</td></tr>
+    </table>
+
+    <h3>Priority guidance</h3>
+    <table>
+      <tr><th>Priority</th><th>Pages</th></tr>
+      <tr><td><code>1.0</code></td><td>Homepage (<code>/</code>)</td></tr>
+      <tr><td><code>0.8</code></td><td>Key landing pages, docs index</td></tr>
+      <tr><td><code>0.6</code></td><td>Individual docs articles, support, terms</td></tr>
+      <tr><td><code>0.4</code></td><td>Secondary landing pages</td></tr>
+    </table>
+
+    <h3>How to add a new URL to sitemap.xml</h3>
+    <pre><code>&lt;url&gt;
+  &lt;loc&gt;https://communitycarpool.org/dubai-carpool.html&lt;/loc&gt;
+  &lt;lastmod&gt;2026-04-01&lt;/lastmod&gt;
+  &lt;changefreq&gt;monthly&lt;/changefreq&gt;
+  &lt;priority&gt;0.8&lt;/priority&gt;
+&lt;/url&gt;</code></pre>
+
+    <h3>After updating sitemap.xml</h3>
+    <ol>
+      <li>Deploy to prod (<code>git push origin main</code>)</li>
+      <li>Go to <a href="https://search.google.com/search-console" target="_blank">Google Search Console</a></li>
+      <li>Navigate to <strong>Indexing → Sitemaps</strong></li>
+      <li>The sitemap is already submitted — GSC re-reads it automatically. If you want to force a re-read, delete and re-add: <code>https://communitycarpool.org/sitemap.xml</code></li>
+    </ol>
+
+    <!-- GA4 -->
+    <h2 id="ga4">Google Analytics 4</h2>
+    <p>GA4 tracks user behaviour on the site — page views, form interactions, events. Measurement ID: <code>G-F7RGV13VFY</code>.</p>
+
+    <h3>Access</h3>
+    <p>Go to <a href="https://analytics.google.com" target="_blank">analytics.google.com</a> → Community Carpool property.</p>
+
+    <h3>Key reports</h3>
+    <table>
+      <tr><th>Report</th><th>Where</th><th>Purpose</th></tr>
+      <tr><td>Realtime</td><td>Reports → Realtime</td><td>Live users on site right now</td></tr>
+      <tr><td>Pages &amp; screens</td><td>Reports → Engagement → Pages</td><td>Most visited pages</td></tr>
+      <tr><td>Acquisition</td><td>Reports → Acquisition → Traffic acquisition</td><td>Where users come from</td></tr>
+      <tr><td>Events</td><td>Reports → Engagement → Events</td><td>Custom events (form_started, page_visited)</td></tr>
+    </table>
+
+    <h3>The GA4 snippet</h3>
+    <p>The GA4 snippet is included on every page via a <code>&lt;script&gt;</code> tag pointing to Google's gtag.js. Any new page created from the landing page template will automatically include it — no manual action needed.</p>
+    <p>GA4 does <strong>not</strong> need to be updated when adding new pages — it tracks all pages automatically.</p>
+
+    <!-- SCHEMA -->
+    <h2 id="schema">Schema.org structured data</h2>
+    <p>Schema.org JSON-LD blocks help Google understand page content and can unlock rich results (FAQ dropdowns, breadcrumbs, article metadata) in search.</p>
+
+    <h3>What we have</h3>
+    <table>
+      <tr><th>Schema type</th><th>Pages</th></tr>
+      <tr><td><code>WebSite</code> + <code>Organization</code></td><td><code>index.html</code></td></tr>
+      <tr><td><code>Article</code> + <code>BreadcrumbList</code></td><td>All 21 docs user articles</td></tr>
+      <tr><td><code>WebPage</code></td><td><code>support.html</code>, <code>terms.html</code></td></tr>
+      <tr><td><code>WebPage</code> + <code>BreadcrumbList</code></td><td><code>docs/index.html</code></td></tr>
+    </table>
+
+    <h3>When to update schema</h3>
+    <table>
+      <tr><th>Trigger</th><th>Action</th></tr>
+      <tr><td>New landing page</td><td>Add <code>WebPage</code> JSON-LD from the landing page template</td></tr>
+      <tr><td>New docs article</td><td>Add <code>Article</code> + <code>BreadcrumbList</code> JSON-LD</td></tr>
+      <tr><td>Organisation name or URL changes</td><td>Update <code>Organization</code> schema on <code>index.html</code></td></tr>
+    </table>
+
+    <h3>How to verify schema</h3>
+    <p>Use Google's <a href="https://search.google.com/test/rich-results" target="_blank">Rich Results Test</a> — paste any URL to see detected schema and any errors.</p>
+
+    <!-- CHECKLIST -->
+    <h2 id="checklist">New page checklist</h2>
+    <p>Every time a new <strong>public</strong> page is added to the site:</p>
+    <table>
+      <tr><th>Task</th><th>Required</th><th>Notes</th></tr>
+      <tr><td>Use landing page template</td><td><span class="tag tag-green">Yes</span></td><td>GA4 and meta structure already included</td></tr>
+      <tr><td>Write unique <code>&lt;meta name="description"&gt;</code></td><td><span class="tag tag-green">Yes</span></td><td>110–160 characters</td></tr>
+      <tr><td>Add <code>og:title</code>, <code>og:description</code>, <code>og:url</code></td><td><span class="tag tag-amber">Landing pages only</span></td><td>Not needed for docs articles</td></tr>
+      <tr><td>Add Schema.org JSON-LD</td><td><span class="tag tag-green">Yes</span></td><td>Use <code>WebPage</code> for landing pages, <code>Article</code> for docs</td></tr>
+      <tr><td>Add URL to <code>sitemap.xml</code></td><td><span class="tag tag-green">Yes</span></td><td>Then re-submit in Search Console if needed</td></tr>
+      <tr><td>Update <code>robots.txt</code></td><td><span class="tag tag-gray">Only if private</span></td><td>Add <code>Disallow:</code> entry for private pages</td></tr>
+      <tr><td>Verify in opengraph.xyz</td><td><span class="tag tag-amber">Landing pages only</span></td><td>Check WhatsApp/LinkedIn preview card</td></tr>
+      <tr><td>Request indexing in Search Console</td><td><span class="tag tag-green">Yes</span></td><td>Speeds up Google crawl</td></tr>
+    </table>
+
+  </main>
+</div>
+</body>
+</html>
