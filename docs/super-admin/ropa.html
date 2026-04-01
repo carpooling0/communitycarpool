@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Record of Processing Activities (ROPA) | Super-Admin Docs</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="../favicon.png" type="image/png">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔧</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="sa-style.css">
+  <style>
+    .sa-badge { display:inline-flex;align-items:center;gap:5px;background:#fef2f2;color:#991b1b;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:3px 10px;border-radius:20px;border:1px solid #fecaca;margin-bottom:18px; }
+    code { background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:1px 6px;font-size:13px;font-family:monospace; }
+    table { width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px; }
+    th { background:#f8fafc;font-weight:700;text-align:left;padding:10px 14px;border:1px solid var(--border); }
+    td { padding:9px 14px;border:1px solid var(--border);vertical-align:top;line-height:1.55; }
+    tr:nth-child(even) td { background:#fafafa; }
+    .tag { display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700; }
+    .tag-green { background:#dcfce7;color:#15803d; }
+    .tag-amber { background:#fef9c3;color:#92400e; }
+    .tag-blue { background:#eff6ff;color:#1d4ed8; }
+    .tag-gray { background:#f3f4f6;color:#374151; }
+    .activity-card {
+      border:1.5px solid var(--border);
+      border-radius:12px;
+      margin:28px 0;
+      overflow:hidden;
+    }
+    .activity-header {
+      background:#f8fafc;
+      border-bottom:1.5px solid var(--border);
+      padding:16px 20px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .activity-num {
+      background:#16a34a;
+      color:white;
+      font-size:12px;
+      font-weight:700;
+      width:26px;height:26px;
+      border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;
+    }
+    .activity-title { font-size:16px;font-weight:700;color:#111827; }
+    .activity-body { padding:0 20px 4px; }
+    .activity-body table { margin:12px 0 16px; }
+    .meta-grid {
+      display:grid;grid-template-columns:1fr 1fr;gap:16px;
+      padding:20px;border-top:1px solid var(--border);background:#fafafa;
+      font-size:13.5px;
+    }
+    .meta-item strong { display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#6b7280;margin-bottom:4px; }
+    @media(max-width:640px){ .meta-grid{grid-template-columns:1fr;} }
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <a class="topnav-logo" href="../../index.html"><picture><source srcset="../../logo.webp" type="image/webp"><img src="../../logo.png" alt="CCP"></picture></a>
+  <div class="topnav-divider"></div>
+  <span class="topnav-section">Super-Admin Docs</span>
+  <div class="topnav-spacer"></div>
+  <a class="topnav-home" href="index.html">← SA Docs home</a>
+</nav>
+
+<div class="article-shell">
+  <aside class="sidebar">
+    <nav id="sidebar-nav">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Platform Infrastructure</div>
+        <a class="sidebar-link" href="supabase.html">Supabase dashboards</a>
+        <a class="sidebar-link" href="github.html">GitHub &amp; deployment</a>
+        <a class="sidebar-link" href="dev-vs-prod.html">Dev vs Prod environments</a>
+        <a class="sidebar-link" href="cost-billing.html">Cost &amp; billing</a>
+        <a class="sidebar-link" href="architecture.html">System architecture</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Integrations &amp; APIs</div>
+        <a class="sidebar-link" href="email-providers.html">Email — Resend &amp; SES</a>
+        <a class="sidebar-link" href="maps.html">Google Maps &amp; Mapbox</a>
+        <a class="sidebar-link" href="dns.html">DNS records</a>
+        <a class="sidebar-link" href="apis-connections.html">All APIs &amp; connections</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Database</div>
+        <a class="sidebar-link" href="database-tables.html">Tables reference</a>
+        <a class="sidebar-link" href="database-migrations.html">Database migrations</a>
+        <a class="sidebar-link" href="database-backup.html">Backup &amp; recovery</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Edge Functions &amp; Automation</div>
+        <a class="sidebar-link" href="edge-functions.html">Edge functions reference</a>
+        <a class="sidebar-link" href="cron-jobs.html">Cron jobs &amp; scheduled tasks</a>
+        <a class="sidebar-link" href="deploying-edge-functions.html">Deploying edge functions</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Configuration</div>
+        <a class="sidebar-link" href="config-table.html">Config table</a>
+        <a class="sidebar-link" href="secrets.html">Secrets &amp; API keys</a>
+        <a class="sidebar-link" href="rotating-secrets.html">Rotating secrets</a>
+        <a class="sidebar-link" href="testing-mode.html">Testing mode</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Operations</div>
+        <a class="sidebar-link" href="managing-team.html">Managing team access</a>
+        <a class="sidebar-link" href="support-tickets.html">Support tickets</a>
+        <a class="sidebar-link" href="blacklist.html">Blacklist &amp; moderation</a>
+        <a class="sidebar-link" href="organisations.html">Organisations</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Processes</div>
+        <a class="sidebar-link" href="terms-conditions.html">T&amp;C process</a>
+        <a class="sidebar-link" href="campaign-management.html">Campaign management</a>
+        <a class="sidebar-link" href="email-templates.html">Email templates</a>
+        <a class="sidebar-link" href="seo.html">SEO &amp; search management</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Compliance &amp; Incidents</div>
+        <a class="sidebar-link" href="monitoring-logs.html">Monitoring &amp; logs</a>
+        <a class="sidebar-link" href="data-subject-requests.html">Data subject requests</a>
+        <a class="sidebar-link active" href="ropa.html">Record of Processing (ROPA)</a>
+        <a class="sidebar-link" href="incident-runbook.html">Incident runbook</a>
+        <a class="sidebar-link" href="security.html">Security hardening</a>
+      </div>
+    </nav>
+  </aside>
+  <main class="article-main">
+    <div class="breadcrumb">
+      <a href="index.html">SA Docs</a><span class="breadcrumb-sep">/</span>
+      <span>Compliance &amp; Incidents</span>
+    </div>
+    <div class="sa-badge">🔒 Super-Admin Only</div>
+    <div class="article-eyebrow">📋 Compliance &amp; Incidents</div>
+    <h1 class="article-title">Record of Processing Activities (ROPA)</h1>
+    <p class="article-lead">Required under GDPR Article 30. This document records every activity in which Community Carpool processes personal data — what data, why, where it goes, how long it's kept. Review and update whenever a new data flow is introduced.</p>
+
+    <!-- Controller details -->
+    <h2 style="margin:32px 0 12px;font-size:18px;font-weight:700;">Controller details</h2>
+    <table>
+      <tbody>
+        <tr><td style="width:200px;font-weight:600;">Organisation name</td><td>Community Carpool</td></tr>
+        <tr><td style="font-weight:600;">Website</td><td>communitycarpool.org</td></tr>
+        <tr><td style="font-weight:600;">Contact email</td><td>support@communitycarpool.org</td></tr>
+        <tr><td style="font-weight:600;">Data Protection Officer</td><td>Not appointed (not required at current scale and data categories)</td></tr>
+        <tr><td style="font-weight:600;">Last reviewed</td><td>April 2026</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip" style="margin:24px 0;">
+      <div class="callout-icon">📌</div>
+      <div class="callout-body"><strong>When to update this document:</strong> any time you add a new form field, integrate a new third-party service, change retention periods, or introduce a new use of existing data. Treat it as a living document.</div>
+    </div>
+
+    <!-- Activity 1 -->
+    <div class="activity-card">
+      <div class="activity-header">
+        <div class="activity-num">1</div>
+        <div class="activity-title">Journey registration</div>
+      </div>
+      <div class="activity-body">
+        <table>
+          <tr><th style="width:200px;">Field</th><th>Detail</th></tr>
+          <tr><td><strong>Purpose</strong></td><td>Registering a user's commute journey so they can be matched with compatible carpoolers</td></tr>
+          <tr><td><strong>Legal basis</strong></td><td>Consent — user explicitly accepts Terms &amp; Conditions and Privacy Policy at submission (terms checkbox, version recorded)</td></tr>
+          <tr><td><strong>Data subjects</strong></td><td>Registered users (adults 16+)</td></tr>
+          <tr><td><strong>Personal data collected</strong></td>
+            <td>
+              First name · Email address · Home/work location addresses (text) · Home/work coordinates (lat/lng) · IP address · Country (derived from IP) · Terms version accepted · Timestamp
+            </td>
+          </tr>
+          <tr><td><strong>Special category data</strong></td><td>None</td></tr>
+          <tr><td><strong>Source</strong></td><td>Directly from the data subject via the web form</td></tr>
+          <tr><td><strong>Recipients</strong></td><td>Internal team (via admin dashboard) only. No data sold or shared externally.</td></tr>
+          <tr><td><strong>Third-party processors</strong></td>
+            <td>
+              <strong>Supabase</strong> (database hosting, Singapore) — stores all user and submission data<br>
+              <strong>Google Maps API</strong> (address autocomplete) — receives address search strings; no name or email<br>
+              <strong>Mapbox</strong> (road distance) — receives lat/lng pairs only; no name or email<br>
+              <strong>ipwho.is</strong> (IP geolocation) — receives IP address, returns country code; no data retained by us beyond country code
+            </td>
+          </tr>
+          <tr><td><strong>International transfers</strong></td><td>Supabase hosted in Singapore (ap-southeast-1). Covered by Supabase's standard terms which incorporate appropriate safeguards. Google Maps and Mapbox servers in the US — covered by their standard DPA/SCCs.</td></tr>
+          <tr><td><strong>Retention period</strong></td><td>Journey data retained while account is active. Deleted within 30 days of a confirmed account deletion request. Expired journeys archived (status = expired) but not purged automatically — manual review or cron job required.</td></tr>
+          <tr><td><strong>Automated decisions</strong></td><td>Match scoring is automated (algorithm-based, no human review). Not used for decisions with legal or similarly significant effects — users are free to ignore any match.</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Activity 2 -->
+    <div class="activity-card">
+      <div class="activity-header">
+        <div class="activity-num">2</div>
+        <div class="activity-title">Carpool matching &amp; match notifications</div>
+      </div>
+      <div class="activity-body">
+        <table>
+          <tr><th style="width:200px;">Field</th><th>Detail</th></tr>
+          <tr><td><strong>Purpose</strong></td><td>Comparing journey data across users to identify compatible matches and notifying users by email when a match is found</td></tr>
+          <tr><td><strong>Legal basis</strong></td><td>Consent (as above — integral to the service the user signed up for)</td></tr>
+          <tr><td><strong>Data subjects</strong></td><td>Registered users with active journeys</td></tr>
+          <tr><td><strong>Personal data used</strong></td><td>Journey coordinates (lat/lng), from/to location addresses, distance preference, name (first name only, masked as "A**** B." in match previews), email (only revealed on mutual interest)</td></tr>
+          <tr><td><strong>Special category data</strong></td><td>None</td></tr>
+          <tr><td><strong>Recipients</strong></td><td>Matched users receive each other's masked name until both express mutual interest, at which point full name and email are revealed to both parties only</td></tr>
+          <tr><td><strong>Third-party processors</strong></td>
+            <td>
+              <strong>Resend</strong> (email delivery, US) — receives recipient email address, first name, and match notification content (masked names, match link). No coordinates or full match details in email body.
+            </td>
+          </tr>
+          <tr><td><strong>International transfers</strong></td><td>Resend processes emails in the US. Covered by Resend's standard DPA and SCCs.</td></tr>
+          <tr><td><strong>Retention period</strong></td><td>Match records retained while either linked journey is active. Deleted with account on deletion request.</td></tr>
+          <tr><td><strong>Automated decisions</strong></td><td>Match score calculated automatically. No human review. Not legally significant — purely informational.</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Activity 3 -->
+    <div class="activity-card">
+      <div class="activity-header">
+        <div class="activity-num">3</div>
+        <div class="activity-title">Email preference management (unsubscribe)</div>
+      </div>
+      <div class="activity-body">
+        <table>
+          <tr><th style="width:200px;">Field</th><th>Detail</th></tr>
+          <tr><td><strong>Purpose</strong></td><td>Allowing users to opt out of match notifications, reminders, and/or marketing emails</td></tr>
+          <tr><td><strong>Legal basis</strong></td><td>Legal obligation (right to withdraw consent / opt out of marketing under GDPR and PECR)</td></tr>
+          <tr><td><strong>Data subjects</strong></td><td>Registered users</td></tr>
+          <tr><td><strong>Personal data used</strong></td><td>Email address, unsubscribe preference flags (unsubscribed_matches, unsubscribed_reminders, unsubscribed_marketing)</td></tr>
+          <tr><td><strong>Special category data</strong></td><td>None</td></tr>
+          <tr><td><strong>Recipients</strong></td><td>Internal only</td></tr>
+          <tr><td><strong>Third-party processors</strong></td><td>None beyond Supabase (storage)</td></tr>
+          <tr><td><strong>International transfers</strong></td><td>Supabase (Singapore) — as above</td></tr>
+          <tr><td><strong>Retention period</strong></td><td>Retained until account is deleted</td></tr>
+          <tr><td><strong>Automated decisions</strong></td><td>None</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Activity 4 -->
+    <div class="activity-card">
+      <div class="activity-header">
+        <div class="activity-num">4</div>
+        <div class="activity-title">Support ticket submission</div>
+      </div>
+      <div class="activity-body">
+        <table>
+          <tr><th style="width:200px;">Field</th><th>Detail</th></tr>
+          <tr><td><strong>Purpose</strong></td><td>Receiving and responding to user support requests, including technical issues and reports of other users</td></tr>
+          <tr><td><strong>Legal basis</strong></td><td>Legitimate interest (providing customer support; resolving safety/moderation issues)</td></tr>
+          <tr><td><strong>Data subjects</strong></td><td>Any person who submits a support request; may also involve third parties named in the ticket</td></tr>
+          <tr><td><strong>Personal data collected</strong></td><td>Name, email address, free-text message, ticket type, submission timestamp. May contain third-party personal data if the user describes another user.</td></tr>
+          <tr><td><strong>Special category data</strong></td><td>Potentially — if a user describes a sensitive situation involving another person. Handled with discretion.</td></tr>
+          <tr><td><strong>Recipients</strong></td><td>Internal support team via admin dashboard. Notification email sent to <code>carpooling0@gmail.com</code> on new ticket.</td></tr>
+          <tr><td><strong>Third-party processors</strong></td>
+            <td>
+              <strong>Resend</strong> — sends notification of new ticket to support inbox<br>
+              <strong>Google (Gmail)</strong> — support notification received at carpooling0@gmail.com
+            </td>
+          </tr>
+          <tr><td><strong>International transfers</strong></td><td>Resend (US); Google (US). Both covered by standard DPA/SCCs.</td></tr>
+          <tr><td><strong>Retention period</strong></td><td>Tickets retained indefinitely for moderation history. No automated deletion. Consider periodic manual review.</td></tr>
+          <tr><td><strong>Automated decisions</strong></td><td>None</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Activity 5 -->
+    <div class="activity-card">
+      <div class="activity-header">
+        <div class="activity-num">5</div>
+        <div class="activity-title">Account deletion</div>
+      </div>
+      <div class="activity-body">
+        <table>
+          <tr><th style="width:200px;">Field</th><th>Detail</th></tr>
+          <tr><td><strong>Purpose</strong></td><td>Processing user requests to permanently delete their account and all associated personal data</td></tr>
+          <tr><td><strong>Legal basis</strong></td><td>Legal obligation (GDPR right to erasure, Article 17)</td></tr>
+          <tr><td><strong>Data subjects</strong></td><td>Registered users requesting deletion</td></tr>
+          <tr><td><strong>Personal data used</strong></td><td>Email address (to verify request via token), deletion request timestamp, deletion log record</td></tr>
+          <tr><td><strong>Special category data</strong></td><td>None</td></tr>
+          <tr><td><strong>Recipients</strong></td><td>Internal admin team (processes deletion). Resend (sends confirmation email to user).</td></tr>
+          <tr><td><strong>Third-party processors</strong></td><td>Resend — sends deletion confirmation email</td></tr>
+          <tr><td><strong>International transfers</strong></td><td>Resend (US) — as above</td></tr>
+          <tr><td><strong>Retention period</strong></td><td>All personal data deleted within 30 days of confirmed deletion request. A deletion_log record (email + timestamp only) is retained for audit purposes — this is a legitimate interest in proving compliance.</td></tr>
+          <tr><td><strong>Automated decisions</strong></td><td>None — deletion is triggered by cron job but verified by admin before permanent execution (Delete Now button requires PIN)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Activity 6 -->
+    <div class="activity-card">
+      <div class="activity-header">
+        <div class="activity-num">6</div>
+        <div class="activity-title">Campaign attribution &amp; referral tracking</div>
+      </div>
+      <div class="activity-body">
+        <table>
+          <tr><th style="width:200px;">Field</th><th>Detail</th></tr>
+          <tr><td><strong>Purpose</strong></td><td>Understanding which marketing campaigns or referral links led users to register, to measure campaign effectiveness</td></tr>
+          <tr><td><strong>Legal basis</strong></td><td>Legitimate interest (measuring campaign ROI; no profiling or targeting beyond attribution)</td></tr>
+          <tr><td><strong>Data subjects</strong></td><td>Registered users who arrived via a referral link or UTM-tagged URL</td></tr>
+          <tr><td><strong>Personal data used</strong></td><td>Referral code (ref_code), UTM source/medium/campaign tags, linked to user record. No third-party tracking pixels or cookies involved — attribution is first-party only.</td></tr>
+          <tr><td><strong>Special category data</strong></td><td>None</td></tr>
+          <tr><td><strong>Recipients</strong></td><td>Internal team via admin dashboard only</td></tr>
+          <tr><td><strong>Third-party processors</strong></td><td>None — attribution is stored in Supabase only (no Google Analytics, no Meta Pixel)</td></tr>
+          <tr><td><strong>International transfers</strong></td><td>Supabase (Singapore) — as above</td></tr>
+          <tr><td><strong>Retention period</strong></td><td>Retained with user record; deleted on account deletion</td></tr>
+          <tr><td><strong>Automated decisions</strong></td><td>None</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Activity 7 -->
+    <div class="activity-card">
+      <div class="activity-header">
+        <div class="activity-num">7</div>
+        <div class="activity-title">Admin access &amp; audit logging</div>
+      </div>
+      <div class="activity-body">
+        <table>
+          <tr><th style="width:200px;">Field</th><th>Detail</th></tr>
+          <tr><td><strong>Purpose</strong></td><td>Controlling internal access to the platform and maintaining an audit trail of administrative actions</td></tr>
+          <tr><td><strong>Legal basis</strong></td><td>Legitimate interest (security, accountability, compliance)</td></tr>
+          <tr><td><strong>Data subjects</strong></td><td>Admin team members; indirectly, platform users whose records are viewed or modified</td></tr>
+          <tr><td><strong>Personal data used</strong></td><td>Admin: name, email, password hash (PBKDF2), role, IP address, last login timestamp. Audit log: admin name, action taken, entity email affected, IP address, timestamp.</td></tr>
+          <tr><td><strong>Special category data</strong></td><td>None</td></tr>
+          <tr><td><strong>Recipients</strong></td><td>Super-Admin only (audit log access)</td></tr>
+          <tr><td><strong>Third-party processors</strong></td><td>Supabase (storage)</td></tr>
+          <tr><td><strong>International transfers</strong></td><td>Supabase (Singapore) — as above</td></tr>
+          <tr><td><strong>Retention period</strong></td><td>Admin session records expire after 8 hours. Audit log retained indefinitely for accountability. Admin user records retained while account is active; deactivated on offboarding.</td></tr>
+          <tr><td><strong>Automated decisions</strong></td><td>None</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Third-party processor summary -->
+    <h2 style="margin:40px 0 12px;font-size:18px;font-weight:700;">Third-party processor summary</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Processor</th>
+          <th>Location</th>
+          <th>What they receive</th>
+          <th>DPA / Safeguard</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Supabase</strong></td>
+          <td>Singapore (ap-southeast-1)</td>
+          <td>All user, submission, match, ticket, admin data</td>
+          <td>Supabase standard Terms of Service (includes data processing clauses)</td>
+        </tr>
+        <tr>
+          <td><strong>Resend</strong></td>
+          <td>United States</td>
+          <td>Recipient email, first name, notification content</td>
+          <td>Resend DPA available on request; standard SCCs</td>
+        </tr>
+        <tr>
+          <td><strong>Google Maps API</strong></td>
+          <td>United States</td>
+          <td>Address search strings (no name/email)</td>
+          <td>Google Cloud DPA + SCCs</td>
+        </tr>
+        <tr>
+          <td><strong>Mapbox</strong></td>
+          <td>United States</td>
+          <td>Lat/lng coordinate pairs (no name/email)</td>
+          <td>Mapbox DPA + SCCs</td>
+        </tr>
+        <tr>
+          <td><strong>ipwho.is</strong></td>
+          <td>Unknown / distributed</td>
+          <td>IP address (server-side lookup only; returns country code)</td>
+          <td>No formal DPA — transient lookup only; IP not stored by ipwho.is beyond server logs. Consider switching to a DPA-covered provider if regulatory scrutiny increases.</td>
+        </tr>
+        <tr>
+          <td><strong>Google (Gmail)</strong></td>
+          <td>United States</td>
+          <td>Support ticket notification emails received at carpooling0@gmail.com</td>
+          <td>Google Workspace DPA (if using Workspace); standard Gmail ToS otherwise. Consider migrating support inbox to a professional address on a DPA-covered mail provider.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip" style="margin-top:32px;">
+      <div class="callout-icon">🔄</div>
+      <div class="callout-body"><strong>Review schedule:</strong> Review this ROPA at least once per year, or immediately when: adding a new third-party integration, collecting a new data field, changing how data is used, or expanding into a new country or jurisdiction.</div>
+    </div>
+
+    <div class="article-nav">
+      <a class="prev" href="data-subject-requests.html"><span class="nav-dir">← Previous</span><span class="nav-title">Data subject requests</span></a>
+      <a class="next" href="incident-runbook.html"><span class="nav-dir">Next →</span><span class="nav-title">Incident runbook</span></a>
+    </div>
+  </main>
+</div>
+</body>
+</html>
