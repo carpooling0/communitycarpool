@@ -1140,7 +1140,7 @@
         let fromLocationText = '', toLocationText = '';
         let fromLatLng = '', toLatLng = '';
         let fromSelected = false, toSelected = false;
-        let userIP = '', userCountry = 'ae';
+        let userCountry = 'ae'; // default for Maps bias; real country detected server-side
         let fromCountry = null; // ISO country code from Google Maps address_components (e.g. 'AE')
         let fromAutocomplete = null, toAutocomplete = null;
 
@@ -1178,39 +1178,7 @@
         })();
 
 
-        // ============================================
-        // IP DETECTION (CORS-friendly APIs)
-        // ============================================
-        async function getIPInfo() {
-            // Use only CORS-friendly APIs
-            const apis = [
-                { url: 'https://ipwho.is/', parse: d => ({ ip: d.ip, cc: d.country_code }) },
-                { url: 'https://api.ipify.org?format=json', parse: d => ({ ip: d.ip, cc: null }) },
-                { url: 'https://api.db-ip.com/v2/free/self', parse: d => ({ ip: d.ipAddress, cc: d.countryCode }) }
-            ];
-
-            for (const api of apis) {
-                try {
-                    const res = await fetch(api.url);
-                    if (!res.ok) continue;
-                    const data = await res.json();
-                    const parsed = api.parse(data);
-                    if (parsed.ip) {
-                        userIP = parsed.ip || '';
-                        userCountry = (parsed.cc || 'ae').toLowerCase();
-                        console.log('IP:', userIP, 'Country:', userCountry);
-                        return;
-                    }
-                } catch (e) {
-                    // Silent fail, try next API
-                }
-            }
-            // Fallback if all APIs fail
-            userIP = 'unknown';
-            userCountry = 'ae';
-            console.log('IP detection failed, using defaults');
-        }
-        getIPInfo();
+        // Country for Maps autocomplete bias — edge function handles real IP/country detection
 
 
 
@@ -1503,8 +1471,7 @@
                 toLatLng: toLatLng,
                 distance: distanceLabel, // Send label (e.g., "1 - 3 km")
                 distanceValue: distanceStep, // Send step value (1-4)
-                ip: userIP || 'unknown',
-                country: fromCountry || userCountry?.toUpperCase() || 'AE',
+                country: fromCountry || userCountry?.toUpperCase() || 'AE', // hint only; edge function detects authoritative IP/country server-side
                 orgCode: orgCode || undefined,
                 refCode: sessionStorage.getItem('cc_ref') || undefined,
                 utmSource: sessionStorage.getItem('cc_utm_source') || undefined,
@@ -1793,7 +1760,7 @@
         }
 
         // Warm up submit-journey in the background while user fills the form
-        fetch(`${SUPABASE_URL}/functions/v1/submit-journey`, { method: 'OPTIONS' }).catch(() => {});
+        fetch(`${SUPABASE_URL}/functions/v1/submit-journey`, { mode: 'no-cors' }).catch(() => {});
 
         // page_visited: fires once on load
         trackPageEvent('page_visited', {

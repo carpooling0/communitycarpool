@@ -62,8 +62,23 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json()
-    const { firstName, email, fromLocation, fromLatLng, toLocation, toLatLng, distance, distanceValue, ip, country, orgCode,
+    const { firstName, email, fromLocation, fromLatLng, toLocation, toLatLng, distance, distanceValue, country: countryHint, orgCode,
             refCode, utmSource, utmMedium, utmCampaign, termsVersion } = body
+
+    // Detect real IP from request headers (server-side, no CORS restrictions)
+    const ip = req.headers.get('cf-connecting-ip')
+            || req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+            || 'unknown'
+
+    // Detect country server-side via ipwho.is (works from Deno, no browser CORS issues)
+    let country = countryHint || 'AE'
+    try {
+      const geoRes = await fetch(`https://ipwho.is/${ip}`, { signal: AbortSignal.timeout(2000) })
+      if (geoRes.ok) {
+        const geoData = await geoRes.json()
+        if (geoData.success && geoData.country_code) country = geoData.country_code
+      }
+    } catch { /* silent fail — use hint/default */ }
 
     // 1. Check blacklist
     const { data: blacklisted } = await supabase
