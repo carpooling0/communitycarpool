@@ -208,6 +208,166 @@ supabase functions deploy [function-name]</code></pre>
       </ol>
     </div>
 
+    <!-- ──────────────────────────────────────────────────────────── -->
+    <h2 style="margin:40px 0 8px;font-size:20px;font-weight:700;color:#111827;">Data Breach Procedures</h2>
+    <p style="color:#374151;font-size:15px;line-height:1.6;margin-bottom:8px;">A data breach is any incident where personal data is accessed, disclosed, altered, or destroyed without authorisation. Under GDPR, you must assess, contain, and notify within <strong>72 hours of becoming aware</strong> of a qualifying breach. The scenarios below cover the most likely events for this platform.</p>
+
+    <div class="callout" style="background:#fef9c3;border:1px solid #fde68a;border-radius:10px;padding:16px 20px;margin:16px 0 28px;display:flex;gap:14px;align-items:flex-start;">
+      <div style="font-size:20px;">⏱️</div>
+      <div><strong style="color:#92400e;">72-hour clock starts when you become aware.</strong> "Aware" means you have reasonable certainty a breach occurred — not when investigation is complete. When in doubt, start the clock and document everything.</div>
+    </div>
+
+    <div class="incident">
+      <div class="incident-title">🔴 Breach Scenario 1: Supabase infrastructure breach notification received</div>
+      <p><strong>When:</strong> Supabase sends you a security advisory that their infrastructure was compromised and your data may have been accessed.</p>
+      <ol>
+        <li><strong>Start the clock.</strong> Note the exact time you received the notification.</li>
+        <li>Read the advisory in full. Note: which data categories were affected, which date range, and whether Supabase has already rotated credentials on your behalf.</li>
+        <li>If service role key or database credentials may have been exposed:
+          <ul>
+            <li>Immediately rotate all Supabase secrets — see <a href="rotating-secrets.html">Rotating secrets</a></li>
+            <li>Invalidate all active admin sessions: <code>DELETE FROM admin_sessions;</code></li>
+            <li>Invalidate all active match tokens (nuclear option if necessary): <code>UPDATE users SET journey_token = NULL, journey_token_expires_at = NULL;</code></li>
+          </ul>
+        </li>
+        <li>Assess what data was potentially exposed:
+          <ul>
+            <li><strong>PII stored:</strong> name, email, home/work journey locations (lat/lng + address text), IP addresses</li>
+            <li><strong>Not stored:</strong> passwords (none — no-password platform), payment data (none), government IDs (none)</li>
+          </ul>
+        </li>
+        <li>Determine whether the breach is "notifiable" — it is notifiable under GDPR if it is likely to result in a risk to individuals' rights and freedoms. Location data + email = almost certainly notifiable.</li>
+        <li>If notifiable: notify affected users by email within 72 hours. See the <strong>User Notification Template</strong> below.</li>
+        <li>File a breach report with the relevant supervisory authority (ICO for UK, relevant DPA for UAE/EU). Document on the Breach Log.</li>
+        <li>Reply to Supabase's notification referencing the advisory ID and confirming you have taken steps.</li>
+      </ol>
+    </div>
+
+    <div class="incident">
+      <div class="incident-title">🔴 Breach Scenario 2: Service role key or anon key potentially exposed</div>
+      <p><strong>When:</strong> The <code>DB_SERVICE_KEY</code> or <code>SUPABASE_ANON_KEY</code> may have been committed to a public repository, shared in a support chat, or otherwise leaked.</p>
+      <ol>
+        <li><strong>Rotate immediately — do not delay to investigate first.</strong></li>
+        <li>In the Supabase dashboard: <strong>Project Settings → API → Regenerate anon key / service role key</strong>. Both keys can be rotated independently.</li>
+        <li>Update <code>config.js</code> (anon key) and all Supabase edge function secrets (<code>DB_SERVICE_KEY</code>) immediately. Redeploy all edge functions.</li>
+        <li>Check the Supabase Postgres logs for any suspicious queries in the period the key was exposed:
+          <pre><code>-- Look for unusual SELECT * patterns or large data dumps
+-- Go to: Supabase dashboard → Logs → Postgres</code></pre>
+        </li>
+        <li>If the service role key was exposed (bypasses RLS): assume all table data was accessible. Treat as a full data breach — proceed to user notification and authority report.</li>
+        <li>If only the anon key was exposed: since RLS is enabled on all user tables with no public policies, anon access is blocked by default. Risk is lower — assess case by case.</li>
+        <li>Document: when key was created, when exposure occurred, what data may have been accessible, when key was rotated.</li>
+      </ol>
+    </div>
+
+    <div class="incident">
+      <div class="incident-title">🟡 Breach Scenario 3: Accidental data exposure via edge function bug</div>
+      <p><strong>When:</strong> An edge function bug causes one user's data to be returned to another user's request (e.g. <code>get-matches-page</code> returning wrong user's matches).</p>
+      <ol>
+        <li>Identify the function and the bug immediately. Redeploy a fixed version — this is your first priority to stop ongoing exposure.</li>
+        <li>From function logs, determine the time window the bug was active:
+          <pre><code>-- Check deployment timestamps in Supabase edge function logs
+-- Filter by function name and look for the bad deploy vs the fix deploy</code></pre>
+        </li>
+        <li>Identify which users may have seen incorrect data. This requires cross-referencing request timestamps with affected token holders. The match token in the URL is user-specific — check who made requests during the window.</li>
+        <li>Assess what was exposed: match data includes masked names (A**** B.) and match coordinates — but not contact details until mutual interest is confirmed.</li>
+        <li>If contact details (full name + email) were exposed to the wrong user: this is a notifiable breach. Notify both the user whose data was exposed and the supervisory authority.</li>
+        <li>Contact both users directly (the one whose data was leaked and the one who saw it) to explain what happened.</li>
+        <li>Document the bug, the time window, affected users, data exposed, and fix applied.</li>
+      </ol>
+    </div>
+
+    <div class="incident">
+      <div class="incident-title">🟡 Breach Scenario 4: Third-party provider breach (Resend / Google Maps / Mapbox)</div>
+      <p><strong>When:</strong> A third-party service you rely on reports a breach that may have included data you sent them.</p>
+      <ol>
+        <li><strong>Resend breach:</strong> Data shared with Resend = recipient email addresses, first names, and email content (match notification details, masked names). Rotate the Resend API key immediately. Assess whether email content included anything sensitive beyond masked names.</li>
+        <li><strong>Google Maps breach:</strong> Data sent to Google Maps = address strings entered by users (from/to locations). No emails or names are sent to Google Maps. Risk is lower — but location data alone can be re-identifying.</li>
+        <li><strong>Mapbox breach:</strong> Data sent to Mapbox = lat/lng coordinate pairs for road distance calculation. No names or emails. Assess based on advisory details.</li>
+        <li>In all cases: rotate your API key for the affected provider immediately, even if not required by the advisory.</li>
+        <li>Review the provider's advisory to understand whether they have a DPA (Data Processing Agreement) with you — if they process personal data on your behalf, they are a processor and their breach is your breach for GDPR purposes.</li>
+        <li>If personal data was materially exposed: treat as notifiable and proceed accordingly.</li>
+      </ol>
+    </div>
+
+    <div class="incident">
+      <div class="incident-title">🔴 72-hour GDPR response checklist</div>
+      <p>Use this for any breach that may be notifiable (personal data at risk to individuals).</p>
+      <table>
+        <thead><tr><th>Hour</th><th>Action</th><th>Owner</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag tag-red">0–1h</span></td><td>Contain the breach — fix the bug / rotate the key / disable the account</td><td>Super-Admin</td></tr>
+          <tr><td><span class="tag tag-red">0–2h</span></td><td>Assess scope: what data, which users, how long, via what vector</td><td>Super-Admin</td></tr>
+          <tr><td><span class="tag tag-amber">2–24h</span></td><td>Decide notifiability. If in doubt, notify — it's better to over-notify than miss the window</td><td>Super-Admin</td></tr>
+          <tr><td><span class="tag tag-amber">24–48h</span></td><td>Draft user notification email (see template below). Draft authority notification.</td><td>Super-Admin</td></tr>
+          <tr><td><span class="tag tag-amber">48–72h</span></td><td>Send user notifications. Submit breach report to supervisory authority (ICO / relevant DPA)</td><td>Super-Admin</td></tr>
+          <tr><td><span class="tag tag-blue">72h+</span></td><td>Monitor. Respond to authority follow-up. Write post-mortem. Update runbook.</td><td>Super-Admin</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:12px;font-size:13.5px;color:#374151;"><strong>Supervisory authority contacts:</strong></p>
+      <ul style="font-size:13.5px;color:#374151;line-height:1.8;">
+        <li><strong>UK:</strong> ICO — <a href="https://ico.org.uk/make-a-complaint/data-security-incidents-report/" target="_blank">ico.org.uk/report</a> — report online within 72h</li>
+        <li><strong>UAE:</strong> UAE Data Office — <a href="https://www.uaedataoffice.gov.ae" target="_blank">uaedataoffice.gov.ae</a></li>
+        <li><strong>EU:</strong> Report to the DPA of the country where affected EU residents are located</li>
+      </ul>
+    </div>
+
+    <div class="incident">
+      <div class="incident-title">📋 User notification email template</div>
+      <p>Send from <code>support@communitycarpool.org</code> or your verified Resend sender address. Adapt as needed — do not minimise the incident.</p>
+      <pre><code>Subject: Important notice about your Community Carpool account
+
+Hi [First name],
+
+We are writing to let you know about a security incident that may have
+affected your account on Community Carpool.
+
+What happened:
+[1–2 sentences: what occurred, e.g. "A vulnerability in one of our systems
+meant that your journey location data may have been accessible to a third
+party between [date] and [date]."]
+
+What data was involved:
+- [List: e.g. name, email, journey locations]
+- [What was NOT involved: e.g. no passwords, no payment data]
+
+What we have done:
+- [Action taken, e.g. "We fixed the issue immediately and rotated all
+  access keys."]
+- [Reported to the relevant data protection authority]
+
+What you can do:
+- No action is required on your part.
+- If you have concerns, contact us at support@communitycarpool.org
+
+We take the protection of your data seriously and sincerely apologise for
+this incident.
+
+The Community Carpool team</code></pre>
+    </div>
+
+    <div class="incident">
+      <div class="incident-title">📁 Breach log — record every incident here</div>
+      <p>Maintain a breach log (a private document or spreadsheet, not in this repo). Each entry should include:</p>
+      <table>
+        <thead><tr><th>Field</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td>Breach ID</td><td>BR-2026-001</td></tr>
+          <tr><td>Date discovered</td><td>2026-04-01 09:15 UTC</td></tr>
+          <tr><td>Date contained</td><td>2026-04-01 09:47 UTC</td></tr>
+          <tr><td>Nature of breach</td><td>Accidental data exposure via get-matches-page bug</td></tr>
+          <tr><td>Data categories affected</td><td>Email, first name, journey locations</td></tr>
+          <tr><td>Number of users affected</td><td>3</td></tr>
+          <tr><td>Notifiable?</td><td>Yes — personal data with location</td></tr>
+          <tr><td>Authority notified</td><td>ICO — 2026-04-02 14:30 UTC — reference #XYZ</td></tr>
+          <tr><td>Users notified</td><td>2026-04-02 — 3 users emailed</td></tr>
+          <tr><td>Root cause</td><td>Missing user_id filter in SQL query</td></tr>
+          <tr><td>Fix applied</td><td>Patched edge function, redeployed 09:47 UTC</td></tr>
+          <tr><td>Post-mortem completed</td><td>Yes — 2026-04-03</td></tr>
+        </tbody>
+      </table>
+    </div>
+
     <div class="callout tip">
       <div class="callout-icon">💡</div>
       <div class="callout-body"><strong>After any incident:</strong> write a short post-mortem. What happened, why, how it was fixed, and what can be done to prevent it. Even a few bullet points helps. Store these in your team's documentation or communication channel.</div>
