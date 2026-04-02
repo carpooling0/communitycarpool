@@ -697,6 +697,11 @@
           <input type="date" id="anDateTo" class="an-range-select" style="padding:5px 8px;cursor:pointer">
           <button class="btn btn-sm btn-primary" onclick="loadAnalytics()" style="padding:5px 14px;font-size:13px">Apply</button>
         </span>
+        <span style="margin-left:auto;display:flex;align-items:center;gap:6px">
+          <input type="date" id="anSyncDate" class="an-range-select" style="padding:5px 8px;cursor:pointer" title="Date to sync into analytics_daily">
+          <button class="btn btn-sm" onclick="syncAnalytics()" id="anSyncBtn" style="padding:5px 12px;font-size:12px;background:#f3f4f6;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:inherit">↓ Sync</button>
+          <span id="anSyncStatus" style="font-size:12px;color:var(--text-muted)"></span>
+        </span>
       </div>
       <div id="analyticsContent"><div class="loading"><span class="spinner"></span>Loading analytics…</div></div>
     </div>
@@ -1168,7 +1173,7 @@ function switchPanel(panel) {
   document.getElementById(`panel-${panel}`)?.classList.remove('hidden')
   document.querySelectorAll('.nav-item[data-panel]').forEach(b => b.classList.toggle('active', b.dataset.panel === panel))
   document.getElementById('topbarTitle').textContent = PANEL_TITLES[panel] || panel
-  if (panel === 'analytics') loadAnalytics()
+  if (panel === 'analytics') { initSyncDate(); loadAnalytics() }
   if (panel === 'tickets')   loadTickets()
   if (panel === 'deletions') loadDeletions()
   if (panel === 'audit')     loadAudit()
@@ -2271,6 +2276,42 @@ function onRangeChange() {
   }
   anOffset = 0
   loadAnalytics()
+}
+
+async function syncAnalytics() {
+  const dateInput = document.getElementById('anSyncDate')
+  const date = dateInput?.value
+  if (!date) { alert('Pick a date to sync first.'); return }
+  const btn = document.getElementById('anSyncBtn')
+  const status = document.getElementById('anSyncStatus')
+  btn.disabled = true
+  status.textContent = 'Syncing…'
+  status.style.color = 'var(--text-muted)'
+  try {
+    const tok = localStorage.getItem(TOKEN_KEY)
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/sync-analytics`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: tok, date })
+    })
+    const data = await res.json()
+    if (data.success) {
+      status.textContent = `✓ Synced ${date} — ${data.visitors} visitors, ${data.pageviews} views`
+      status.style.color = 'var(--green)'
+    } else {
+      status.textContent = `✗ ${data.error}`
+      status.style.color = 'var(--red)'
+    }
+  } catch (e) {
+    status.textContent = `✗ ${e.message}`
+    status.style.color = 'var(--red)'
+  }
+  btn.disabled = false
+}
+
+function initSyncDate() {
+  const el = document.getElementById('anSyncDate')
+  if (el) el.value = new Date().toISOString().slice(0, 10)
 }
 
 function getAnalyticsRange() {
