@@ -125,6 +125,41 @@
     .kpi-tip:hover .kpi-tooltip { display: block; }
     .kpi-tooltip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: #1f2937; color: white; font-size: 12px; font-weight: 400; padding: 6px 10px; border-radius: 6px; white-space: nowrap; z-index: 50; }
 
+    /* ANALYTICS */
+    .an-range-bar { display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap; }
+    .an-range-select { background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;color:var(--text);font-family:inherit;cursor:pointer;outline:none; }
+    .an-range-select:focus { border-color:var(--green); }
+    .an-nav-btn { background:#f3f4f6;border:1px solid var(--border);border-radius:6px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-secondary);font-size:14px;flex-shrink:0;font-family:inherit; }
+    .an-nav-btn:hover { background:var(--bg); }
+    .an-grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px; }
+    .an-panel { background:white;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow); }
+    .an-panel-title { font-size:14px;font-weight:700;padding:14px 16px 0;color:var(--text); }
+    .an-tabs { display:flex;padding:10px 16px 0;border-bottom:1px solid var(--border);gap:0; }
+    .an-tab { font-size:12.5px;color:var(--text-secondary);padding:5px 0;margin-right:16px;cursor:pointer;border:none;background:none;font-family:inherit;border-bottom:2px solid transparent;white-space:nowrap; }
+    .an-tab.active { color:var(--blue);border-bottom-color:var(--blue);font-weight:600; }
+    .an-panel-body { padding:12px 16px; }
+    .an-row { display:flex;align-items:center;padding:6px 0;border-bottom:1px solid #f9fafb; }
+    .an-row:last-child { border-bottom:none; }
+    .an-row-label { font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 0 auto;max-width:45%; }
+    .an-bar-wrap { flex:1;margin:0 12px;height:5px;background:#f3f4f6;border-radius:3px;overflow:hidden; }
+    .an-bar { height:100%;background:var(--blue);border-radius:3px;opacity:0.65; }
+    .an-row-val { font-size:13px;font-weight:600;color:var(--text);white-space:nowrap; }
+    .an-row-pct { font-size:12px;color:var(--text-muted);margin-left:5px;min-width:32px;text-align:right; }
+    .an-more { display:block;text-align:center;padding:9px;font-size:12px;color:var(--text-muted);cursor:pointer;border-top:1px solid var(--border);background:none;border-left:none;border-right:none;border-bottom:none;width:100%;font-family:inherit; }
+    .an-more:hover { background:var(--bg); }
+    .an-empty { text-align:center;padding:20px;font-size:13px;color:var(--text-muted); }
+    .an-heatmap-wrap { background:white;border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);margin-bottom:14px; }
+    .an-heatmap-title { font-size:14px;font-weight:700;margin-bottom:12px; }
+    .an-heatmap { display:grid;grid-template-columns:40px repeat(7,1fr);gap:2px;font-size:10px; }
+    .an-hm-h { text-align:center;color:var(--text-muted);padding:2px 0;font-weight:600; }
+    .an-hm-lbl { text-align:right;padding-right:6px;color:var(--text-muted);line-height:14px; }
+    .an-hm-cell { height:13px;border-radius:2px;background:#eff6ff; }
+    .an-hm-cell.l1 { background:#bfdbfe; }
+    .an-hm-cell.l2 { background:#93c5fd; }
+    .an-hm-cell.l3 { background:#60a5fa; }
+    .an-hm-cell.l4 { background:#3b82f6; }
+    .an-flag { margin-right:6px; }
+
     /* SECTION HEADERS */
     .section-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
     .section-title { font-size: 15px; font-weight: 700; }
@@ -349,6 +384,7 @@
     <div class="nav-body">
       <div class="nav-section-label">Overview</div>
       <button class="nav-item active" data-panel="dashboard" onclick="switchPanel('dashboard')">Dashboard</button>
+      <button class="nav-item" data-panel="analytics" onclick="switchPanel('analytics')">📊 Analytics</button>
 
       <div class="nav-section-label">Support</div>
       <button class="nav-item" data-panel="tickets" onclick="switchPanel('tickets')">Tickets</button>
@@ -638,6 +674,24 @@
           <div style="font-size:12px;color:var(--text-muted)">No links saved yet.</div>
         </div>
       </div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div id="panel-analytics" class="panel hidden">
+      <div class="an-range-bar">
+        <button class="an-nav-btn" onclick="analyticsShift(-1)">‹</button>
+        <select class="an-range-select" id="anRange" onchange="loadAnalytics()">
+          <option value="24h">Last 24 hours</option>
+          <option value="7d">Last 7 days</option>
+          <option value="30d" selected>Last 30 days</option>
+          <option value="90d">Last 90 days</option>
+          <option value="6m">Last 6 months</option>
+          <option value="12m">Last 12 months</option>
+          <option value="all">All time</option>
+        </select>
+        <button class="an-nav-btn" onclick="analyticsShift(1)">›</button>
+      </div>
+      <div id="analyticsContent"><div class="loading"><span class="spinner"></span>Loading analytics…</div></div>
     </div>
 
   </main>
@@ -1099,7 +1153,7 @@ function applyTemplate(ticketId) {
 // ═══════════════════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════════════════
-const PANEL_TITLES = { dashboard:'Dashboard', tickets:'Support Tickets', deletions:'Deletion Requests', users:'User Lookup', audit:'Audit Log', team:'Team Management' }
+const PANEL_TITLES = { dashboard:'Dashboard', analytics:'Analytics', tickets:'Support Tickets', deletions:'Deletion Requests', users:'User Lookup', audit:'Audit Log', team:'Team Management' }
 
 function switchPanel(panel) {
   currentPanel = panel
@@ -1107,6 +1161,7 @@ function switchPanel(panel) {
   document.getElementById(`panel-${panel}`)?.classList.remove('hidden')
   document.querySelectorAll('.nav-item[data-panel]').forEach(b => b.classList.toggle('active', b.dataset.panel === panel))
   document.getElementById('topbarTitle').textContent = PANEL_TITLES[panel] || panel
+  if (panel === 'analytics') loadAnalytics()
   if (panel === 'tickets')   loadTickets()
   if (panel === 'deletions') loadDeletions()
   if (panel === 'audit')     loadAudit()
@@ -2188,6 +2243,220 @@ function lgClearHistory() {
   lgRenderLinkList(document.getElementById('lgHistory'))
 }
 
+
+// ═══════════════════════════════════════════════════════════════
+// ANALYTICS
+// ═══════════════════════════════════════════════════════════════
+let anOffset = 0 // period offset for prev/next navigation
+
+function getAnalyticsRange() {
+  const range = document.getElementById('anRange')?.value || '30d'
+  const now = Date.now()
+  let startAt, endAt = now
+
+  if (range === '24h')  { startAt = now - 24*60*60*1000 }
+  else if (range === '7d')  { startAt = now - 7*24*60*60*1000 }
+  else if (range === '30d') { startAt = now - 30*24*60*60*1000 }
+  else if (range === '90d') { startAt = now - 90*24*60*60*1000 }
+  else if (range === '6m')  { startAt = now - 180*24*60*60*1000 }
+  else if (range === '12m') { startAt = now - 365*24*60*60*1000 }
+  else { startAt = new Date('2025-01-01').getTime() } // all time
+
+  const duration = endAt - startAt
+  startAt += anOffset * duration
+  endAt   += anOffset * duration
+
+  const unit = range === '24h' ? 'hour' : (range === '7d' || range === '30d') ? 'day' : 'month'
+  return { startAt: Math.floor(startAt), endAt: Math.floor(endAt), unit }
+}
+
+function analyticsShift(dir) {
+  anOffset += dir
+  loadAnalytics()
+}
+
+async function loadAnalytics() {
+  anOffset = anOffset // preserve offset only when called from shift, reset when range changes
+  const el = document.getElementById('analyticsContent')
+  if (!el) return
+  el.innerHTML = '<div class="loading"><span class="spinner"></span>Loading analytics…</div>'
+  try {
+    const { startAt, endAt, unit } = getAnalyticsRange()
+    const data = await apiPost('get-analytics', { startAt, endAt, unit })
+    if (!data.success) {
+      if (data.error?.includes('UMAMI_API_KEY')) {
+        el.innerHTML = '<div class="an-empty">⚙️ Analytics not configured.<br><span style="font-size:12px">Add <code>UMAMI_API_KEY</code> to Supabase Edge Function secrets to enable.</span></div>'
+      } else {
+        el.innerHTML = `<div class="an-empty">Failed to load analytics: ${data.error}</div>`
+      }
+      return
+    }
+    renderAnalytics(data)
+  } catch(e) {
+    el.innerHTML = `<div class="an-empty">Error loading analytics: ${e.message}</div>`
+  }
+}
+
+function renderAnalytics(data) {
+  const el = document.getElementById('analyticsContent')
+  const s = data.stats || {}
+  const pv = data.pageviews || {}
+
+  // Summary KPIs
+  const bounceRate = s.bounces && s.visits ? ((s.bounces.value / s.visits.value) * 100).toFixed(1) : 0
+  const avgDuration = s.totaltime && s.visits ? (s.totaltime.value / s.visits.value).toFixed(0) : 0
+  const fmtDur = d => d >= 60 ? `${Math.floor(d/60)}m ${d%60}s` : `${d}s`
+  const fmtChg = (v) => {
+    if (!v && v !== 0) return ''
+    const cls = v > 0 ? 'up' : v < 0 ? 'dn' : ''
+    return `<span class="kpi-trend ${cls}">${v > 0 ? '↑' : v < 0 ? '↓' : ''}${Math.abs(v)}%</span>`
+  }
+
+  let html = `
+  <div class="kpi-grid kpi-5" style="margin-bottom:16px">
+    <div class="kpi-card"><div class="kpi-label">Visitors</div><div class="kpi-value">${(s.visitors?.value||0).toLocaleString()}</div><div class="kpi-sub">${fmtChg(s.visitors?.change)}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Visits</div><div class="kpi-value">${(s.visits?.value||0).toLocaleString()}</div><div class="kpi-sub">${fmtChg(s.visits?.change)}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Views</div><div class="kpi-value">${(s.pageviews?.value||0).toLocaleString()}</div><div class="kpi-sub">${fmtChg(s.pageviews?.change)}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Bounce Rate</div><div class="kpi-value">${bounceRate}%</div></div>
+    <div class="kpi-card"><div class="kpi-label">Visit Duration</div><div class="kpi-value">${fmtDur(Number(avgDuration))}</div></div>
+  </div>`
+
+  // Chart
+  const chartId = 'anChart_' + Date.now()
+  html += `<div class="chart-card" style="margin-bottom:16px">
+    <canvas id="${chartId}" height="80"></canvas>
+    <div style="display:flex;gap:16px;justify-content:center;margin-top:10px;font-size:12px;color:var(--text-muted)">
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:50%;background:#3b82f6;display:inline-block"></span>Visitors</span>
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:50%;background:#93c5fd;display:inline-block"></span>Views</span>
+    </div>
+  </div>`
+
+  // Pages + Sources
+  html += `<div class="an-grid-2">`
+  html += anBreakdownPanel('Pages', 'anPages', [
+    { label:'Path', key:'pages' },
+    { label:'Entry', key:'entryPages' },
+    { label:'Exit', key:'exitPages' }
+  ], data)
+  html += anBreakdownPanel('Sources', 'anSources', [
+    { label:'Referrers', key:'referrers' },
+    { label:'Channels', key:'channels' }
+  ], data)
+  html += `</div>`
+
+  // Environment + Location
+  html += `<div class="an-grid-2">`
+  html += anBreakdownPanel('Environment', 'anEnv', [
+    { label:'Browsers', key:'browsers' },
+    { label:'OS', key:'os' },
+    { label:'Devices', key:'devices' }
+  ], data)
+  html += anBreakdownPanel('Location', 'anLoc', [
+    { label:'Countries', key:'countries' },
+    { label:'Regions', key:'regions' },
+    { label:'Cities', key:'cities' }
+  ], data)
+  html += `</div>`
+
+  // Traffic heatmap
+  html += anHeatmap(pv)
+
+  el.innerHTML = html
+
+  // Draw chart
+  requestAnimationFrame(() => {
+    const canvas = document.getElementById(chartId)
+    if (!canvas || !pv.pageviews) return
+    const labels = (pv.pageviews||[]).map(d => {
+      const dt = new Date(d.x)
+      return dt.toLocaleDateString('en-GB', { day:'numeric', month:'short' })
+    })
+    new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label:'Visitors', data:(pv.sessions||[]).map(d=>d.y), backgroundColor:'#3b82f6cc', borderRadius:3 },
+          { label:'Views', data:(pv.pageviews||[]).map(d=>d.y), backgroundColor:'#93c5fd88', borderRadius:3 }
+        ]
+      },
+      options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ display:false }, ticks:{ maxTicksLimit:12, font:{size:11} } }, y:{ beginAtZero:true, ticks:{stepSize:1, font:{size:11}} } } }
+    })
+
+    // Set up tab switching for breakdown panels
+    document.querySelectorAll('.an-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const panel = tab.dataset.panel
+        const key = tab.dataset.key
+        tab.closest('.an-panel').querySelectorAll('.an-tab').forEach(t => t.classList.toggle('active', t === tab))
+        tab.closest('.an-panel').querySelectorAll('.an-tab-content').forEach(c => c.classList.toggle('hidden', c.dataset.key !== key))
+      })
+    })
+  })
+}
+
+function anBreakdownPanel(title, id, tabs, data) {
+  let html = `<div class="an-panel"><div class="an-panel-title">${title}</div><div class="an-tabs">`
+  tabs.forEach((t, i) => {
+    html += `<button class="an-tab${i===0?' active':''}" data-panel="${id}" data-key="${t.key}">${t.label}</button>`
+  })
+  html += `</div>`
+  tabs.forEach((t, i) => {
+    const items = data[t.key] || []
+    const max = items.length ? Math.max(...items.map(x => x.visitors || x.y || 0)) : 1
+    html += `<div class="an-tab-content${i!==0?' hidden':''}" data-key="${t.key}"><div class="an-panel-body">`
+    if (!items.length) {
+      html += `<div class="an-empty">No data</div>`
+    } else {
+      const show = items.slice(0, 8)
+      show.forEach(item => {
+        const label = item.x || item.url || item.referrer || item.browser || item.country || item.city || '—'
+        const val = item.visitors || item.y || 0
+        const pct = max ? Math.round((val/max)*100) : 0
+        const flag = item.flag ? `<span class="an-flag">${item.flag}</span>` : ''
+        html += `<div class="an-row">
+          <div class="an-row-label" title="${label}">${flag}${label}</div>
+          <div class="an-bar-wrap"><div class="an-bar" style="width:${pct}%"></div></div>
+          <div class="an-row-val">${val.toLocaleString()}</div>
+        </div>`
+      })
+      if (items.length > 8) html += `<button class="an-more">⤢ More (${items.length - 8} more)</button>`
+    }
+    html += `</div></div>`
+  })
+  html += `</div>`
+  return html
+}
+
+function anHeatmap(pv) {
+  const days = ['','Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+  const times = ['12am','1am','2am','3am','4am','5am','6am','7am','8am','9am','10am','11am',
+                 '12pm','1pm','2pm','3pm','4pm','5pm','6pm','7pm','8pm','9pm','10pm','11pm']
+
+  // Build heatmap data from pageviews if hourly, else empty
+  const cells = {}
+  if (pv.pageviews) {
+    pv.pageviews.forEach(d => {
+      const dt = new Date(d.x)
+      const key = `${dt.getDay()}-${dt.getHours()}`
+      cells[key] = (cells[key] || 0) + d.y
+    })
+  }
+  const maxVal = Math.max(1, ...Object.values(cells))
+
+  let html = `<div class="an-heatmap-wrap"><div class="an-heatmap-title">Traffic patterns</div><div class="an-heatmap">`
+  days.forEach(d => html += `<div class="an-hm-h">${d}</div>`)
+  times.forEach((t, hour) => {
+    html += `<div class="an-hm-lbl">${hour%3===0?t:''}</div>`
+    for (let day = 0; day < 7; day++) {
+      const v = cells[`${day}-${hour}`] || 0
+      const intensity = v === 0 ? '' : v < maxVal*0.25 ? ' l1' : v < maxVal*0.5 ? ' l2' : v < maxVal*0.75 ? ' l3' : ' l4'
+      html += `<div class="an-hm-cell${intensity}" title="${v} views"></div>`
+    }
+  })
+  html += `</div></div>`
+  return html
+}
 
 // ═══════════════════════════════════════════════════════════════
 // INIT

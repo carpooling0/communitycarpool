@@ -118,7 +118,7 @@
       <a href="#search-console">Google Search Console</a>
       <a href="#robots">robots.txt</a>
       <a href="#sitemap">sitemap.xml</a>
-      <a href="#ga4">Google Analytics 4</a>
+      <a href="#umami">Umami Analytics</a>
       <a href="#schema">Schema.org structured data</a>
       <a href="#checklist">New page checklist</a>
     </div>
@@ -259,10 +259,88 @@ Sitemap: https://communitycarpool.org/sitemap.xml</code></pre>
       <li>The sitemap is already submitted — GSC re-reads it automatically. If you want to force a re-read, delete and re-add: <code>https://communitycarpool.org/sitemap.xml</code></li>
     </ol>
 
-    <!-- GA4 -->
-    <h2 id="ga4">Google Analytics 4</h2>
-    <p>GA4 has been removed from the platform. Campaign attribution is handled natively via <code>ref_code</code> on the <code>users</code> table, populated from <code>?ref=</code> URL parameters. Referral links and QR codes are managed in the admin dashboard.</p>
-    <p>If GA4 is reinstated in future, cookie consent gating must be implemented before the GA4 script fires (GDPR requirement).</p>
+    <!-- UMAMI -->
+    <h2 id="umami">Umami Analytics</h2>
+    <p>Community Carpool uses <strong>Umami</strong> for privacy-first web analytics — no cookies, no personal data, GDPR compliant with no consent banner required. GA4 was removed in April 2026.</p>
+
+    <h3>Account &amp; access</h3>
+    <table>
+      <tr><th>Field</th><th>Detail</th></tr>
+      <tr><td>Dashboard</td><td><a href="https://cloud.umami.is" target="_blank">cloud.umami.is</a></td></tr>
+      <tr><td>Account</td><td>carpooling0@gmail.com</td></tr>
+      <tr><td>Plan</td><td>Hobby (free) — 100K events/month, 6-month retention</td></tr>
+      <tr><td>Prod website</td><td>Community Carpool — <code>communitycarpool.org</code></td></tr>
+      <tr><td>Dev website</td><td>dev Community Carpool — <code>dev.communitycarpool.org</code></td></tr>
+    </table>
+
+    <h3>Website IDs</h3>
+    <table>
+      <tr><th>Environment</th><th>Website ID</th><th>Where stored</th></tr>
+      <tr><td>Production</td><td><code>95b6c0b0-6a71-42ea-8f2d-56ec5eb5e55a</code></td><td><code>config.js</code> → <code>UMAMI_WEBSITE_ID</code></td></tr>
+      <tr><td>Dev</td><td><code>9d08c539-686d-47f8-87b6-bb4ff63f5c17</code></td><td><code>config.dev.js</code> → <code>UMAMI_WEBSITE_ID</code></td></tr>
+    </table>
+
+    <div class="callout tip">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-body">Dev is behind Cloudflare Access — Umami tracking does not fire on dev. Dev analytics are available via Cloudflare's built-in dashboard instead.</div>
+    </div>
+
+    <h3>How tracking is implemented</h3>
+    <p>A single <code>umami.js</code> file in the project root is included on every public-facing page. It dynamically injects the Umami script tag using the correct website ID for the environment:</p>
+    <ul>
+      <li>Pages that load <code>config.js</code> use <code>UMAMI_WEBSITE_ID</code> directly</li>
+      <li>Docs pages (no <code>config.js</code>) use hostname detection to pick the correct ID</li>
+    </ul>
+    <p>When a new public page is added, include <code>umami.js</code> in the <code>&lt;head&gt;</code>:</p>
+    <pre><code>&lt;!-- Root-level pages --&gt;
+&lt;script src="umami.js"&gt;&lt;/script&gt;
+
+&lt;!-- Pages one level deep (e.g. docs/) --&gt;
+&lt;script src="../umami.js"&gt;&lt;/script&gt;</code></pre>
+
+    <h3>What Umami tracks</h3>
+    <table>
+      <tr><th>Metric</th><th>Available</th></tr>
+      <tr><td>Page views</td><td><span class="tag tag-green">Yes</span></td></tr>
+      <tr><td>Unique visitors</td><td><span class="tag tag-green">Yes</span></td></tr>
+      <tr><td>Bounce rate</td><td><span class="tag tag-green">Yes</span></td></tr>
+      <tr><td>Visit duration</td><td><span class="tag tag-green">Yes</span></td></tr>
+      <tr><td>Top pages</td><td><span class="tag tag-green">Yes</span></td></tr>
+      <tr><td>Referrers &amp; UTM sources</td><td><span class="tag tag-green">Yes</span></td></tr>
+      <tr><td>Countries</td><td><span class="tag tag-green">Yes</span></td></tr>
+      <tr><td>Devices / browsers / OS</td><td><span class="tag tag-green">Yes</span></td></tr>
+      <tr><td>Custom events (e.g. form_submitted)</td><td><span class="tag tag-green">Yes</span></td></tr>
+      <tr><td>Individual user identity</td><td><span class="tag tag-red">No — by design</span></td></tr>
+    </table>
+
+    <h3>Campaign attribution</h3>
+    <p>Umami automatically captures UTM parameters (<code>utm_source</code>, <code>utm_medium</code>, <code>utm_campaign</code>) from URLs. These appear under <strong>Sources → Channels</strong> in the Umami dashboard. First-touch attribution is also stored natively in Supabase via the <code>user_attribution</code> table and <code>ref_code</code> on the <code>users</code> table — this is your primary attribution source for conversion tracking.</p>
+
+    <h3>Admin dashboard — Analytics panel</h3>
+    <p>The admin console (<code>admin.html</code>) includes a full <strong>Analytics panel</strong> that mirrors the Umami dashboard — KPI cards, time-series chart, and breakdown panels for Pages, Sources, Environment, and Location. It pulls live data from Umami via the <code>get-analytics</code> edge function (deployed to prod and dev).</p>
+    <p>To activate it, a <code>UMAMI_API_KEY</code> secret must be set on both Supabase projects:</p>
+    <ol>
+      <li>Go to <a href="https://cloud.umami.is" target="_blank">cloud.umami.is</a> → Settings → <strong>API Keys</strong></li>
+      <li>Create a key (name it "CCP Admin Dashboard") — copy it immediately (shown once)</li>
+      <li>Add the secret to both Supabase projects:
+        <pre><code>supabase secrets set UMAMI_API_KEY=&lt;key&gt; --project-ref tbkjealpnoriwdosvmju
+supabase secrets set UMAMI_API_KEY=&lt;key&gt; --project-ref jboohdwihsiuvyrfeftp</code></pre>
+      </li>
+    </ol>
+    <p>Until the secret is set, the Analytics panel shows a "not configured" message — no errors in the rest of admin.</p>
+
+    <h3>Long-term data storage</h3>
+    <p>A Supabase table <code>analytics_daily</code> is provisioned on both projects to store daily snapshots imported from Umami (pageviews, visitors, bounce rate, avg duration, plus JSONB columns for pages, referrers, countries, browsers, devices, OS). A <code>sync-analytics</code> edge function (planned as a daily cron) will populate this table, extending retention beyond Umami's 6-month free-tier window.</p>
+    <table>
+      <tr><th>Limit</th><th>Value</th></tr>
+      <tr><td>Events per month</td><td>100,000 (free tier)</td></tr>
+      <tr><td>Data retention in Umami Cloud</td><td>6 months</td></tr>
+      <tr><td>Data retention in analytics_daily</td><td>Unlimited (Supabase)</td></tr>
+      <tr><td>Websites</td><td>Up to 3 (currently using 2)</td></tr>
+    </table>
+
+    <h3>Upgrading the plan</h3>
+    <p>If monthly events exceed 100K, upgrade to Umami Pro ($20/month) at <a href="https://cloud.umami.is" target="_blank">cloud.umami.is</a> → Settings → Billing.</p>
 
     <!-- SCHEMA -->
     <h2 id="schema">Schema.org structured data</h2>
