@@ -1459,6 +1459,9 @@
             submitBtn.classList.add('loading');
             submitBtn.disabled = true;
 
+            // Ensure terms version is fetched before submitting
+            await termsVersionReady;
+
             const finalFromLocation = fromLocationText || fromInput.value.trim();
             const finalToLocation = toLocationText || toInput.value.trim();
 
