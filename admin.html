@@ -2297,13 +2297,13 @@ async function loadAnalytics() {
       }
       return
     }
-    renderAnalytics(data)
+    renderAnalytics(data, unit)
   } catch(e) {
     el.innerHTML = `<div class="an-empty">Error loading analytics: ${e.message}</div>`
   }
 }
 
-function renderAnalytics(data) {
+function renderAnalytics(data, unit) {
   const el = document.getElementById('analyticsContent')
   const s = data.stats || {}
   const pv = data.pageviews || {}
@@ -2397,8 +2397,11 @@ function renderAnalytics(data) {
     if (!canvas || !pv.pageviews) return
     const labels = (pv.pageviews||[]).map(d => {
       const dt = new Date(d.x)
-      return dt.toLocaleDateString('en-GB', { day:'numeric', month:'short' })
+      if (unit === 'hour') return dt.toLocaleTimeString('en-GB', { hour:'numeric', minute:'2-digit', hour12:true })
+      if (unit === 'month') return dt.toLocaleDateString('en-GB', { month:'short', year:'numeric' })
+      return dt.toLocaleDateString('en-GB', { day:'numeric', month:'short' }) // day (default)
     })
+    const maxTicks = unit === 'hour' ? 12 : unit === 'month' ? 12 : 10
     new Chart(canvas, {
       type: 'bar',
       data: {
@@ -2408,7 +2411,7 @@ function renderAnalytics(data) {
           { label:'Views', data:(pv.pageviews||[]).map(d=>d.y), backgroundColor:'#93c5fd88', borderRadius:3 }
         ]
       },
-      options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ display:false }, ticks:{ maxTicksLimit:12, font:{size:11} } }, y:{ beginAtZero:true, ticks:{stepSize:1, font:{size:11}} } } }
+      options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ display:false }, ticks:{ maxTicksLimit:maxTicks, font:{size:11} } }, y:{ beginAtZero:true, ticks:{stepSize:1, font:{size:11}} } } }
     })
 
     // Set up tab switching for breakdown panels
