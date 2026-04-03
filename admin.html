@@ -2394,7 +2394,7 @@ async function loadArchiveAnalytics() {
   if (!date) { el.innerHTML = '<div class="an-empty">Select a date first.</div>'; return }
   el.innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>'
   try {
-    const res = await apiPost({ action: 'analytics.archive', date })
+    const res = await apiPost('analytics.archive', { date })
     if (!res.success || !res.row) {
       el.innerHTML = `<div class="an-empty">No data for ${date}.</div>`
       return
