@@ -1092,17 +1092,19 @@
     const PAGE_SIZE = 25
 
     function shareWhatsApp() {
+      const ref = (typeof userData !== 'undefined' && userData?.refCode) ? userData.refCode : '007'
+      const url = `https://communitycarpool.org?ref=${ref}`
       const text = encodeURIComponent(
 `Hi,
 
 Carpooling can cut your transportation emissions by half. We built CommunityCarpool.org to make finding carpool partners as frictionless as it should be.
 
 How it works:
-\u2022  Enter your home and destination
-\u2022  Get matched with neighbors going the same way
-\u2022  See your current commute's carbon footprint
-\u2022  Connect only when both people are interested
-\u2022  All communication happens over email
+\u2022\u2060 \u2060Enter your home and destination
+\u2022\u2060 \u2060Get matched with neighbors going the same way
+\u2022\u2060 \u2060See your current commute's carbon footprint
+\u2022\u2060 \u2060Connect only when both people are interested
+\u2022\u2060 \u2060All communication happens over email
 
 No App. No Cookies. Completely FREE.
 
@@ -1110,7 +1112,7 @@ The more people register in your neighborhood, the better matches get. If you ar
 
 We would really appreciate any feedback as we grow this.
 
-${SITE_URL}`)
+${url}`)
       window.open('https://wa.me/?text=' + text, '_blank')
     }
 
