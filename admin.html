@@ -2407,8 +2407,7 @@ function archiveShift(dir) {
 
 function getArchiveRange() {
   const range = document.getElementById('archRange')?.value || '30d'
-  const now = Date.now()
-  let startAt, endAt = now, unit
+  let startAt, endAt, unit
 
   if (range === 'custom') {
     const from = document.getElementById('archDateFrom').value
@@ -2421,13 +2420,18 @@ function getArchiveRange() {
     return { startAt, endAt, unit }
   }
 
-  if (range === '24h')  { startAt = now - 24*60*60*1000; unit = 'hour' }
-  else if (range === '7d')  { startAt = now - 7*86400000;   unit = 'day' }
-  else if (range === '30d') { startAt = now - 30*86400000;  unit = 'day' }
-  else if (range === '90d') { startAt = now - 90*86400000;  unit = 'day' }
-  else if (range === '6m')  { startAt = now - 180*86400000; unit = 'month' }
-  else if (range === '12m') { startAt = now - 365*86400000; unit = 'month' }
-  else { startAt = new Date('2025-01-01').getTime();        unit = 'month' }
+  // Align to UTC day boundaries to match how sync-analytics stores data (full UTC days)
+  const now = new Date()
+  const todayMs = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  endAt = todayMs + 86399999
+
+  if (range === '24h')  { startAt = todayMs;                 unit = 'hour'  }
+  else if (range === '7d')  { startAt = todayMs - 6*86400000;   unit = 'day'   }
+  else if (range === '30d') { startAt = todayMs - 29*86400000;  unit = 'day'   }
+  else if (range === '90d') { startAt = todayMs - 89*86400000;  unit = 'day'   }
+  else if (range === '6m')  { startAt = todayMs - 179*86400000; unit = 'month' }
+  else if (range === '12m') { startAt = todayMs - 364*86400000; unit = 'month' }
+  else { startAt = new Date('2025-01-01').getTime();            unit = 'month' }
 
   const duration = endAt - startAt
   startAt += archOffset * duration
@@ -2470,7 +2474,11 @@ async function loadArchiveAnalytics() {
 
     // Show coverage note
     const note = document.getElementById('archCoverageNote')
-    if (note) note.textContent = `${rows.length} day${rows.length!==1?'s':''} of data (${rows[0].date} – ${rows[rows.length-1].date})`
+    if (note) {
+      const coverageText = `${rows.length} day${rows.length!==1?'s':''} of data (${rows[0].date} – ${rows[rows.length-1].date})`
+      const visitorsNote = rows.length > 1 ? ' · Visitors are per-day sums (repeat visitors counted once per day)' : ''
+      note.textContent = coverageText + visitorsNote
+    }
 
     // Aggregate stats across all rows
     const totals = rows.reduce((acc, r) => ({
@@ -2531,8 +2539,7 @@ async function loadArchiveAnalytics() {
 
 function getAnalyticsRange() {
   const range = document.getElementById('anRange')?.value || '30d'
-  const now = Date.now()
-  let startAt, endAt = now, unit
+  let startAt, endAt, unit
 
   if (range === 'custom') {
     const from = document.getElementById('anDateFrom').value
@@ -2545,13 +2552,18 @@ function getAnalyticsRange() {
     return { startAt, endAt, unit }
   }
 
-  if (range === '24h')  { startAt = now - 24*60*60*1000; unit = 'hour' }
-  else if (range === '7d')  { startAt = now - 7*86400000;   unit = 'day' }
-  else if (range === '30d') { startAt = now - 30*86400000;  unit = 'day' }
-  else if (range === '90d') { startAt = now - 90*86400000;  unit = 'day' }
-  else if (range === '6m')  { startAt = now - 180*86400000; unit = 'month' }
-  else if (range === '12m') { startAt = now - 365*86400000; unit = 'month' }
-  else { startAt = new Date('2025-01-01').getTime();        unit = 'month' }
+  // Align to UTC day boundaries so Live and Archive tabs use identical date ranges
+  const now = new Date()
+  const todayMs = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  endAt = todayMs + 86399999
+
+  if (range === '24h')  { startAt = todayMs;                 unit = 'hour'  }
+  else if (range === '7d')  { startAt = todayMs - 6*86400000;   unit = 'day'   }
+  else if (range === '30d') { startAt = todayMs - 29*86400000;  unit = 'day'   }
+  else if (range === '90d') { startAt = todayMs - 89*86400000;  unit = 'day'   }
+  else if (range === '6m')  { startAt = todayMs - 179*86400000; unit = 'month' }
+  else if (range === '12m') { startAt = todayMs - 364*86400000; unit = 'month' }
+  else { startAt = new Date('2025-01-01').getTime();            unit = 'month' }
 
   const duration = endAt - startAt
   startAt += anOffset * duration
@@ -2688,12 +2700,26 @@ function renderAnalytics(data, unit) {
     const canvas = document.getElementById(chartId)
     if (!canvas) return
 
-    // Build a complete dense time-series covering the full selected range,
-    // filling zeros for any buckets Umami omits (sparse data = fat bars otherwise)
-    const { startAt, endAt } = getAnalyticsRange()
+    // Build a complete dense time-series from the actual data range
+    // (using getAnalyticsRange() here would break the Archive tab which has its own range)
     const stepMs = unit === 'hour' ? 3600000 : unit === 'month' ? 30*24*3600000 : 86400000
+    const allPoints = [...(pv.pageviews||[]), ...(pv.sessions||[])]
+    let startAt, endAt
+    if (allPoints.length) {
+      const times = allPoints.map(d => new Date(d.x).getTime())
+      startAt = Math.min(...times)
+      endAt   = Math.max(...times)
+    } else {
+      // Fallback to the appropriate range selector when no data points exist
+      const r = el.id === 'analyticsContent' ? getAnalyticsRange() : getArchiveRange()
+      if (r) { startAt = r.startAt; endAt = r.endAt }
+      else   { startAt = Date.now() - 86400000; endAt = Date.now() }
+    }
+    // Snap to step boundaries
+    startAt = Math.floor(startAt / stepMs) * stepMs
+    endAt   = Math.floor(endAt   / stepMs) * stepMs
     const allKeys = []
-    for (let t = startAt; t <= endAt + stepMs; t += stepMs) allKeys.push(Math.floor(t / stepMs) * stepMs)
+    for (let t = startAt; t <= endAt + stepMs; t += stepMs) allKeys.push(t)
 
     const fmtLabel = ts => {
       const dt = new Date(ts)
