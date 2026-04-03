@@ -131,6 +131,9 @@
     .an-range-select:focus { border-color:var(--green); }
     .an-nav-btn { background:#f3f4f6;border:1px solid var(--border);border-radius:6px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-secondary);font-size:14px;flex-shrink:0;font-family:inherit; }
     .an-nav-btn:hover { background:var(--bg); }
+    .an-subtab { background:none;border:none;border-bottom:2px solid transparent;padding:8px 16px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;font-family:inherit;margin-bottom:-1px; }
+    .an-subtab.active { color:var(--green-dark);border-bottom-color:var(--green-dark); }
+    .an-subtab:hover:not(.active) { color:var(--text); }
     .an-grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px; }
     .an-panel { background:white;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow); }
     .an-panel-title { font-size:14px;font-weight:700;padding:14px 16px 0;color:var(--text); }
@@ -678,32 +681,69 @@
 
     <!-- ANALYTICS -->
     <div id="panel-analytics" class="panel hidden">
-      <div class="an-range-bar">
-        <button class="an-nav-btn" id="anPrev" onclick="analyticsShift(-1)">‹</button>
-        <select class="an-range-select" id="anRange" onchange="onRangeChange()">
-          <option value="24h">Last 24 hours</option>
-          <option value="7d">Last 7 days</option>
-          <option value="30d" selected>Last 30 days</option>
-          <option value="90d">Last 90 days</option>
-          <option value="6m">Last 6 months</option>
-          <option value="12m">Last 12 months</option>
-          <option value="all">All time</option>
-          <option value="custom">Custom range…</option>
-        </select>
-        <button class="an-nav-btn" id="anNext" onclick="analyticsShift(1)">›</button>
-        <span id="anCustomWrap" class="hidden" style="display:flex;align-items:center;gap:6px">
-          <input type="date" id="anDateFrom" class="an-range-select" style="padding:5px 8px;cursor:pointer">
-          <span style="font-size:13px;color:var(--text-muted)">→</span>
-          <input type="date" id="anDateTo" class="an-range-select" style="padding:5px 8px;cursor:pointer">
-          <button class="btn btn-sm btn-primary" onclick="loadAnalytics()" style="padding:5px 14px;font-size:13px">Apply</button>
-        </span>
-        <span style="margin-left:auto;display:flex;align-items:center;gap:6px">
-          <input type="date" id="anSyncDate" class="an-range-select" style="padding:5px 8px;cursor:pointer" title="Date to sync into analytics_daily">
-          <button class="btn btn-sm" onclick="syncAnalytics()" id="anSyncBtn" style="padding:5px 12px;font-size:12px;background:#f3f4f6;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:inherit">↓ Sync</button>
-          <span id="anSyncStatus" style="font-size:12px;color:var(--text-muted)"></span>
-        </span>
+
+      <!-- Sub-tab switcher -->
+      <div style="display:flex;align-items:center;gap:0;border-bottom:1px solid var(--border);margin-bottom:14px">
+        <button class="an-subtab active" id="anSubLive" onclick="switchAnalyticsTab('live')">Live (Umami)</button>
+        <button class="an-subtab" id="anSubArchive" onclick="switchAnalyticsTab('archive')">Archive (Supabase)</button>
+        <button onclick="toggleAnInfo()" title="Metric definitions" style="margin-left:auto;margin-bottom:4px;background:none;border:1px solid var(--border);border-radius:50%;width:24px;height:24px;font-size:12px;cursor:pointer;color:var(--text-muted);line-height:1;padding:0">?</button>
       </div>
-      <div id="analyticsContent"><div class="loading"><span class="spinner"></span>Loading analytics…</div></div>
+
+      <!-- Metric definitions (Super-Admin reference) -->
+      <div id="anInfoBox" class="hidden" style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin-bottom:14px;font-size:13px;line-height:1.6;color:var(--text)">
+        <div style="font-weight:600;margin-bottom:8px;color:var(--green-dark)">Metric Definitions</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 24px">
+          <div><strong>Visitors</strong> — Unique individuals identified by browser fingerprint (cookie + IP + user-agent hash) within the selected period. A visitor returning across multiple days counts once per day in daily rollups but once total in a range query.</div>
+          <div><strong>Views</strong> (Pageviews) — Total number of individual page loads. One visitor browsing 5 pages = 5 views. Views ÷ Visitors gives average pages per visitor.</div>
+          <div><strong>Visits</strong> (Sessions) — A continuous browsing session. A new session starts when the same visitor returns after 30+ minutes of inactivity. One visitor can have multiple visits. Views ÷ Visits = pages per session.</div>
+          <div><strong>Bounce Rate</strong> — % of visits that ended after a single page with no further interaction. 60% means 6 in 10 sessions saw only one page. Lower = better engagement. Umami counts a bounce as: one page load, no further events recorded before tab close.</div>
+        </div>
+        <div style="margin-top:8px;color:var(--text-muted);font-size:12px">Source: Umami Analytics. Data refreshes on each panel open (Live tab) or on manual sync (Archive tab).</div>
+      </div>
+
+      <!-- LIVE TAB: range selector + live Umami data -->
+      <div id="anLiveSection">
+        <div class="an-range-bar">
+          <button class="an-nav-btn" id="anPrev" onclick="analyticsShift(-1)">‹</button>
+          <select class="an-range-select" id="anRange" onchange="onRangeChange()">
+            <option value="24h">Last 24 hours</option>
+            <option value="7d">Last 7 days</option>
+            <option value="30d" selected>Last 30 days</option>
+            <option value="90d">Last 90 days</option>
+            <option value="6m">Last 6 months</option>
+            <option value="12m">Last 12 months</option>
+            <option value="all">All time</option>
+            <option value="custom">Custom range…</option>
+          </select>
+          <button class="an-nav-btn" id="anNext" onclick="analyticsShift(1)">›</button>
+          <span id="anCustomWrap" class="hidden" style="display:flex;align-items:center;gap:6px">
+            <input type="date" id="anDateFrom" class="an-range-select" style="padding:5px 8px;cursor:pointer">
+            <span style="font-size:13px;color:var(--text-muted)">→</span>
+            <input type="date" id="anDateTo" class="an-range-select" style="padding:5px 8px;cursor:pointer">
+            <button class="btn btn-sm btn-primary" onclick="loadAnalytics()" style="padding:5px 14px;font-size:13px">Apply</button>
+          </span>
+          <span style="margin-left:auto;display:flex;align-items:center;gap:6px">
+            <input type="date" id="anSyncDate" class="an-range-select" style="padding:5px 8px;cursor:pointer" title="Date to sync into analytics_daily">
+            <button class="btn btn-sm" onclick="syncAnalytics()" id="anSyncBtn" style="padding:5px 12px;font-size:12px;background:#f3f4f6;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:inherit">↓ Sync</button>
+            <span id="anSyncStatus" style="font-size:12px;color:var(--text-muted)"></span>
+          </span>
+        </div>
+        <div id="analyticsContent"><div class="loading"><span class="spinner"></span>Loading analytics…</div></div>
+      </div>
+
+      <!-- ARCHIVE TAB: reads from analytics_daily in Supabase -->
+      <div id="anArchiveSection" class="hidden">
+        <div class="an-range-bar">
+          <span style="font-size:13px;color:var(--text-muted)">Date:</span>
+          <select class="an-range-select" id="anArchiveDatePicker" style="min-width:160px">
+            <option value="">Loading available dates…</option>
+          </select>
+          <button class="btn btn-sm btn-primary" onclick="loadArchiveAnalytics()" style="padding:5px 14px;font-size:13px">Load</button>
+          <span id="anArchiveSyncedAt" style="font-size:12px;color:var(--text-muted);margin-left:8px"></span>
+        </div>
+        <div id="archiveContent"><div class="an-empty">Select a date and click Load to view archived data.</div></div>
+      </div>
+
     </div>
 
   </main>
@@ -2312,6 +2352,102 @@ async function syncAnalytics() {
 function initSyncDate() {
   const el = document.getElementById('anSyncDate')
   if (el) el.value = new Date().toISOString().slice(0, 10)
+}
+
+// ── Analytics sub-tabs ─────────────────────────────────────────────────────
+let anCurrentTab = 'live'
+
+function switchAnalyticsTab(tab) {
+  anCurrentTab = tab
+  document.getElementById('anSubLive').classList.toggle('active', tab === 'live')
+  document.getElementById('anSubArchive').classList.toggle('active', tab === 'archive')
+  document.getElementById('anLiveSection').classList.toggle('hidden', tab !== 'live')
+  document.getElementById('anArchiveSection').classList.toggle('hidden', tab !== 'archive')
+  if (tab === 'archive') loadArchiveDateList()
+}
+
+function toggleAnInfo() {
+  document.getElementById('anInfoBox').classList.toggle('hidden')
+}
+
+async function loadArchiveDateList() {
+  const picker = document.getElementById('anArchiveDatePicker')
+  picker.innerHTML = '<option value="">Loading…</option>'
+  try {
+    const tok = localStorage.getItem(TOKEN_KEY)
+    const res = await apiPost({ action: 'analytics.archive' })
+    if (!res.success || !res.rows?.length) {
+      picker.innerHTML = '<option value="">No synced dates yet — use ↓ Sync on the Live tab</option>'
+      return
+    }
+    picker.innerHTML = res.rows.map(r =>
+      `<option value="${r.date}">${r.date} &nbsp;(${r.visitors} visitors, ${r.pageviews} views)</option>`
+    ).join('')
+  } catch(e) {
+    picker.innerHTML = `<option value="">Error: ${e.message}</option>`
+  }
+}
+
+async function loadArchiveAnalytics() {
+  const date = document.getElementById('anArchiveDatePicker').value
+  const el = document.getElementById('archiveContent')
+  if (!date) { el.innerHTML = '<div class="an-empty">Select a date first.</div>'; return }
+  el.innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>'
+  try {
+    const res = await apiPost({ action: 'analytics.archive', date })
+    if (!res.success || !res.row) {
+      el.innerHTML = `<div class="an-empty">No data for ${date}.</div>`
+      return
+    }
+    const r = res.row
+    const syncedAt = r.synced_at ? new Date(r.synced_at).toLocaleString('en-GB') : ''
+    document.getElementById('anArchiveSyncedAt').textContent = syncedAt ? `Synced: ${syncedAt}` : ''
+
+    // Build synthetic data shape compatible with renderAnalytics
+    const stats = {
+      visitors:  r.visitors,
+      visits:    r.visits,
+      pageviews: r.pageviews,
+      bounces:   r.bounces,
+      totaltime: r.totaltime,
+    }
+    const pageviews_hourly = r.pageviews_hourly || []
+    const pvSeries = pageviews_hourly.map(h => ({ x: new Date(Date.UTC(Number(date.slice(0,4)), Number(date.slice(5,7))-1, Number(date.slice(8,10)), h.hour)).toISOString(), y: h.pageviews }))
+    const sesSeries = pageviews_hourly.map(h => ({ x: new Date(Date.UTC(Number(date.slice(0,4)), Number(date.slice(5,7))-1, Number(date.slice(8,10)), h.hour)).toISOString(), y: h.sessions }))
+    const pvObj = { pageviews: pvSeries, sessions: sesSeries }
+
+    const archiveData = {
+      success: true,
+      stats,
+      pageviews: pvObj,
+      pages:      r.pages      || [],
+      entryPages: r.entry_pages || [],
+      exitPages:  r.exit_pages  || [],
+      referrers:  r.referrers  || [],
+      channels:   r.channels   || [],
+      queries:    r.queries    || [],
+      browsers:   r.browsers   || [],
+      os:         r.os         || [],
+      devices:    r.devices    || [],
+      screens:    r.screens    || [],
+      languages:  r.languages  || [],
+      countries:  r.countries  || [],
+      regions:    r.regions    || [],
+      cities:     r.cities     || [],
+    }
+
+    // Render into archiveContent instead of analyticsContent
+    const origEl = document.getElementById('analyticsContent')
+    // Temporarily swap target, render, then swap back
+    origEl._savedContent = origEl.innerHTML
+    origEl.id = 'analyticsContent_hidden'
+    el.id = 'analyticsContent'
+    renderAnalytics(archiveData, 'hour')
+    el.id = 'archiveContent'
+    origEl.id = 'analyticsContent'
+  } catch(e) {
+    el.innerHTML = `<div class="an-empty">Error: ${e.message}</div>`
+  }
 }
 
 function getAnalyticsRange() {
