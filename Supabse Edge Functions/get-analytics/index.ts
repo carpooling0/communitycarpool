@@ -65,6 +65,7 @@ serve(async (req) => {
       languages,
       screens,
       queries,
+      events,
     ] = await Promise.all([
       umamiGet(`/websites/${id}/stats?${qs}`),
       umamiGet(`/websites/${id}/pageviews?${qsUnit}`),
@@ -82,6 +83,7 @@ serve(async (req) => {
       umamiGet(`/websites/${id}/metrics?${qs}&type=language`),
       umamiGet(`/websites/${id}/metrics?${qs}&type=screen`),
       umamiGet(`/websites/${id}/metrics?${qs}&type=query`),
+      umamiGet(`/websites/${id}/metrics?${qs}&type=event`),
     ])
 
     return new Response(
@@ -93,6 +95,7 @@ serve(async (req) => {
         browsers, os, devices,
         countries, regions, cities,
         languages, screens, queries,
+        events,
       }),
       { headers: { ...CORS, 'Content-Type': 'application/json' } }
     )

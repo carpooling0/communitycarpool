@@ -42,8 +42,8 @@ serve(async (req) => {
         { status: 503, headers: { ...CORS, 'Content-Type': 'application/json' } })
     }
 
-    // Target date: provided date or today
-    const targetDate = date ? new Date(date) : new Date()
+    // Target date: provided date, or yesterday (default for nightly cron — today is always partial)
+    const targetDate = date ? new Date(date) : new Date(Date.now() - 86400000)
     const dateStr = targetDate.toISOString().slice(0, 10)
     const startAt = new Date(dateStr + 'T00:00:00.000Z').getTime()
     const endAt   = new Date(dateStr + 'T23:59:59.999Z').getTime()
@@ -62,6 +62,7 @@ serve(async (req) => {
       browsers, os, devices,
       countries, regions, cities,
       languages, screens, queries,
+      events,
     ] = await Promise.all([
       uGet(`/websites/${id}/stats?${qs}`),
       uGet(`/websites/${id}/pageviews?${qs}&unit=hour`),
@@ -79,6 +80,7 @@ serve(async (req) => {
       uGet(`/websites/${id}/metrics?${qs}&type=language`),
       uGet(`/websites/${id}/metrics?${qs}&type=screen`),
       uGet(`/websites/${id}/metrics?${qs}&type=query`),
+      uGet(`/websites/${id}/metrics?${qs}&type=event`),
     ])
 
     const gv = (s: any, f: string) => {
@@ -126,6 +128,7 @@ serve(async (req) => {
       browsers, os, devices,
       countries, regions, cities,
       languages, screens, queries,
+      events,
       pageviews_hourly,
       synced_at: new Date().toISOString(),
     }, { onConflict: 'date' })
