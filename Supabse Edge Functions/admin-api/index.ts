@@ -461,6 +461,21 @@ Deno.serve(async (req) => {
       return json({ success: true, links: data })
     }
 
+    if (action === 'analytics.archive') {
+      const { date } = body
+      if (date) {
+        // Return single day's full data
+        const { data: row } = await supabase.from('analytics_daily')
+          .select('*').eq('date', date).single()
+        return json({ success: true, row: row || null })
+      }
+      // No date: return list of available dates for the picker
+      const { data: rows } = await supabase.from('analytics_daily')
+        .select('date, pageviews, visitors, synced_at')
+        .order('date', { ascending: false })
+      return json({ success: true, rows: rows || [] })
+    }
+
     return json({ error: `Unknown action: ${action}` }, 400)
 
   } catch (err: any) {
