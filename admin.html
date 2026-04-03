@@ -734,14 +734,27 @@
       <!-- ARCHIVE TAB: reads from analytics_daily in Supabase -->
       <div id="anArchiveSection" class="hidden">
         <div class="an-range-bar">
-          <span style="font-size:13px;color:var(--text-muted)">Date:</span>
-          <select class="an-range-select" id="anArchiveDatePicker" style="min-width:160px">
-            <option value="">Loading available dates…</option>
+          <button class="an-nav-btn" id="archPrev" onclick="archiveShift(-1)">‹</button>
+          <select class="an-range-select" id="archRange" onchange="onArchRangeChange()">
+            <option value="24h">Last 24 hours</option>
+            <option value="7d">Last 7 days</option>
+            <option value="30d" selected>Last 30 days</option>
+            <option value="90d">Last 90 days</option>
+            <option value="6m">Last 6 months</option>
+            <option value="12m">Last 12 months</option>
+            <option value="all">All time</option>
+            <option value="custom">Custom range…</option>
           </select>
-          <button class="btn btn-sm btn-primary" onclick="loadArchiveAnalytics()" style="padding:5px 14px;font-size:13px">Load</button>
-          <span id="anArchiveSyncedAt" style="font-size:12px;color:var(--text-muted);margin-left:8px"></span>
+          <button class="an-nav-btn" id="archNext" onclick="archiveShift(1)">›</button>
+          <span id="archCustomWrap" class="hidden" style="display:flex;align-items:center;gap:6px">
+            <input type="date" id="archDateFrom" class="an-range-select" style="padding:5px 8px;cursor:pointer">
+            <span style="font-size:13px;color:var(--text-muted)">→</span>
+            <input type="date" id="archDateTo" class="an-range-select" style="padding:5px 8px;cursor:pointer">
+            <button class="btn btn-sm btn-primary" onclick="loadArchiveAnalytics()" style="padding:5px 14px;font-size:13px">Apply</button>
+          </span>
+          <span style="margin-left:auto;font-size:12px;color:var(--text-muted)" id="archCoverageNote"></span>
         </div>
-        <div id="archiveContent"><div class="an-empty">Select a date and click Load to view archived data.</div></div>
+        <div id="archiveContent"><div class="loading"><span class="spinner"></span>Loading archive…</div></div>
       </div>
 
     </div>
@@ -2356,6 +2369,7 @@ function initSyncDate() {
 
 // ── Analytics sub-tabs ─────────────────────────────────────────────────────
 let anCurrentTab = 'live'
+let archOffset = 0
 
 function switchAnalyticsTab(tab) {
   anCurrentTab = tab
@@ -2363,88 +2377,153 @@ function switchAnalyticsTab(tab) {
   document.getElementById('anSubArchive').classList.toggle('active', tab === 'archive')
   document.getElementById('anLiveSection').classList.toggle('hidden', tab !== 'live')
   document.getElementById('anArchiveSection').classList.toggle('hidden', tab !== 'archive')
-  if (tab === 'archive') loadArchiveDateList()
+  if (tab === 'archive') loadArchiveAnalytics()
 }
 
 function toggleAnInfo() {
   document.getElementById('anInfoBox').classList.toggle('hidden')
 }
 
-async function loadArchiveDateList() {
-  const picker = document.getElementById('anArchiveDatePicker')
-  picker.innerHTML = '<option value="">Loading…</option>'
-  try {
-    const tok = localStorage.getItem(TOKEN_KEY)
-    const res = await apiPost('analytics.archive')
-    if (!res.success || !res.rows?.length) {
-      picker.innerHTML = '<option value="">No synced dates yet — use ↓ Sync on the Live tab</option>'
-      return
-    }
-    picker.innerHTML = res.rows.map(r =>
-      `<option value="${r.date}">${r.date} &nbsp;(${r.visitors} visitors, ${r.pageviews} views)</option>`
-    ).join('')
-  } catch(e) {
-    picker.innerHTML = `<option value="">Error: ${e.message}</option>`
+function onArchRangeChange() {
+  const range = document.getElementById('archRange').value
+  const isCustom = range === 'custom'
+  document.getElementById('archCustomWrap').classList.toggle('hidden', !isCustom)
+  document.getElementById('archPrev').classList.toggle('hidden', isCustom)
+  document.getElementById('archNext').classList.toggle('hidden', isCustom)
+  if (isCustom) {
+    const to = new Date(); const from = new Date(to - 30*86400000)
+    document.getElementById('archDateFrom').value = from.toISOString().slice(0,10)
+    document.getElementById('archDateTo').value   = to.toISOString().slice(0,10)
+    return
   }
+  archOffset = 0
+  loadArchiveAnalytics()
+}
+
+function archiveShift(dir) {
+  archOffset += dir
+  loadArchiveAnalytics()
+}
+
+function getArchiveRange() {
+  const range = document.getElementById('archRange')?.value || '30d'
+  const now = Date.now()
+  let startAt, endAt = now, unit
+
+  if (range === 'custom') {
+    const from = document.getElementById('archDateFrom').value
+    const to   = document.getElementById('archDateTo').value
+    if (!from || !to) return null
+    startAt = new Date(from).getTime()
+    endAt   = new Date(to).getTime() + 86399999
+    const days = (endAt - startAt) / 86400000
+    unit = days <= 2 ? 'hour' : days <= 90 ? 'day' : 'month'
+    return { startAt, endAt, unit }
+  }
+
+  if (range === '24h')  { startAt = now - 24*60*60*1000; unit = 'hour' }
+  else if (range === '7d')  { startAt = now - 7*86400000;   unit = 'day' }
+  else if (range === '30d') { startAt = now - 30*86400000;  unit = 'day' }
+  else if (range === '90d') { startAt = now - 90*86400000;  unit = 'day' }
+  else if (range === '6m')  { startAt = now - 180*86400000; unit = 'month' }
+  else if (range === '12m') { startAt = now - 365*86400000; unit = 'month' }
+  else { startAt = new Date('2025-01-01').getTime();        unit = 'month' }
+
+  const duration = endAt - startAt
+  startAt += archOffset * duration
+  endAt   += archOffset * duration
+
+  return { startAt: Math.floor(startAt), endAt: Math.floor(endAt), unit }
+}
+
+// Merge an array of JSONB breakdown arrays (each is [{x, y}, ...]) by summing y values per x
+function mergeBreakdown(arrays) {
+  const map = {}
+  for (const arr of arrays) {
+    for (const item of (arr || [])) {
+      const k = item.x || ''
+      map[k] = (map[k] || 0) + (item.y || 0)
+    }
+  }
+  return Object.entries(map).map(([x, y]) => ({ x, y })).sort((a, b) => b.y - a.y)
 }
 
 async function loadArchiveAnalytics() {
-  const date = document.getElementById('anArchiveDatePicker').value
   const el = document.getElementById('archiveContent')
-  if (!date) { el.innerHTML = '<div class="an-empty">Select a date first.</div>'; return }
-  el.innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>'
+  if (!el) return
+  el.innerHTML = '<div class="loading"><span class="spinner"></span>Loading archive…</div>'
   try {
-    const res = await apiPost('analytics.archive', { date })
-    if (!res.success || !res.row) {
-      el.innerHTML = `<div class="an-empty">No data for ${date}.</div>`
+    const range = getArchiveRange()
+    if (!range) { el.innerHTML = ''; return }
+    const { startAt, endAt, unit } = range
+
+    // Fetch all rows that fall within the range
+    const fromDate = new Date(startAt).toISOString().slice(0,10)
+    const toDate   = new Date(endAt).toISOString().slice(0,10)
+    const res = await apiPost('analytics.archive', { fromDate, toDate })
+    if (!res.success) { el.innerHTML = `<div class="an-empty">Error: ${res.error}</div>`; return }
+    const rows = res.rows || []
+    if (!rows.length) {
+      el.innerHTML = `<div class="an-empty">No synced data for this range.<br><span style="font-size:12px">Use the ↓ Sync button on the Live tab to archive dates first.</span></div>`
       return
     }
-    const r = res.row
-    const syncedAt = r.synced_at ? new Date(r.synced_at).toLocaleString('en-GB') : ''
-    document.getElementById('anArchiveSyncedAt').textContent = syncedAt ? `Synced: ${syncedAt}` : ''
 
-    // Build synthetic data shape compatible with renderAnalytics
-    const stats = {
-      visitors:  r.visitors,
-      visits:    r.visits,
-      pageviews: r.pageviews,
-      bounces:   r.bounces,
-      totaltime: r.totaltime,
+    // Show coverage note
+    const note = document.getElementById('archCoverageNote')
+    if (note) note.textContent = `${rows.length} day${rows.length!==1?'s':''} of data (${rows[0].date} – ${rows[rows.length-1].date})`
+
+    // Aggregate stats across all rows
+    const totals = rows.reduce((acc, r) => ({
+      visitors:  acc.visitors  + (r.visitors  || 0),
+      visits:    acc.visits    + (r.visits    || 0),
+      pageviews: acc.pageviews + (r.pageviews || 0),
+      bounces:   acc.bounces   + (r.bounces   || 0),
+      totaltime: acc.totaltime + (r.totaltime || 0),
+    }), { visitors:0, visits:0, pageviews:0, bounces:0, totaltime:0 })
+
+    // Build pageviews time series from daily rows (one point per day)
+    const pvSeries  = rows.map(r => ({ x: r.date + 'T12:00:00Z', y: r.pageviews || 0 }))
+    const sesSeries = rows.map(r => ({ x: r.date + 'T12:00:00Z', y: r.visits    || 0 }))
+
+    // For single-day with hourly data, use hourly breakdown
+    let pvObj = { pageviews: pvSeries, sessions: sesSeries }
+    if (rows.length === 1 && rows[0].pageviews_hourly?.length) {
+      const d = rows[0].date
+      const hourly = rows[0].pageviews_hourly
+      pvObj = {
+        pageviews: hourly.map(h => ({ x: `${d}T${String(h.hour).padStart(2,'0')}:00:00Z`, y: h.pageviews })),
+        sessions:  hourly.map(h => ({ x: `${d}T${String(h.hour).padStart(2,'0')}:00:00Z`, y: h.sessions  }))
+      }
     }
-    const pageviews_hourly = r.pageviews_hourly || []
-    const pvSeries = pageviews_hourly.map(h => ({ x: new Date(Date.UTC(Number(date.slice(0,4)), Number(date.slice(5,7))-1, Number(date.slice(8,10)), h.hour)).toISOString(), y: h.pageviews }))
-    const sesSeries = pageviews_hourly.map(h => ({ x: new Date(Date.UTC(Number(date.slice(0,4)), Number(date.slice(5,7))-1, Number(date.slice(8,10)), h.hour)).toISOString(), y: h.sessions }))
-    const pvObj = { pageviews: pvSeries, sessions: sesSeries }
 
     const archiveData = {
       success: true,
-      stats,
+      stats: totals,
       pageviews: pvObj,
-      pages:      r.pages      || [],
-      entryPages: r.entry_pages || [],
-      exitPages:  r.exit_pages  || [],
-      referrers:  r.referrers  || [],
-      channels:   r.channels   || [],
-      queries:    r.queries    || [],
-      browsers:   r.browsers   || [],
-      os:         r.os         || [],
-      devices:    r.devices    || [],
-      screens:    r.screens    || [],
-      languages:  r.languages  || [],
-      countries:  r.countries  || [],
-      regions:    r.regions    || [],
-      cities:     r.cities     || [],
+      pages:      mergeBreakdown(rows.map(r => r.pages)),
+      entryPages: mergeBreakdown(rows.map(r => r.entry_pages)),
+      exitPages:  mergeBreakdown(rows.map(r => r.exit_pages)),
+      referrers:  mergeBreakdown(rows.map(r => r.referrers)),
+      channels:   mergeBreakdown(rows.map(r => r.channels)),
+      queries:    mergeBreakdown(rows.map(r => r.queries)),
+      browsers:   mergeBreakdown(rows.map(r => r.browsers)),
+      os:         mergeBreakdown(rows.map(r => r.os)),
+      devices:    mergeBreakdown(rows.map(r => r.devices)),
+      screens:    mergeBreakdown(rows.map(r => r.screens)),
+      languages:  mergeBreakdown(rows.map(r => r.languages)),
+      countries:  mergeBreakdown(rows.map(r => r.countries)),
+      regions:    mergeBreakdown(rows.map(r => r.regions)),
+      cities:     mergeBreakdown(rows.map(r => r.cities)),
     }
 
-    // Render into archiveContent instead of analyticsContent
-    const origEl = document.getElementById('analyticsContent')
-    // Temporarily swap target, render, then swap back
-    origEl._savedContent = origEl.innerHTML
-    origEl.id = 'analyticsContent_hidden'
+    // Render into archiveContent by temporarily swapping element IDs
+    const liveEl = document.getElementById('analyticsContent')
+    liveEl.id = 'analyticsContent_hidden'
     el.id = 'analyticsContent'
-    renderAnalytics(archiveData, 'hour')
+    const effectiveUnit = rows.length === 1 && rows[0].pageviews_hourly?.length ? 'hour' : unit
+    renderAnalytics(archiveData, effectiveUnit)
     el.id = 'archiveContent'
-    origEl.id = 'analyticsContent'
+    liveEl.id = 'analyticsContent'
   } catch(e) {
     el.innerHTML = `<div class="an-empty">Error: ${e.message}</div>`
   }

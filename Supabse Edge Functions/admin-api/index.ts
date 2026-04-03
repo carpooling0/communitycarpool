@@ -462,14 +462,22 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'analytics.archive') {
-      const { date } = body
+      const { date, fromDate, toDate } = body
       if (date) {
-        // Return single day's full data
+        // Single day (legacy)
         const { data: row } = await supabase.from('analytics_daily')
           .select('*').eq('date', date).single()
         return json({ success: true, row: row || null })
       }
-      // No date: return list of available dates for the picker
+      if (fromDate && toDate) {
+        // Range query — full data for all rows in range
+        const { data: rows } = await supabase.from('analytics_daily')
+          .select('*')
+          .gte('date', fromDate).lte('date', toDate)
+          .order('date', { ascending: true })
+        return json({ success: true, rows: rows || [] })
+      }
+      // No params: summary list
       const { data: rows } = await supabase.from('analytics_daily')
         .select('date, pageviews, visitors, synced_at')
         .order('date', { ascending: false })
