@@ -2522,6 +2522,7 @@ async function loadArchiveAnalytics() {
       countries:  mergeBreakdown(rows.map(r => r.countries)),
       regions:    mergeBreakdown(rows.map(r => r.regions)),
       cities:     mergeBreakdown(rows.map(r => r.cities)),
+      events:     mergeBreakdown(rows.map(r => r.events)),
     }
 
     // Render into archiveContent by temporarily swapping element IDs
@@ -2641,6 +2642,9 @@ function renderAnalytics(data, unit) {
     return `<span class="kpi-trend ${cls}">${v > 0 ? '↑' : v < 0 ? '↓' : ''}${Math.abs(v)}%</span>`
   }
 
+  const eventsArr = Array.isArray(data.events) ? data.events : []
+  const waShares = (eventsArr.find(e => e.x === 'whatsapp_share')?.y) || 0
+
   let html = `
   <div class="kpi-grid kpi-5" style="margin-bottom:16px">
     <div class="kpi-card"><div class="kpi-label">Visitors</div><div class="kpi-value">${visitors.toLocaleString()}</div><div class="kpi-sub">${fmtChg(gc('visitors'))}</div></div>
@@ -2648,6 +2652,13 @@ function renderAnalytics(data, unit) {
     <div class="kpi-card"><div class="kpi-label">Views</div><div class="kpi-value">${pageviews.toLocaleString()}</div><div class="kpi-sub">${fmtChg(gc('pageviews'))}</div></div>
     <div class="kpi-card"><div class="kpi-label">Bounce Rate</div><div class="kpi-value">${bounceRate}%</div></div>
     <div class="kpi-card"><div class="kpi-label">Visit Duration</div><div class="kpi-value">${fmtDur(avgDuration)}</div></div>
+  </div>
+  <div class="kpi-grid kpi-5" style="margin-bottom:16px">
+    <div class="kpi-card" style="border-left:3px solid #25d366">
+      <div class="kpi-label">WhatsApp Shares</div>
+      <div class="kpi-value" style="color:#15803d">${waShares.toLocaleString()}</div>
+      <div class="kpi-sub" style="font-size:11px;color:#64748b">Share button taps</div>
+    </div>
   </div>`
 
   // Chart
