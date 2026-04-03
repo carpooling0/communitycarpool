@@ -113,8 +113,9 @@
     /* KPI CARDS */
     .kpi-grid { display: grid; gap: 14px; margin-bottom: 22px; }
     .kpi-5 { grid-template-columns: repeat(5, 1fr); }
+    .kpi-6 { grid-template-columns: repeat(6, 1fr); }
     .kpi-4 { grid-template-columns: repeat(4, 1fr); }
-    .kpi-card { background: white; border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; }
+    .kpi-card { background: white; border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; }
     .kpi-label { font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
     .kpi-value { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
     .kpi-sub { font-size: 12px; color: var(--text-secondary); }
@@ -302,8 +303,8 @@
     .sub-accordion-body.open { display: block; }
 
     /* RESPONSIVE */
-    @media (max-width: 1200px) { .kpi-5 { grid-template-columns: repeat(3, 1fr); } }
-    @media (max-width: 900px) { .kpi-5, .kpi-4 { grid-template-columns: repeat(2, 1fr); } .chart-grid-3, .chart-grid-2 { grid-template-columns: 1fr; } .chart-grid-1-2 { grid-template-columns: 1fr; } .form-grid-2 { grid-template-columns: 1fr; } }
+    @media (max-width: 1200px) { .kpi-5 { grid-template-columns: repeat(3, 1fr); } .kpi-6 { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 900px) { .kpi-5, .kpi-6, .kpi-4 { grid-template-columns: repeat(2, 1fr); } .chart-grid-3, .chart-grid-2 { grid-template-columns: 1fr; } .chart-grid-1-2 { grid-template-columns: 1fr; } .form-grid-2 { grid-template-columns: 1fr; } }
   .qr-style-btn { font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid var(--border);background:white;color:var(--text-secondary);cursor:pointer;transition:all .15s }
   .qr-style-btn:hover { border-color:#6b7280 }
   .qr-style-btn.active { background:var(--green-dark);color:white;border-color:var(--green-dark) }
@@ -2646,14 +2647,12 @@ function renderAnalytics(data, unit) {
   const waShares = (eventsArr.find(e => e.x === 'whatsapp_share')?.y) || 0
 
   let html = `
-  <div class="kpi-grid kpi-5" style="margin-bottom:16px">
+  <div class="kpi-grid kpi-6" style="margin-bottom:16px">
     <div class="kpi-card"><div class="kpi-label">Visitors</div><div class="kpi-value">${visitors.toLocaleString()}</div><div class="kpi-sub">${fmtChg(gc('visitors'))}</div></div>
     <div class="kpi-card"><div class="kpi-label">Visits</div><div class="kpi-value">${visits.toLocaleString()}</div><div class="kpi-sub">${fmtChg(gc('visits'))}</div></div>
     <div class="kpi-card"><div class="kpi-label">Views</div><div class="kpi-value">${pageviews.toLocaleString()}</div><div class="kpi-sub">${fmtChg(gc('pageviews'))}</div></div>
     <div class="kpi-card"><div class="kpi-label">Bounce Rate</div><div class="kpi-value">${bounceRate}%</div></div>
     <div class="kpi-card"><div class="kpi-label">Visit Duration</div><div class="kpi-value">${fmtDur(avgDuration)}</div></div>
-  </div>
-  <div class="kpi-grid kpi-5" style="margin-bottom:16px">
     <div class="kpi-card" style="border-left:3px solid #25d366">
       <div class="kpi-label">WhatsApp Shares</div>
       <div class="kpi-value" style="color:#15803d">${waShares.toLocaleString()}</div>
