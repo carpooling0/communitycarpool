@@ -162,6 +162,12 @@ Deno.serve(async (req) => {
 
         if (!allJourneyRows) continue
 
+        const shareUrl = SITE_URL
+        const shareWA  = encodeURIComponent(`Hey! I just signed up on CommunityCarpool.org to find carpooling partners for my commute.\n\nIt matches neighbors going the same route \u2014 completely FREE, No Cookies, No App, and you only connect when both sides are interested. Everything over email.\n\nThe more people sign up in our area, the better the matches get. Takes 30 seconds!\n${shareUrl}`)
+        const shareTW  = encodeURIComponent(`Just joined communitycarpool.org to find carpooling neighbors on my route. Free, no app, email-only. The more locals sign up, the better the matches! Check it out \uD83D\uDC47\n${shareUrl}`)
+        const shareFB  = encodeURIComponent(shareUrl)
+        const shareLI  = encodeURIComponent(shareUrl)
+
         const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
           <body style="margin:0;padding:0;background:#f9fafb;font-family:Inter,system-ui,sans-serif;">
           <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
@@ -174,6 +180,16 @@ Deno.serve(async (req) => {
               <h2 style="color:#111827;font-size:20px;margin:0 0 4px;">Hi ${userData.name}!</h2>
               <p style="color:#6b7280;margin:0 0 24px;font-size:14px;">Your Carpool Update &mdash; ${batchDate}</p>
               <table width="100%" cellpadding="0" cellspacing="0">${allJourneyRows}</table>
+            </div>
+            <div style="background:white;border-radius:12px;padding:20px 24px;margin-top:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+              <p style="color:#374151;font-size:14px;font-weight:600;margin:0 0 4px;">Know someone who commutes the same way?</p>
+              <p style="color:#6b7280;font-size:13px;margin:0 0 16px;">The more people in your area sign up, the better the matches get.</p>
+              <table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr>
+                <td style="padding:0 4px;"><a href="https://wa.me/?text=${shareWA}" style="display:inline-block;background:#25d366;color:white;padding:9px 14px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">WhatsApp</a></td>
+                <td style="padding:0 4px;"><a href="https://www.facebook.com/sharer/sharer.php?u=${shareFB}" style="display:inline-block;background:#1877F2;color:white;padding:9px 14px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">Facebook</a></td>
+                <td style="padding:0 4px;"><a href="https://x.com/intent/tweet?text=${shareTW}" style="display:inline-block;background:#000;color:white;padding:9px 14px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">Twitter / X</a></td>
+                <td style="padding:0 4px;"><a href="https://www.linkedin.com/sharing/share-offsite/?url=${shareLI}" style="display:inline-block;background:#0A66C2;color:white;padding:9px 14px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">LinkedIn</a></td>
+              </tr></table>
             </div>
             <div style="text-align:center;margin-top:24px;color:#9ca3af;font-size:13px;">
               <p>
