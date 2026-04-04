@@ -2644,7 +2644,7 @@ function renderAnalytics(data, unit) {
   }
 
   const eventsArr = Array.isArray(data.events) ? data.events : []
-  const waShares = (eventsArr.find(e => e.x === 'whatsapp_share')?.y) || 0
+  const waShares = eventsArr.filter(e => e.x === 'social_share').reduce((sum, e) => sum + (e.y || 0), 0)
 
   let html = `
   <div class="kpi-grid kpi-6" style="margin-bottom:16px">
@@ -2653,9 +2653,9 @@ function renderAnalytics(data, unit) {
     <div class="kpi-card"><div class="kpi-label">Views</div><div class="kpi-value">${pageviews.toLocaleString()}</div><div class="kpi-sub">${fmtChg(gc('pageviews'))}</div></div>
     <div class="kpi-card"><div class="kpi-label">Bounce Rate</div><div class="kpi-value">${bounceRate}%</div></div>
     <div class="kpi-card"><div class="kpi-label">Visit Duration</div><div class="kpi-value">${fmtDur(avgDuration)}</div></div>
-    <div class="kpi-card" style="border-left:3px solid #25d366">
-      <div class="kpi-label">WhatsApp Shares</div>
-      <div class="kpi-value" style="color:#15803d">${waShares.toLocaleString()}</div>
+    <div class="kpi-card" style="border-left:3px solid #6366f1">
+      <div class="kpi-label">Social Shares</div>
+      <div class="kpi-value" style="color:#4338ca">${waShares.toLocaleString()}</div>
       <div class="kpi-sub" style="font-size:11px;color:#64748b">Share button taps</div>
     </div>
   </div>`
