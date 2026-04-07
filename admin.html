@@ -115,7 +115,7 @@
     .kpi-5 { grid-template-columns: repeat(5, 1fr); }
     .kpi-6 { grid-template-columns: repeat(6, 1fr); }
     .kpi-4 { grid-template-columns: repeat(4, 1fr); }
-    .kpi-card { background: white; border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; }
+    .kpi-card { background: white; border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--shadow); border: 1px solid var(--border); border-top: 3px solid var(--green); position: relative; }
     .kpi-label { font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
     .kpi-value { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
     .kpi-sub { font-size: 12px; color: var(--text-secondary); }
@@ -1652,23 +1652,13 @@ function buildHeatmapGrid(mode, sbCharts, an) {
   const maxHour = Math.max(1, ...hourArr)
   const normDow = dowArr.map(v => v / maxDow)
   const normHour = hourArr.map(v => v / maxHour)
+  const greenScale = ['#f0fdf4','#dcfce7','#bbf7d0','#86efac','#4ade80','#22c55e','#16a34a','#15803d','#166534','#14532d']
+  const blueScale  = ['#eff6ff','#dbeafe','#bfdbfe','#93c5fd','#60a5fa','#3b82f6','#2563eb','#1d4ed8','#1e40af','#1e3a8a']
   function cellColor(intensity) {
-    if (intensity < 0.01) return '#f3f4f6'
-    if (isDB) {
-      if (intensity < 0.15) return '#dcfce7'
-      if (intensity < 0.30) return '#86efac'
-      if (intensity < 0.50) return '#4ade80'
-      if (intensity < 0.70) return '#16a34a'
-      if (intensity < 0.85) return '#15803d'
-      return '#14532d'
-    } else {
-      if (intensity < 0.15) return '#dbeafe'
-      if (intensity < 0.30) return '#93c5fd'
-      if (intensity < 0.50) return '#3b82f6'
-      if (intensity < 0.70) return '#2563eb'
-      if (intensity < 0.85) return '#1d4ed8'
-      return '#1e3a8a'
-    }
+    if (intensity < 0.005) return '#f9fafb'
+    const scale = isDB ? greenScale : blueScale
+    const idx = Math.min(9, Math.floor(intensity * 10))
+    return scale[idx]
   }
   let html = `<div>`
   // Day headers row
@@ -1685,8 +1675,8 @@ function buildHeatmapGrid(mode, sbCharts, an) {
       const intensity = isDB ? normDow[d] * normHour[h] : normDow[d]
       const bg = cellColor(intensity)
       const tipText = isDB
-        ? `${days[d]} ${hourLabels[h]}: ${Math.round(intensity * 100)}% relative activity (${dowArr[d]} submissions on ${days[d]}, ${hourArr[h]} at ${hourLabels[h]})`
-        : `${days[d]} ${hourLabels[h]}: ${dowArr[d]} visitors on ${days[d]}`
+        ? `${days[d]} at ${hourLabels[h]} — ${dowArr[d]} submissions on ${days[d]}s · ${hourArr[h]} submissions at ${hourLabels[h]}`
+        : `${days[d]} at ${hourLabels[h]} — ${dowArr[d]} visitors on ${days[d]}s`
       html += `<div style="height:8px;background:${bg};border-radius:1px;cursor:default" title="${tipText}"></div>`
     }
     html += `</div>`
