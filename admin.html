@@ -152,6 +152,7 @@
     .an-more { display:block;text-align:center;padding:9px;font-size:12px;color:var(--text-muted);cursor:pointer;border-top:1px solid var(--border);background:none;border-left:none;border-right:none;border-bottom:none;width:100%;font-family:inherit; }
     .an-more:hover { background:var(--bg); }
     .an-empty { text-align:center;padding:20px;font-size:13px;color:var(--text-muted); }
+    #floatTip { position:fixed;background:rgba(15,15,15,0.88);color:#fff;padding:5px 10px;border-radius:6px;font-size:12px;pointer-events:none;z-index:9999;display:none;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.25); }
     .an-heatmap-wrap { background:white;border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);margin-bottom:14px; }
     .an-heatmap-title { font-size:14px;font-weight:700;margin-bottom:12px; }
     .an-heatmap { display:grid;grid-template-columns:40px repeat(7,1fr);gap:2px;font-size:10px; }
@@ -377,6 +378,7 @@
 </div>
 
 <!-- ══════════════ APP SHELL ══════════════ -->
+<div id="floatTip"></div>
 <div id="app" class="hidden">
 
   <!-- Sidebar -->
@@ -403,6 +405,7 @@
       <div class="nav-section-label superadmin-only">System</div>
       <button class="nav-item superadmin-only" data-panel="audit" onclick="switchPanel('audit')">Audit Log</button>
       <button class="nav-item superadmin-only" data-panel="team" onclick="switchPanel('team')">Team</button>
+      <button class="nav-item superadmin-only" data-panel="organizations" onclick="switchPanel('organizations');loadOrgs()">Organizations</button>
 
       <div class="nav-section-label">Docs</div>
       <a class="nav-docs-link" href="docs/admin/" target="_blank">
@@ -564,6 +567,75 @@
       </div>
       <div id="teamContent"><div class="loading"><span class="spinner"></span>Loading…</div></div>
     </div>
+
+  <div id="panel-organizations" class="panel hidden">
+    <div class="panel-inner">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Organizations</div>
+          <div class="panel-sub">Manage organizations and their pickup/drop-off locations</div>
+        </div>
+      </div>
+
+      <!-- Create Organization -->
+      <div class="table-wrap" style="margin-bottom:18px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:14px">Create Organization</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group"><label>Org Code *</label><input type="text" id="newOrgCode" placeholder="damac" /></div>
+          <div class="form-group"><label>Org Name *</label><input type="text" id="newOrgName" placeholder="DAMAC Properties" /></div>
+          <div class="form-group"><label>Logo URL</label><input type="text" id="newOrgLogo" placeholder="https://..." /></div>
+          <div class="form-group"><label>Custom Message</label><input type="text" id="newOrgMsg" placeholder="Welcome to DAMAC carpool" /></div>
+        </div>
+        <div style="display:flex;gap:20px;align-items:center;margin-top:8px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="newOrgCross" /> Allow Cross-Matching</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="newOrgActive" checked /> Active</label>
+          <button class="btn btn-primary btn-sm" onclick="createOrg()" style="margin-left:auto">+ Create</button>
+        </div>
+        <div id="orgCreateError" style="color:var(--red);font-size:13px;margin-top:6px"></div>
+      </div>
+
+      <!-- Organizations table -->
+      <div class="table-wrap" style="margin-bottom:18px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px">
+          <div style="font-size:14px;font-weight:700">Existing Organizations</div>
+          <button class="btn btn-ghost btn-sm" onclick="loadOrgs()">↻ Refresh</button>
+        </div>
+        <div style="max-height:260px;overflow-y:auto">
+          <table style="width:100%;border-collapse:collapse">
+            <thead><tr>
+              <th style="text-align:left;padding:8px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:#f9fafb;border-bottom:1px solid var(--border)">ID</th>
+              <th style="text-align:left;padding:8px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:#f9fafb;border-bottom:1px solid var(--border)">Code</th>
+              <th style="text-align:left;padding:8px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:#f9fafb;border-bottom:1px solid var(--border)">Name</th>
+              <th style="text-align:left;padding:8px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:#f9fafb;border-bottom:1px solid var(--border)">Cross</th>
+              <th style="text-align:left;padding:8px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:#f9fafb;border-bottom:1px solid var(--border)">Active</th>
+              <th style="padding:8px 16px;background:#f9fafb;border-bottom:1px solid var(--border)"></th>
+            </tr></thead>
+            <tbody id="orgTableBody"><tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Org Locations -->
+      <div class="table-wrap" id="orgLocSection" style="display:none">
+        <div style="padding:14px 16px 0;display:flex;align-items:center;gap:10px">
+          <div style="font-size:14px;font-weight:700" id="orgLocTitle">Locations</div>
+          <span class="badge bg-blue" id="orgLocBadge"></span>
+        </div>
+        <div id="orgLocList" style="padding:10px 16px 0"></div>
+        <!-- Add location form -->
+        <div style="padding:12px 16px;border-top:1px solid var(--border);margin-top:6px">
+          <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px">Add Location</div>
+          <div style="display:grid;grid-template-columns:2fr 1fr auto;gap:8px;align-items:end">
+            <div class="form-group" style="margin:0"><input type="text" id="newLocName" placeholder="Location name *" /></div>
+            <div class="form-group" style="margin:0"><input type="text" id="newLocLatLng" placeholder="lat,lng (optional)" /></div>
+            <button class="btn btn-primary btn-sm" onclick="addOrgLocation()">+ Add</button>
+          </div>
+          <div id="orgLocError" style="color:var(--red);font-size:13px;margin-top:6px"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
     <div id="panel-campaigns" class="panel hidden">
       <div class="section-hd">
@@ -914,6 +986,26 @@ let charts = {}
 // UTILS
 // ═══════════════════════════════════════════════════════════════
 function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+// Floating tooltip for data-tip elements
+document.addEventListener('mouseover', e => {
+  const el = e.target.closest('[data-tip]')
+  const ft = document.getElementById('floatTip')
+  if (!ft) return
+  if (el) { ft.textContent = el.dataset.tip; ft.style.display = 'block' }
+  else ft.style.display = 'none'
+})
+document.addEventListener('mousemove', e => {
+  const ft = document.getElementById('floatTip')
+  if (ft && ft.style.display !== 'none') {
+    ft.style.left = (e.clientX + 14) + 'px'
+    ft.style.top  = (e.clientY + 14) + 'px'
+  }
+})
+document.addEventListener('mouseleave', () => {
+  const ft = document.getElementById('floatTip')
+  if (ft) ft.style.display = 'none'
+}, true)
 
 function fmtDate(iso) {
   if (!iso) return '—'
@@ -1677,7 +1769,7 @@ function buildHeatmapGrid(mode, sbCharts, an) {
       const tipText = isDB
         ? `${days[d]} at ${hourLabels[h]} — ${dowArr[d]} submissions on ${days[d]}s · ${hourArr[h]} submissions at ${hourLabels[h]}`
         : `${days[d]} at ${hourLabels[h]} — ${dowArr[d]} visitors on ${days[d]}s`
-      html += `<div style="height:8px;background:${bg};border-radius:1px;cursor:default" title="${tipText}"></div>`
+      html += `<div style="height:8px;background:${bg};border-radius:1px;cursor:default" data-tip="${tipText}"></div>`
     }
     html += `</div>`
   }
@@ -1765,6 +1857,155 @@ function renderBarChart(id, labels, values, color) {
     data: { labels, datasets:[{data:values,backgroundColor:color+'bb',borderColor:color,borderWidth:1,borderRadius:3}] },
     options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{beginAtZero:true,grid:{color:'#f3f4f6'},ticks:{font:{size:11}}}} }
   })
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ORGANIZATIONS
+// ═══════════════════════════════════════════════════════════════
+let orgsCache = []
+let locsCache = []
+let selectedOrgId = null
+
+async function loadOrgs() {
+  document.getElementById('orgTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">Loading…</td></tr>'
+  const data = await apiPost('orgs.list', {})
+  if (!data.success) { showToast(data.error || 'Failed to load orgs', 'error'); return }
+  orgsCache = data.orgs || []
+  locsCache = data.locations || []
+  renderOrgsTable()
+  if (selectedOrgId) renderOrgLocations(selectedOrgId)
+}
+
+function renderOrgsTable() {
+  const tbody = document.getElementById('orgTableBody')
+  if (!orgsCache.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">No organizations yet</td></tr>'; return }
+  tbody.innerHTML = orgsCache.map(o => {
+    const locCount = locsCache.filter(l => l.org_id === o.org_id).length
+    const isSelected = o.org_id === selectedOrgId
+    return `<tr style="cursor:pointer;background:${isSelected?'var(--green-light)':'white'}" onclick="selectOrg(${o.org_id})">
+      <td style="padding:9px 16px;font-size:13px;border-bottom:1px solid var(--border)">${o.org_id}</td>
+      <td style="padding:9px 16px;font-size:13px;font-family:monospace;border-bottom:1px solid var(--border)">${esc(o.org_code)}</td>
+      <td style="padding:9px 16px;font-size:13px;font-weight:600;border-bottom:1px solid var(--border)">${esc(o.org_name)}</td>
+      <td style="padding:9px 16px;font-size:13px;border-bottom:1px solid var(--border)">${o.allow_cross_matching?'Yes':'No'}</td>
+      <td style="padding:9px 16px;font-size:13px;border-bottom:1px solid var(--border)"><span class="badge ${o.is_active?'bg-green':'bg-gray'}">${o.is_active?'Active':'Inactive'}</span></td>
+      <td style="padding:9px 16px;font-size:13px;border-bottom:1px solid var(--border);text-align:right">
+        <span style="font-size:11px;color:var(--text-muted)">${locCount} location${locCount!==1?'s':''}</span>
+        <button class="btn btn-ghost btn-sm" style="margin-left:8px" onclick="event.stopPropagation();toggleOrgActive(${o.org_id},${!o.is_active})">${o.is_active?'Deactivate':'Activate'}</button>
+      </td>
+    </tr>`
+  }).join('')
+}
+
+function selectOrg(orgId) {
+  selectedOrgId = orgId
+  renderOrgsTable()
+  renderOrgLocations(orgId)
+}
+
+function renderOrgLocations(orgId) {
+  const org = orgsCache.find(o => o.org_id === orgId)
+  if (!org) return
+  const locs = locsCache.filter(l => l.org_id === orgId)
+  document.getElementById('orgLocSection').style.display = ''
+  document.getElementById('orgLocTitle').textContent = `Locations — ${org.org_name}`
+  document.getElementById('orgLocBadge').textContent = `${locs.length} location${locs.length!==1?'s':''}`
+  const container = document.getElementById('orgLocList')
+  if (!locs.length) {
+    container.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:8px 0">No locations yet.</div>'
+    return
+  }
+  container.innerHTML = `<div style="max-height:240px;overflow-y:auto">${locs.map(l => `
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)" id="locRow${l.location_id}">
+      <span id="locName${l.location_id}" style="flex:1;font-size:13px">${esc(l.location_name)}</span>
+      ${l.location_latlng ? `<span style="font-size:11px;color:var(--text-muted);font-family:monospace">${esc(l.location_latlng)}</span>` : ''}
+      <span class="badge ${l.is_active?'bg-green':'bg-gray'}" style="font-size:10px">${l.is_active?'Active':'Off'}</span>
+      <button class="btn btn-ghost btn-sm" onclick="startEditLoc(${l.location_id})" style="padding:2px 8px;font-size:11px">Edit</button>
+      <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px;color:var(--red)" onclick="deleteOrgLocation(${l.location_id})">✕</button>
+    </div>`).join('')}</div>`
+}
+
+function startEditLoc(locationId) {
+  const loc = locsCache.find(l => l.location_id === locationId)
+  if (!loc) return
+  const row = document.getElementById('locRow' + locationId)
+  if (!row) return
+  row.innerHTML = `
+    <input type="text" value="${esc(loc.location_name)}" id="editLocName${locationId}" style="flex:1;padding:4px 8px;border:1px solid var(--border);border-radius:5px;font-size:13px" />
+    <input type="text" value="${loc.location_latlng||''}" id="editLocLL${locationId}" placeholder="lat,lng" style="width:140px;padding:4px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:monospace" />
+    <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" id="editLocActive${locationId}" ${loc.is_active?'checked':''} /> Active</label>
+    <button class="btn btn-primary btn-sm" style="padding:3px 10px" onclick="saveEditLoc(${locationId})">Save</button>
+    <button class="btn btn-ghost btn-sm" style="padding:3px 8px" onclick="renderOrgLocations(${selectedOrgId})">✕</button>`
+}
+
+async function saveEditLoc(locationId) {
+  const name = document.getElementById('editLocName' + locationId)?.value?.trim()
+  const ll   = document.getElementById('editLocLL'   + locationId)?.value?.trim()
+  const act  = document.getElementById('editLocActive' + locationId)?.checked
+  if (!name) return
+  const data = await apiPost('org_locations.update', { locationId, locationName: name, locationLatlng: ll || null, isActive: act })
+  if (!data.success) { showToast(data.error || 'Failed', 'error'); return }
+  const loc = locsCache.find(l => l.location_id === locationId)
+  if (loc) { loc.location_name = name; loc.location_latlng = ll || null; loc.is_active = act }
+  showToast('Location updated', 'success')
+  renderOrgLocations(selectedOrgId)
+}
+
+async function deleteOrgLocation(locationId) {
+  if (!confirm('Delete this location?')) return
+  const data = await apiPost('org_locations.delete', { locationId })
+  if (!data.success) { showToast(data.error || 'Failed', 'error'); return }
+  locsCache = locsCache.filter(l => l.location_id !== locationId)
+  renderOrgLocations(selectedOrgId)
+  renderOrgsTable()
+  showToast('Location deleted', 'success')
+}
+
+async function addOrgLocation() {
+  const name = document.getElementById('newLocName')?.value?.trim()
+  const ll   = document.getElementById('newLocLatLng')?.value?.trim()
+  const errEl = document.getElementById('orgLocError')
+  errEl.textContent = ''
+  if (!name) { errEl.textContent = 'Location name required'; return }
+  const data = await apiPost('org_locations.add', { orgId: selectedOrgId, locationName: name, locationLatlng: ll || null })
+  if (!data.success) { errEl.textContent = data.error || 'Failed'; return }
+  locsCache.push(data.location)
+  document.getElementById('newLocName').value = ''
+  document.getElementById('newLocLatLng').value = ''
+  showToast('Location added', 'success')
+  renderOrgLocations(selectedOrgId)
+  renderOrgsTable()
+}
+
+async function createOrg() {
+  const orgCode = document.getElementById('newOrgCode')?.value?.trim()
+  const orgName = document.getElementById('newOrgName')?.value?.trim()
+  const logoUrl = document.getElementById('newOrgLogo')?.value?.trim()
+  const customMessage = document.getElementById('newOrgMsg')?.value?.trim()
+  const allowCrossMatching = document.getElementById('newOrgCross')?.checked
+  const isActive = document.getElementById('newOrgActive')?.checked
+  const errEl = document.getElementById('orgCreateError')
+  errEl.textContent = ''
+  if (!orgCode || !orgName) { errEl.textContent = 'Org Code and Org Name are required'; return }
+  const data = await apiPost('orgs.create', { orgCode, orgName, logoUrl: logoUrl||null, customMessage: customMessage||null, allowCrossMatching, isActive })
+  if (!data.success) { errEl.textContent = data.error || 'Failed'; return }
+  orgsCache.push(data.org)
+  document.getElementById('newOrgCode').value = ''
+  document.getElementById('newOrgName').value = ''
+  document.getElementById('newOrgLogo').value = ''
+  document.getElementById('newOrgMsg').value = ''
+  document.getElementById('newOrgCross').checked = false
+  document.getElementById('newOrgActive').checked = true
+  showToast('Organization created', 'success')
+  renderOrgsTable()
+}
+
+async function toggleOrgActive(orgId, newState) {
+  const data = await apiPost('orgs.update', { orgId, isActive: newState })
+  if (!data.success) { showToast(data.error || 'Failed', 'error'); return }
+  const org = orgsCache.find(o => o.org_id === orgId)
+  if (org) org.is_active = newState
+  renderOrgsTable()
+  showToast(`Organization ${newState ? 'activated' : 'deactivated'}`, 'success')
 }
 
 async function setGrowthPeriod(period) {
@@ -3098,8 +3339,8 @@ function anBreakdownPanel(title, id, tabs, data) {
     if (!items.length) {
       html += `<div class="an-empty">No data</div>`
     } else {
-      const show = items.slice(0, 8)
-      show.forEach(item => {
+      html += `<div style="max-height:220px;overflow-y:auto">`
+      items.forEach(item => {
         const label = item.x || item.url || item.referrer || item.browser || item.country || item.city || '—'
         const val = item.visitors || item.y || 0
         const pct = max ? Math.round((val/max)*100) : 0
@@ -3110,7 +3351,7 @@ function anBreakdownPanel(title, id, tabs, data) {
           <div class="an-row-val">${val.toLocaleString()}</div>
         </div>`
       })
-      if (items.length > 8) html += `<button class="an-more">⤢ More (${items.length - 8} more)</button>`
+      html += `</div>`
     }
     html += `</div></div>`
   })

@@ -484,6 +484,76 @@ Deno.serve(async (req) => {
       return json({ success: true, rows: rows || [] })
     }
 
+    // ── ORGANISATIONS (super_admin only) ──────────────────────────────────────
+    if (action.startsWith('orgs.') || action.startsWith('org_locations.')) {
+      if (!requireRole(admin, 'super_admin')) return json({ error: 'Insufficient permissions' }, 403)
+
+      if (action === 'orgs.list') {
+        const { data: orgs, error: e1 } = await supabase.from('organisations').select('*').order('org_id')
+        const { data: locs, error: e2 } = await supabase.from('org_locations').select('*').order('org_id, location_id')
+        if (e1) throw e1; if (e2) throw e2
+        return json({ success: true, orgs: orgs || [], locations: locs || [] })
+      }
+
+      if (action === 'orgs.create') {
+        const { orgCode, orgName, logoUrl, customMessage, allowCrossMatching, isActive } = body
+        if (!orgCode || !orgName) return json({ error: 'orgCode and orgName required' }, 400)
+        const { data, error } = await supabase.from('organisations').insert({
+          org_code: orgCode, org_name: orgName,
+          logo_url: logoUrl || null, custom_message: customMessage || null,
+          allow_cross_matching: allowCrossMatching ?? false, is_active: isActive ?? true
+        }).select().single()
+        if (error) return json({ error: error.message }, 400)
+        return json({ success: true, org: data })
+      }
+
+      if (action === 'orgs.update') {
+        const { orgId, orgCode, orgName, logoUrl, customMessage, allowCrossMatching, isActive } = body
+        if (!orgId) return json({ error: 'orgId required' }, 400)
+        const patch: any = {}
+        if (orgCode !== undefined) patch.org_code = orgCode
+        if (orgName !== undefined) patch.org_name = orgName
+        if (logoUrl !== undefined) patch.logo_url = logoUrl
+        if (customMessage !== undefined) patch.custom_message = customMessage
+        if (allowCrossMatching !== undefined) patch.allow_cross_matching = allowCrossMatching
+        if (isActive !== undefined) patch.is_active = isActive
+        const { error } = await supabase.from('organisations').update(patch).eq('org_id', orgId)
+        if (error) return json({ error: error.message }, 400)
+        return json({ success: true })
+      }
+
+      if (action === 'org_locations.add') {
+        const { orgId, locationName, locationLatlng, isActive } = body
+        if (!orgId || !locationName) return json({ error: 'orgId and locationName required' }, 400)
+        const { data, error } = await supabase.from('org_locations').insert({
+          org_id: orgId, location_name: locationName,
+          location_latlng: locationLatlng || null, is_active: isActive ?? true
+        }).select().single()
+        if (error) return json({ error: error.message }, 400)
+        return json({ success: true, location: data })
+      }
+
+      if (action === 'org_locations.update') {
+        const { locationId, locationName, locationLatlng, isActive } = body
+        if (!locationId) return json({ error: 'locationId required' }, 400)
+        const patch: any = {}
+        if (locationName !== undefined) patch.location_name = locationName
+        if (locationLatlng !== undefined) patch.location_latlng = locationLatlng
+        if (isActive !== undefined) patch.is_active = isActive
+        const { error } = await supabase.from('org_locations').update(patch).eq('location_id', locationId)
+        if (error) return json({ error: error.message }, 400)
+        return json({ success: true })
+      }
+
+      if (action === 'org_locations.delete') {
+        const { locationId } = body
+        if (!locationId) return json({ error: 'locationId required' }, 400)
+        const { error } = await supabase.from('org_locations').delete().eq('location_id', locationId)
+        if (error) return json({ error: error.message }, 400)
+        return json({ success: true })
+      }
+    }
+
     return json({ error: `Unknown action: ${action}` }, 400)
 
   } catch (err: any) {
