@@ -152,7 +152,7 @@
     .an-more { display:block;text-align:center;padding:9px;font-size:12px;color:var(--text-muted);cursor:pointer;border-top:1px solid var(--border);background:none;border-left:none;border-right:none;border-bottom:none;width:100%;font-family:inherit; }
     .an-more:hover { background:var(--bg); }
     .an-empty { text-align:center;padding:20px;font-size:13px;color:var(--text-muted); }
-    #floatTip { position:fixed;background:rgba(15,15,15,0.88);color:#fff;padding:5px 10px;border-radius:6px;font-size:12px;pointer-events:none;z-index:9999;display:none;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.25); }
+    #floatTip { position:fixed;background:rgba(15,15,15,0.88);color:#fff;padding:6px 10px;border-radius:6px;font-size:12px;pointer-events:none;z-index:9999;display:none;white-space:normal;max-width:280px;line-height:1.45;box-shadow:0 2px 8px rgba(0,0,0,0.25); }
     .an-heatmap-wrap { background:white;border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);margin-bottom:14px; }
     .an-heatmap-title { font-size:14px;font-weight:700;margin-bottom:12px; }
     .an-heatmap { display:grid;grid-template-columns:40px repeat(7,1fr);gap:2px;font-size:10px; }
@@ -869,7 +869,11 @@
             <input type="date" id="archDateTo" class="an-range-select" style="padding:5px 8px;cursor:pointer">
             <button class="btn btn-sm btn-primary" onclick="loadArchiveAnalytics()" style="padding:5px 14px;font-size:13px">Apply</button>
           </span>
-          <span style="margin-left:auto;font-size:12px;color:var(--text-muted)" id="archCoverageNote"></span>
+          <span style="margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-size:12px;color:var(--text-muted)" id="archCoverageNote"></span>
+            <button class="btn btn-sm" onclick="syncArchiveRange()" id="archSyncBtn" style="padding:4px 10px;font-size:12px;background:#f3f4f6;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:inherit">↓ Sync Range</button>
+            <span id="archSyncStatus" style="font-size:12px;color:var(--text-muted)"></span>
+          </span>
         </div>
         <div id="archiveContent"><div class="loading"><span class="spinner"></span>Loading archive…</div></div>
       </div>
@@ -1017,8 +1021,12 @@ document.addEventListener('mouseover', e => {
 document.addEventListener('mousemove', e => {
   const ft = document.getElementById('floatTip')
   if (ft && ft.style.display !== 'none') {
-    ft.style.left = (e.clientX + 14) + 'px'
-    ft.style.top  = (e.clientY + 14) + 'px'
+    const tw = ft.offsetWidth  || 200
+    const th = ft.offsetHeight || 30
+    const x = Math.min(e.clientX + 14, window.innerWidth  - tw - 10)
+    const y = Math.min(e.clientY + 14, window.innerHeight - th - 10)
+    ft.style.left = Math.max(4, x) + 'px'
+    ft.style.top  = Math.max(4, y) + 'px'
   }
 })
 document.addEventListener('mouseleave', () => {
@@ -1430,8 +1438,18 @@ async function loadDashAnalytics() {
     // Build day-of-week heatmap from archive rows
     const dow = [0,0,0,0,0,0,0]
     rows.forEach(r => { if (r.date) { const d = new Date(r.date+'T12:00:00Z'); dow[d.getUTCDay()] += r.visitors || 0 } })
+    // Build 24-slot hourly array from pageviews_hourly (sessions = visitors per hour)
+    const hourly = new Array(24).fill(0)
+    rows.forEach(r => {
+      if (r.pageviews_hourly && Array.isArray(r.pageviews_hourly)) {
+        r.pageviews_hourly.forEach(h => {
+          if (h.hour >= 0 && h.hour < 24) hourly[h.hour] += h.sessions || 0
+        })
+      }
+    })
     return {
       ...totals, waShares, rows, visitorsByDate, dowVisitors: dow,
+      hourlyVisitors: hourly.some(v => v > 0) ? hourly : null,
       pages:      mergeBreakdown(rows.map(r => r.pages)),
       entryPages: mergeBreakdown(rows.map(r => r.entry_pages)),
       exitPages:  mergeBreakdown(rows.map(r => r.exit_pages)),
@@ -1757,7 +1775,8 @@ function buildHeatmapGrid(mode, sbCharts, an) {
     hourData.forEach(h => { if (h.hour_num >= 0 && h.hour_num < 24) hourArr[h.hour_num] = h.count })
   } else {
     dowArr = an?.dowVisitors || [0,0,0,0,0,0,0]
-    hourArr = new Array(24).fill(1)  // uniform — no hourly breakdown in archive
+    // Use real hourly data from pageviews_hourly if available, else uniform
+    hourArr = an?.hourlyVisitors || new Array(24).fill(1)
   }
   // Normalize hourArr to proportions summing to 1
   // cell(d, h) = dowArr[d] * normHour[h]  →  sum over h = dowArr[d]  ✓
@@ -2987,6 +3006,45 @@ function initSyncDate() {
   if (el) el.value = new Date().toISOString().slice(0, 10)
 }
 
+async function syncArchiveRange() {
+  const btn = document.getElementById('archSyncBtn')
+  const status = document.getElementById('archSyncStatus')
+  const range = getArchiveRange()
+  if (!range) return
+  // Build list of past dates within range (never sync today — partial data)
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
+  const dates = []
+  let d = new Date(range.startAt)
+  d.setUTCHours(12, 0, 0, 0)
+  const endDay = new Date(Math.min(range.endAt, new Date(yesterday + 'T23:59:59Z').getTime()))
+  while (d <= endDay) {
+    dates.push(d.toISOString().slice(0, 10))
+    d.setUTCDate(d.getUTCDate() + 1)
+  }
+  if (!dates.length) { status.textContent = 'No past dates in range'; return }
+  btn.disabled = true
+  const tok = localStorage.getItem(TOKEN_KEY)
+  let synced = 0, failed = 0
+  for (const date of dates) {
+    status.textContent = `Syncing ${date} (${synced + failed + 1}/${dates.length})…`
+    status.style.color = 'var(--text-muted)'
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/sync-analytics`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: tok, date })
+      })
+      const data = await res.json()
+      if (data.success) synced++
+      else { failed++; console.warn('Sync failed', date, data.error) }
+    } catch (e) { failed++; console.warn('Sync error', date, e) }
+  }
+  status.textContent = `✓ ${synced} synced${failed ? ` · ${failed} failed` : ''}`
+  status.style.color = failed ? 'var(--amber)' : 'var(--green)'
+  btn.disabled = false
+  if (synced > 0) loadArchiveAnalytics()
+}
+
 // ── Analytics sub-tabs ─────────────────────────────────────────────────────
 let anCurrentTab = 'live'
 let archOffset = 0
@@ -3088,7 +3146,7 @@ async function loadArchiveAnalytics() {
     if (!res.success) { el.innerHTML = `<div class="an-empty">Error: ${res.error}</div>`; return }
     const rows = res.rows || []
     if (!rows.length) {
-      el.innerHTML = `<div class="an-empty">No synced data for this range.<br><span style="font-size:12px">Use the ↓ Sync button on the Live tab to archive dates first.</span></div>`
+      el.innerHTML = `<div class="an-empty">No synced data for this range.<br><span style="font-size:12px">Use the ↓ Sync Range button above to pull data from Umami for these dates.</span></div>`
       return
     }
 
