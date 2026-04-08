@@ -629,8 +629,9 @@
             <div class="form-group" style="margin:0"><input type="text" id="newLocName" placeholder="Location name *" /></div>
             <div class="form-group" style="margin:0">
               <input type="text" id="newLocLatLng" placeholder="lat,lng (required) *" />
-              <div style="font-size:11px;color:var(--text-muted);margin-top:3px">
-                📍 <a href="https://maps.google.com" target="_blank" style="color:var(--green-dark);text-decoration:none" title="Open Google Maps, right-click any location → the first item shows the coordinates. Tap it to copy.">How to get from Google Maps ↗</a>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:3px;display:flex;align-items:center;gap:4px">
+                📍 Coordinates required
+                <span style="cursor:help;background:#e5e7eb;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;font-size:10px;font-weight:700;color:#374151;flex-shrink:0" data-tip="How to get coordinates from Google Maps: 1) Open maps.google.com  2) Search for or navigate to the location  3) Right-click on the exact spot on the map  4) The very first item in the popup menu shows the coordinates (e.g. 25.2048, 55.2708)  5) Click those numbers to copy them to your clipboard  6) Paste directly into this field">?</span>
               </div>
             </div>
             <button class="btn btn-primary btn-sm" onclick="addOrgLocation()" style="align-self:start;margin-top:0">+ Add</button>
@@ -662,20 +663,6 @@
         <!-- LEFT: Form -->
         <div class="inline-form" style="flex:1;min-width:300px;max-width:560px">
 
-          <!-- Base URL (both modes) -->
-          <div class="form-group" style="margin-bottom:14px">
-            <label>Destination</label>
-            <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
-              <label style="display:flex;align-items:center;gap:8px;font-weight:400;cursor:pointer;width:fit-content">
-                <input type="radio" name="lgBase" id="lgBaseProd" value="https://communitycarpool.org" checked style="flex-shrink:0;width:16px;height:16px;cursor:pointer">
-                <span style="font-size:13px">communitycarpool.org <span style="font-size:11px;color:var(--text-muted)">(Production)</span></span>
-              </label>
-              <label style="display:flex;align-items:center;gap:8px;font-weight:400;cursor:pointer;width:fit-content">
-                <input type="radio" name="lgBase" id="lgBaseDev" value="https://dev.communitycarpool.org" style="flex-shrink:0;width:16px;height:16px;cursor:pointer">
-                <span style="font-size:13px">dev.communitycarpool.org <span style="font-size:11px;color:var(--text-muted)">(Dev)</span></span>
-              </label>
-            </div>
-          </div>
 
           <!-- INDIVIDUAL fields -->
           <div id="lgModeIndividual">
@@ -749,7 +736,7 @@
         <!-- RIGHT: QR -->
         <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);width:220px">
           <div style="font-size:11px;font-weight:700;color:var(--text-secondary);letter-spacing:0.06em">QR CODE</div>
-          <div id="lgQrWrap" style="width:180px;height:180px;display:flex;align-items:center;justify-content:center;background:#f9fafb;border-radius:8px;border:1px dashed var(--border);overflow:hidden">
+          <div id="lgQrWrap" style="width:180px;height:180px;display:flex;align-items:center;justify-content:center;border-radius:8px;overflow:hidden">
             <span id="lgQrPlaceholder" style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px">Fill in the form<br>to generate</span>
             <div id="lgQrCanvas" style="display:none"></div>
           </div>
@@ -1575,11 +1562,11 @@ function renderDashboard(data, an) {
     const fmtDur = d => d >= 60 ? `${Math.floor(d/60)}m ${d%60}s` : `${d}s`
     html += `<div style="margin:18px 0 8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Web Traffic</div><span style="font-size:11px;font-weight:600;color:var(--blue);background:#dbeafe;padding:2px 8px;border-radius:20px">📊 Analytics</span></div></div>
     <div class="kpi-grid kpi-5" style="margin-bottom:22px">
-      <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Visitors</div><div class="kpi-value" style="color:var(--blue)">${an.visitors.toLocaleString()}</div><div class="kpi-sub">unique</div></div>
-      <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Views</div><div class="kpi-value" style="color:var(--blue)">${an.pageviews.toLocaleString()}</div><div class="kpi-sub">page loads</div></div>
-      <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Bounce Rate</div><div class="kpi-value" style="color:var(--blue)">${bounceRate}${bounceRate!=='—'?'%':''}</div><div class="kpi-sub">single-page sessions</div></div>
-      <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Visit Duration</div><div class="kpi-value" style="color:var(--blue)">${fmtDur(avgDuration)}</div><div class="kpi-sub">avg per session</div></div>
-      <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Social Shares</div><div class="kpi-value" style="color:var(--blue)">${an.waShares.toLocaleString()}</div><div class="kpi-sub">share taps</div></div>
+      <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Visitors <span class="kpi-tip">ⓘ<span class="kpi-tooltip">Unique individuals identified by browser fingerprint in the selected date range. Each person is counted once even if they visit multiple times.</span></span></div><div class="kpi-value" style="color:var(--blue)">${an.visitors.toLocaleString()}</div><div class="kpi-sub">unique</div></div>
+      <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Views <span class="kpi-tip">ⓘ<span class="kpi-tooltip">Total page loads in the selected period. One visitor browsing 5 pages = 5 views. Views ÷ Visitors = avg pages per person.</span></span></div><div class="kpi-value" style="color:var(--blue)">${an.pageviews.toLocaleString()}</div><div class="kpi-sub">page loads</div></div>
+      <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Bounce Rate <span class="kpi-tip">ⓘ<span class="kpi-tooltip">% of sessions where the visitor viewed only one page and left with no further interaction. Lower is better — it means visitors are exploring the site.</span></span></div><div class="kpi-value" style="color:var(--blue)">${bounceRate}${bounceRate!=='—'?'%':''}</div><div class="kpi-sub">single-page sessions</div></div>
+      <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Visit Duration <span class="kpi-tip">ⓘ<span class="kpi-tooltip">Average time spent per session, calculated as total engaged time ÷ number of sessions. Longer = more engaged visitors.</span></span></div><div class="kpi-value" style="color:var(--blue)">${fmtDur(avgDuration)}</div><div class="kpi-sub">avg per session</div></div>
+      <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Social Shares <span class="kpi-tip">ⓘ<span class="kpi-tooltip">Number of times the WhatsApp/share button was tapped, tracked as a custom analytics event. Indicates viral sharing activity.</span></span></div><div class="kpi-value" style="color:var(--blue)">${an.waShares.toLocaleString()}</div><div class="kpi-sub">share taps</div></div>
     </div>`
   } else {
     html += `<div style="margin:18px 0 8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Web Traffic</div><span style="font-size:11px;font-weight:600;color:var(--blue);background:#dbeafe;padding:2px 8px;border-radius:20px">📊 Analytics</span></div></div>
@@ -1631,7 +1618,7 @@ function renderDashboard(data, an) {
   </div>`
 
   // Row 7 – Strength + Locations
-  html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Match Strength & Geography</div><span style="font-size:11px;font-weight:600;color:var(--green-dark);background:var(--green-light);padding:2px 8px;border-radius:20px">🗄 Supabase</span></div></div>
+  html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Match Strength & Geography</div><span class="kpi-tip" style="font-size:13px;margin-left:2px">ⓘ<span class="kpi-tooltip" style="white-space:normal;width:260px">Match Strength is the algorithm's confidence score (0–100) for each matched pair based on route overlap and distance. Geography shows the top origin cities and countries of all submissions.</span></span><span style="font-size:11px;font-weight:600;color:var(--green-dark);background:var(--green-light);padding:2px 8px;border-radius:20px">🗄 Supabase</span></div></div>
   <div class="chart-grid-3" style="align-items:start;margin-bottom:22px">
     <div class="chart-card" style="border-top:3px solid var(--green)">
       <h3>Match Strength</h3>
@@ -1653,7 +1640,7 @@ function renderDashboard(data, an) {
   </div>`
 
   // Row 8 – Behavioral Patterns (heatmap + distance)
-  html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Behavioral Patterns</div></div></div>`
+  html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Behavioral Patterns</div><span class="kpi-tip" style="font-size:13px;margin-left:2px">ⓘ<span class="kpi-tooltip" style="white-space:normal;width:280px">Heatmap showing submission activity by day of week and hour of day. Each cell = estimated count for that slot; each row sums to that day's total. Supabase shows all-time submission patterns. Analytics shows visitor patterns (no hourly breakdown in archive — shown equally distributed across 24h).</span></span></div></div>`
   html += `<div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:22px;align-items:start">`
   // Heatmap card (toggleable)
   html += `<div id="hmCard" class="chart-card" style="border-top:3px solid var(--green)">
@@ -1675,7 +1662,7 @@ function renderDashboard(data, an) {
 
   // Row 9 – Analytics Breakdown Panels (Pages, Sources, Environment, Location)
   if (an) {
-    html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Traffic Breakdown</div><span style="font-size:11px;font-weight:600;color:var(--blue);background:#dbeafe;padding:2px 8px;border-radius:20px">📊 Analytics</span></div></div>
+    html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Traffic Breakdown</div><span class="kpi-tip" style="font-size:13px;margin-left:2px">ⓘ<span class="kpi-tooltip" style="white-space:normal;width:260px">Detailed breakdown of web traffic from the Supabase analytics archive. Pages shows most visited, entry, and exit pages. Sources shows referrers, channels, and search queries. Environment shows browser, OS, device type, screen size, and language. Location shows visitor countries, regions, and cities.</span></span><span style="font-size:11px;font-weight:600;color:var(--blue);background:#dbeafe;padding:2px 8px;border-radius:20px">📊 Analytics</span></div></div>
     <div class="an-grid-2" style="margin-bottom:14px">`
     html += anBreakdownPanel('Pages', 'dashPages', [
       { label:'Path', key:'pages' },
@@ -1723,7 +1710,7 @@ function renderDashboard(data, an) {
   // Row 11 – Acquisition Sources
   const hasRefData = (charts.refBreakdown||[]).length > 0 || (charts.utmSourceBreakdown||[]).length > 0
   if (hasRefData) {
-    html += `<div style="margin-bottom:8px"><div class="section-title">Acquisition Sources</div></div>
+    html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Acquisition Sources</div><span class="kpi-tip" style="font-size:13px;margin-left:2px">ⓘ<span class="kpi-tooltip" style="white-space:normal;width:260px">Shows which referral links and campaigns are driving sign-ups. Individual Referral Links tracks users who registered via a ?ref=NNN link. Campaign Sources tracks users who registered via a ?cmp=NNN campaign link. Hover over a code to see the name or campaign details.</span></span></div></div>
     <div class="chart-grid-2" style="margin-bottom:24px">
       <div class="chart-card" style="border-top:3px solid var(--green)">
         <h3>Individual Referral Links <span style="font-size:11px;color:var(--text-muted);font-weight:400">(ref codes)</span></h3>
@@ -1770,22 +1757,20 @@ function buildHeatmapGrid(mode, sbCharts, an) {
     hourData.forEach(h => { if (h.hour_num >= 0 && h.hour_num < 24) hourArr[h.hour_num] = h.count })
   } else {
     dowArr = an?.dowVisitors || [0,0,0,0,0,0,0]
-    hourArr = new Array(24).fill(0).map((_, h) => {
-      // Use gaussian bell centered at 9am to give slight hourly variation in analytics mode
-      return 0.3 + 0.7 * Math.exp(-0.5 * Math.pow((h - 10) / 4, 2))
-    })
+    hourArr = new Array(24).fill(1)  // uniform — no hourly breakdown in archive
   }
-  const maxDow = Math.max(1, ...dowArr)
-  const maxHour = Math.max(1, ...hourArr)
-  const normDow = dowArr.map(v => v / maxDow)
-  const normHour = hourArr.map(v => v / maxHour)
+  // Normalize hourArr to proportions summing to 1
+  // cell(d, h) = dowArr[d] * normHour[h]  →  sum over h = dowArr[d]  ✓
+  const hourTotal = hourArr.reduce((s, v) => s + v, 0) || 1
+  const normHour = hourArr.map(v => v / hourTotal)
+  // Max cell value for color scaling
+  const maxCell = Math.max(1, ...dowArr.flatMap((dv, di) => normHour.map(nh => dv * nh)))
   const greenScale = ['#f0fdf4','#dcfce7','#bbf7d0','#86efac','#4ade80','#22c55e','#16a34a','#15803d','#166534','#14532d']
   const blueScale  = ['#eff6ff','#dbeafe','#bfdbfe','#93c5fd','#60a5fa','#3b82f6','#2563eb','#1d4ed8','#1e40af','#1e3a8a']
-  function cellColor(intensity) {
-    if (intensity < 0.005) return '#f9fafb'
+  function cellColor(val) {
+    if (val < maxCell * 0.005) return '#f9fafb'
     const scale = isDB ? greenScale : blueScale
-    const idx = Math.min(9, Math.floor(intensity * 10))
-    return scale[idx]
+    return scale[Math.min(9, Math.floor(val / maxCell * 10))]
   }
   let html = `<div>`
   // Day headers row
@@ -1799,12 +1784,12 @@ function buildHeatmapGrid(mode, sbCharts, an) {
     html += `<div style="display:grid;grid-template-columns:34px repeat(7,1fr);gap:1px;margin-bottom:1px">`
     html += `<div style="font-size:9px;color:var(--text-muted);text-align:right;padding-right:5px;line-height:8px">${showLabel ? hourLabels[h] : ''}</div>`
     for (let d = 0; d < 7; d++) {
-      const intensity = isDB ? normDow[d] * normHour[h] : normDow[d]
-      const bg = cellColor(intensity)
-      const tipText = isDB
-        ? `${days[d]} at ${hourLabels[h]} — ${Math.round(normDow[d]*normHour[h]*100)}% relative activity (${dowArr[d]} all-time submissions on ${days[d]}s · ${hourArr[h]} all-time at ${hourLabels[h]})`
-        : `${days[d]} at ${hourLabels[h]} — ${Math.round(normDow[d]*100)}% of peak (${dowArr[d]} visitors on ${days[d]}s; no hourly data in archive)`
-      html += `<div style="height:8px;background:${bg};border-radius:1px;cursor:default" data-tip="${tipText}"></div>`
+      const cellVal = dowArr[d] * normHour[h]
+      const count = Math.round(cellVal)
+      const bg = cellColor(cellVal)
+      const noun = isDB ? 'submissions' : 'visitors'
+      const note = !isDB ? ' (no hourly data; shown as daily ÷ 24)' : ''
+      html += `<div style="height:8px;background:${bg};border-radius:1px;cursor:default" data-tip="${days[d]} ${hourLabels[h]} — ${count} ${noun}${note}"></div>`
     }
     html += `</div>`
   }
@@ -2600,7 +2585,10 @@ function setLgMode(mode) {
 }
 
 function lgGetBase() {
-  return document.querySelector('input[name="lgBase"]:checked')?.value || 'https://communitycarpool.org'
+  const h = window.location.hostname
+  return (h.startsWith('dev.') || h === 'localhost' || h === '127.0.0.1')
+    ? 'https://dev.communitycarpool.org'
+    : 'https://communitycarpool.org'
 }
 
 function lgBuild() {
@@ -2661,9 +2649,9 @@ function lgQrStyleChanged() {
 async function lgRenderQR(url, sub) {
   lgQrLastUrl = url; lgQrLastSub = sub
   const SIZE    = 600   // render at high res — crisp when pasted to WhatsApp/email
-  const TEXT_H  = 58    // extra height below QR for the URL label
+  const TEXT_H  = 0     // no footer
   const DISPLAY = 180   // CSS display size keeps the panel compact
-  const DISPLAY_H = Math.round(DISPLAY * (SIZE + TEXT_H) / SIZE)
+  const DISPLAY_H = DISPLAY
   const showLogo = document.getElementById('lgQrLogo')?.checked !== false
   const wrap = document.getElementById('lgQrCanvas')
   wrap.innerHTML = ''
@@ -2732,16 +2720,6 @@ async function lgRenderQR(url, sub) {
       ctx.drawImage(logo, minX, minY, srcW, srcH, dx, dy, dw, dh)
     } catch (e) { console.warn('[lgRenderQR] logo failed', e) }
   }
-
-  // Step 4: draw URL label below QR (transparent background, green text)
-  await document.fonts.ready
-  const fontSize = Math.round(SIZE * 0.052)
-  ctx.font = `600 ${fontSize}px Inter, -apple-system, BlinkMacSystemFont, Arial, sans-serif`
-  ctx.fillStyle = '#15803d'
-  ctx.textAlign = 'center'
-  ctx.textBaseline = 'middle'
-  const footerText = url.replace(/^https?:\/\//, '')
-  ctx.fillText(footerText, SIZE / 2, SIZE + TEXT_H / 2)
 
   wrap.appendChild(canvas)
   lgQrCanvas = canvas
