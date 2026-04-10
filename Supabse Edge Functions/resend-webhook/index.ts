@@ -126,6 +126,20 @@ Deno.serve(async (req) => {
     return json({ error: 'Failed to store event' }, 500)
   }
 
+  // ── Bounce / complaint suppression ───────────────────────────────────────────
+  // Mark the user as email_bounced so no further emails are sent to this address.
+  // We suppress both hard bounces and spam complaints to protect deliverability.
+  if ((eventType === 'email.bounced' || eventType === 'email.complained') && recipient) {
+    const { error: bounceErr } = await supabase.from('users')
+      .update({ email_bounced: true, email_bounced_at: new Date().toISOString() })
+      .eq('email', recipient)
+    if (bounceErr) {
+      console.error(`[resend-webhook] Failed to mark bounce for ${recipient}:`, bounceErr.message)
+    } else {
+      console.log(`[resend-webhook] Marked email_bounced=true for ${recipient} (${eventType})`)
+    }
+  }
+
   console.log(`[resend-webhook] Stored ${eventType} for message_id=${messageId}, batch=${batchId}`)
   return json({ received: true, stored: true, eventType })
 })
