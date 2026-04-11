@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Join the Team — Community Carpool</title>
+  <link rel="icon" href="/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #1B5C3A;
+      --lime: #B4E035;
+      --emerald: #10B981;
+      --text: #1F2937;
+      --muted: #6B7280;
+      --border: #E5E7EB;
+      --bg: #F9FAFB;
+      --white: #FFFFFF;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: var(--green);
+      padding: 16px 24px;
+      text-align: center;
+    }
+    .site-header img { height: 44px; width: auto; }
+
+    /* ── Hero ── */
+    .hero {
+      background: var(--green);
+      padding: 32px 24px 48px;
+      text-align: center;
+      color: white;
+    }
+    .hero h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(22px, 5vw, 32px);
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+    .hero p {
+      color: var(--lime);
+      font-size: 15px;
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── Progress bar ── */
+    .progress-wrap {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .progress-label span { color: var(--green); font-weight: 700; }
+    .progress-segments {
+      display: flex;
+      gap: 4px;
+    }
+    .seg {
+      flex: 1;
+      height: 6px;
+      border-radius: 99px;
+      background: var(--border);
+      transition: background 0.35s ease;
+    }
+    .seg.active { background: var(--lime); }
+    .seg.done { background: var(--green); }
+
+    /* ── Form card ── */
+    .form-outer {
+      max-width: 640px;
+      margin: -24px auto 0;
+      padding: 0 16px;
+    }
+    .form-card {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    /* ── Carousel ── */
+    .carousel-track-wrap { overflow: hidden; }
+    .carousel-track {
+      display: flex;
+      transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .slide {
+      flex: 0 0 100%;
+      width: 100%;
+      padding: 28px 28px 24px;
+    }
+
+    .slide-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 4px;
+    }
+    .slide-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    /* ── Fields ── */
+    .field { margin-bottom: 18px; }
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .field label .opt {
+      font-weight: 400;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .field input[type="text"],
+    .field input[type="email"],
+    .field input[type="tel"],
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      color: var(--text);
+      background: white;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: var(--emerald);
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.12);
+    }
+    .field input.error,
+    .field select.error,
+    .field textarea.error {
+      border-color: #ef4444;
+    }
+    .field textarea {
+      resize: vertical;
+      min-height: 100px;
+      line-height: 1.6;
+    }
+    .field .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+    .field-error {
+      font-size: 12px;
+      color: #ef4444;
+      margin-top: 4px;
+      display: none;
+    }
+    .field-error.show { display: block; }
+
+    /* ── Pill options (checkbox/radio style) ── */
+    .pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .pill-group input { display: none; }
+    .pill-group label {
+      display: inline-block;
+      padding: 8px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 99px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+      margin: 0;
+    }
+    .pill-group input:checked + label {
+      background: var(--green);
+      border-color: var(--green);
+      color: white;
+    }
+    .pill-group label:hover {
+      border-color: var(--emerald);
+      color: var(--green);
+    }
+    .pill-group input:checked + label:hover {
+      color: white;
+    }
+
+    /* ── Star / rating row ── */
+    .rating-group { display: flex; flex-direction: column; gap: 14px; }
+    .rating-row { }
+    .rating-row .rating-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .stars { display: flex; gap: 6px; }
+    .stars input { display: none; }
+    .stars label {
+      width: 36px;
+      height: 36px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      margin: 0;
+    }
+    .stars input:checked ~ label { border-color: var(--border); background: white; color: var(--muted); }
+    .stars label:hover,
+    .stars input:checked + label { background: var(--green); border-color: var(--green); color: white; }
+
+    /* RTL star trick: flex-direction row-reverse so :checked ~ label selects correctly */
+    .stars { flex-direction: row-reverse; justify-content: flex-end; }
+    .stars input:checked ~ label { background: var(--green); border-color: var(--green); color: white; }
+
+    /* ── Navigation ── */
+    .slide-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 28px 24px;
+      border-top: 1px solid var(--border);
+    }
+    .btn-back {
+      background: none;
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+    }
+    .btn-back:hover { border-color: var(--text); color: var(--text); }
+    .btn-back:disabled { opacity: 0.3; pointer-events: none; }
+    .btn-next {
+      background: var(--green);
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Montserrat', sans-serif;
+      letter-spacing: 0.01em;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-next:hover { background: #164d30; }
+    .btn-next.submit { background: var(--emerald); }
+    .btn-next.submit:hover { background: #059669; }
+    .btn-next:disabled { opacity: 0.6; pointer-events: none; }
+
+    /* ── Success screen ── */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 56px 32px;
+    }
+    .success-screen.show { display: block; }
+    .success-icon {
+      width: 72px;
+      height: 72px;
+      background: #dcfce7;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 32px;
+    }
+    .success-screen h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--green);
+      margin-bottom: 10px;
+    }
+    .success-screen p {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 480px) {
+      .slide { padding: 22px 18px 18px; }
+      .slide-nav { padding: 14px 18px 20px; }
+      .stars label { width: 32px; height: 32px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header">
+  <a href="https://communitycarpool.org">
+    <img src="/logo-slogan.png" alt="Community Carpool">
+  </a>
+</header>
+
+<!-- Hero -->
+<div class="hero">
+  <h1>Join the Community Carpool Team</h1>
+  <p>We're looking for curious, motivated volunteers to help grow carpooling across the UAE. Takes about 5 minutes.</p>
+</div>
+
+<!-- Progress -->
+<div class="progress-wrap">
+  <div class="progress-label">
+    <span id="step-label">Step 1 of 6</span>
+    <span id="section-name">Basic Info</span>
+  </div>
+  <div class="progress-segments" id="progress-segs">
+    <div class="seg active" data-i="0"></div>
+    <div class="seg" data-i="1"></div>
+    <div class="seg" data-i="2"></div>
+    <div class="seg" data-i="3"></div>
+    <div class="seg" data-i="4"></div>
+    <div class="seg" data-i="5"></div>
+  </div>
+</div>
+
+<!-- Form -->
+<div class="form-outer">
+  <div class="form-card">
+
+    <div class="carousel-track-wrap">
+      <div class="carousel-track" id="track">
+
+        <!-- ── Slide 1: Basic Info ── -->
+        <div class="slide" data-section="Basic Info">
+          <div class="slide-title">Let's start with the basics</div>
+          <div class="slide-subtitle">Tell us a bit about yourself so we know who we're talking to.</div>
+
+          <div class="field">
+            <label for="full_name">Full Name <span class="req">*</span></label>
+            <input type="text" id="full_name" name="full_name" placeholder="e.g. Sara Al Mansouri" autocomplete="name" required>
+            <div class="field-error" id="err-full_name">Please enter your name.</div>
+          </div>
+          <div class="field">
+            <label for="email">Email Address <span class="req">*</span></label>
+            <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+            <div class="field-error" id="err-email">Please enter a valid email.</div>
+          </div>
+          <div class="field">
+            <label for="phone">Phone / WhatsApp <span class="opt">(optional)</span></label>
+            <input type="tel" id="phone" name="phone" placeholder="+971 50 000 0000" autocomplete="tel">
+          </div>
+          <div class="field">
+            <label for="city_country">City &amp; Country <span class="opt">(optional)</span></label>
+            <input type="text" id="city_country" name="city_country" placeholder="e.g. Dubai, UAE">
+          </div>
+          <div class="field">
+            <label for="school">School / University <span class="opt">(optional)</span></label>
+            <input type="text" id="school" name="school" placeholder="e.g. AUS, UAEU, AUB...">
+          </div>
+          <div class="field">
+            <label for="current_status">What describes you best?</label>
+            <div class="pill-group" id="status-pills">
+              <input type="radio" name="current_status" id="st-student" value="University Student">
+              <label for="st-student">University Student</label>
+              <input type="radio" name="current_status" id="st-grad" value="Recent Graduate">
+              <label for="st-grad">Recent Graduate</label>
+              <input type="radio" name="current_status" id="st-working" value="Working Professional">
+              <label for="st-working">Working Professional</label>
+              <input type="radio" name="current_status" id="st-other" value="Other">
+              <label for="st-other">Other</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Slide 2: Availability ── -->
+        <div class="slide" data-section="Availability">
+          <div class="slide-title">Your availability</div>
+          <div class="slide-subtitle">We're flexible — even a few hours a week makes a real difference.</div>
+
+          <div class="field">
+            <label>How many hours per week can you commit?</label>
+            <div class="pill-group">
+              <input type="radio" name="hours_per_week" id="h1" value="1–3 hours">
+              <label for="h1">1–3 hours</label>
+              <input type="radio" name="hours_per_week" id="h2" value="3–6 hours">
+              <label for="h2">3–6 hours</label>
+              <input type="radio" name="hours_per_week" id="h3" value="6–10 hours">
+              <label for="h3">6–10 hours</label>
+              <input type="radio" name="hours_per_week" id="h4" value="10+ hours">
+              <label for="h4">10+ hours</label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>When are you generally available?</label>
+            <div class="pill-group">
+              <input type="checkbox" name="availability" id="av-wkday" value="Weekday mornings">
+              <label for="av-wkday">Weekday mornings</label>
+              <input type="checkbox" name="availability" id="av-wkaft" value="Weekday afternoons">
+              <label for="av-wkaft">Weekday afternoons</label>
+              <input type="checkbox" name="availability" id="av-wkeve" value="Weekday evenings">
+              <label for="av-wkeve">Weekday evenings</label>
+              <input type="checkbox" name="availability" id="av-wkend" value="Weekends">
+              <label for="av-wkend">Weekends</label>
+              <input type="checkbox" name="availability" id="av-flex" value="Flexible">
+              <label for="av-flex">Flexible</label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="preferred_times">Any specific times that work best? <span class="opt">(optional)</span></label>
+            <input type="text" id="preferred_times" placeholder="e.g. Weekday 9am–12pm, or after 6pm">
+          </div>
+        </div>
+
+        <!-- ── Slide 3: Areas of Interest ── -->
+        <div class="slide" data-section="Areas of Interest">
+          <div class="slide-title">What excites you most?</div>
+          <div class="slide-subtitle">Pick everything that interests you — we'll match tasks accordingly.</div>
+
+          <div class="field">
+            <label>Areas of Interest <span class="opt">(select all that apply)</span></label>
+            <div class="pill-group">
+              <input type="checkbox" name="areas_of_interest" id="ai-community" value="Community Outreach">
+              <label for="ai-community">Community Outreach</label>
+              <input type="checkbox" name="areas_of_interest" id="ai-social" value="Social Media">
+              <label for="ai-social">Social Media</label>
+              <input type="checkbox" name="areas_of_interest" id="ai-content" value="Content Writing">
+              <label for="ai-content">Content Writing</label>
+              <input type="checkbox" name="areas_of_interest" id="ai-research" value="Research">
+              <label for="ai-research">Research</label>
+              <input type="checkbox" name="areas_of_interest" id="ai-ops" value="Operations">
+              <label for="ai-ops">Operations</label>
+              <input type="checkbox" name="areas_of_interest" id="ai-design" value="Design">
+              <label for="ai-design">Design</label>
+              <input type="checkbox" name="areas_of_interest" id="ai-tech" value="Tech / Data">
+              <label for="ai-tech">Tech / Data</label>
+              <input type="checkbox" name="areas_of_interest" id="ai-sustainability" value="Sustainability">
+              <label for="ai-sustainability">Sustainability</label>
+              <input type="checkbox" name="areas_of_interest" id="ai-partnerships" value="Partnerships">
+              <label for="ai-partnerships">Partnerships</label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="primary_interest">If you had to pick one, what's your top area?</label>
+            <select id="primary_interest">
+              <option value="">— Select one —</option>
+              <option>Community Outreach</option>
+              <option>Social Media</option>
+              <option>Content Writing</option>
+              <option>Research</option>
+              <option>Operations</option>
+              <option>Design</option>
+              <option>Tech / Data</option>
+              <option>Sustainability</option>
+              <option>Partnerships</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- ── Slide 4: Scenarios ── -->
+        <div class="slide" data-section="Practical Scenarios">
+          <div class="slide-title">A couple of quick scenarios</div>
+          <div class="slide-subtitle">No right or wrong answers — we just want to understand how you think.</div>
+
+          <div class="field">
+            <label for="scenario_reply">Someone messages us on Instagram: <em>"How does this work? Is it safe?"</em> — How would you reply?</label>
+            <textarea id="scenario_reply" placeholder="Write your reply here..."></textarea>
+          </div>
+
+          <div class="field">
+            <label for="scenario_approach">We want to reach 50 new users in a university campus this month. What would you do?</label>
+            <textarea id="scenario_approach" placeholder="Walk us through your approach..."></textarea>
+          </div>
+
+          <div class="field">
+            <label for="scenario_followup">A user submits their journey but never got matched after 2 weeks. They email us frustrated. How do you handle it? <span class="opt">(optional)</span></label>
+            <textarea id="scenario_followup" placeholder="Your response..."></textarea>
+          </div>
+        </div>
+
+        <!-- ── Slide 5: Skills ── -->
+        <div class="slide" data-section="Effort & Reliability">
+          <div class="slide-title">About you &amp; your working style</div>
+          <div class="slide-subtitle">Rate yourself honestly — 1 = not comfortable, 5 = very comfortable.</div>
+
+          <div class="field">
+            <label>Prior experience <span class="opt">(select all that apply)</span></label>
+            <div class="pill-group">
+              <input type="checkbox" name="prior_experience" id="pe-volunteer" value="Volunteering">
+              <label for="pe-volunteer">Volunteering</label>
+              <input type="checkbox" name="prior_experience" id="pe-internship" value="Internship">
+              <label for="pe-internship">Internship</label>
+              <input type="checkbox" name="prior_experience" id="pe-startup" value="Startup / Side project">
+              <label for="pe-startup">Startup / Side project</label>
+              <input type="checkbox" name="prior_experience" id="pe-club" value="Student club">
+              <label for="pe-club">Student club</label>
+              <input type="checkbox" name="prior_experience" id="pe-work" value="Part-time / Full-time job">
+              <label for="pe-work">Part-time / Full-time job</label>
+              <input type="checkbox" name="prior_experience" id="pe-none" value="None yet">
+              <label for="pe-none">None yet</label>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="rating-group">
+              <div class="rating-row">
+                <div class="rating-label">Writing clearly (emails, captions, messages)</div>
+                <div class="stars" id="stars-writing">
+                  <input type="radio" name="comfort_writing" id="cw5" value="5"><label for="cw5">5</label>
+                  <input type="radio" name="comfort_writing" id="cw4" value="4"><label for="cw4">4</label>
+                  <input type="radio" name="comfort_writing" id="cw3" value="3"><label for="cw3">3</label>
+                  <input type="radio" name="comfort_writing" id="cw2" value="2"><label for="cw2">2</label>
+                  <input type="radio" name="comfort_writing" id="cw1" value="1"><label for="cw1">1</label>
+                </div>
+              </div>
+              <div class="rating-row">
+                <div class="rating-label">Talking to strangers / cold outreach</div>
+                <div class="stars" id="stars-strangers">
+                  <input type="radio" name="comfort_strangers" id="cs5" value="5"><label for="cs5">5</label>
+                  <input type="radio" name="comfort_strangers" id="cs4" value="4"><label for="cs4">4</label>
+                  <input type="radio" name="comfort_strangers" id="cs3" value="3"><label for="cs3">3</label>
+                  <input type="radio" name="comfort_strangers" id="cs2" value="2"><label for="cs2">2</label>
+                  <input type="radio" name="comfort_strangers" id="cs1" value="1"><label for="cs1">1</label>
+                </div>
+              </div>
+              <div class="rating-row">
+                <div class="rating-label">Doing repetitive or admin-style tasks</div>
+                <div class="stars" id="stars-repetitive">
+                  <input type="radio" name="comfort_repetitive_tasks" id="cr5" value="5"><label for="cr5">5</label>
+                  <input type="radio" name="comfort_repetitive_tasks" id="cr4" value="4"><label for="cr4">4</label>
+                  <input type="radio" name="comfort_repetitive_tasks" id="cr3" value="3"><label for="cr3">3</label>
+                  <input type="radio" name="comfort_repetitive_tasks" id="cr2" value="2"><label for="cr2">2</label>
+                  <input type="radio" name="comfort_repetitive_tasks" id="cr1" value="1"><label for="cr1">1</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="ok_with_repetitive">Some tasks here involve repetitive outreach work — messaging people, tracking responses, following up. Are you OK with that? Tell us what you think. <span class="opt">(optional)</span></label>
+            <textarea id="ok_with_repetitive" placeholder="Your thoughts..."></textarea>
+          </div>
+        </div>
+
+        <!-- ── Slide 6: Motivation ── -->
+        <div class="slide" data-section="Motivation">
+          <div class="slide-title">Finally — what drives you?</div>
+          <div class="slide-subtitle">This is the most important question. Take your time.</div>
+
+          <div class="field">
+            <label for="motivation">Why do you want to be part of Community Carpool? What excites you about this mission?</label>
+            <textarea id="motivation" rows="7" placeholder="Tell us what brought you here and what you're hoping to contribute..."></textarea>
+          </div>
+        </div>
+
+      </div><!-- /carousel-track -->
+    </div><!-- /carousel-track-wrap -->
+
+    <!-- Navigation -->
+    <div class="slide-nav">
+      <button class="btn-back" id="btn-back" disabled>&#8592; Back</button>
+      <button class="btn-next" id="btn-next">Next &nbsp;&#8594;</button>
+    </div>
+
+    <!-- Success screen (hidden until submit) -->
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon">&#127881;</div>
+      <h2>Application Received!</h2>
+      <p>Thanks for applying. We read every application personally and will be in touch soon if there's a good fit.</p>
+    </div>
+
+  </div><!-- /form-card -->
+</div><!-- /form-outer -->
+
+<script>
+  // ── Config ──────────────────────────────────────────────────────────────────
+  const SUPABASE_URL  = 'https://tbkjealpnoriwdosvmju.supabase.co'
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRia2plYWxwbm9yaXdkb3N2bWp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMTg2ODAsImV4cCI6MjA4Njg5NDY4MH0.K0iS87GLgAZhYwFIQNphVFrarMzFxECkFYFvxpeVcsA'
+  const FN_URL = `${SUPABASE_URL}/functions/v1/submit-intern-application`
+
+  const TOTAL = 6
+  const sectionNames = ['Basic Info', 'Availability', 'Areas of Interest', 'Practical Scenarios', 'Effort & Reliability', 'Motivation']
+
+  let current = 0
+
+  const track     = document.getElementById('track')
+  const btnBack   = document.getElementById('btn-back')
+  const btnNext   = document.getElementById('btn-next')
+  const segs      = document.querySelectorAll('.seg')
+  const stepLabel = document.getElementById('step-label')
+  const secName   = document.getElementById('section-name')
+  const successScreen = document.getElementById('success-screen')
+
+  // ── Navigation ──────────────────────────────────────────────────────────────
+  function goTo(idx) {
+    current = idx
+    track.style.transform = `translateX(-${current * 100}%)`
+
+    btnBack.disabled = current === 0
+    btnNext.textContent = current === TOTAL - 1 ? 'Submit Application ✓' : 'Next →'
+    if (current === TOTAL - 1) {
+      btnNext.classList.add('submit')
+    } else {
+      btnNext.classList.remove('submit')
+    }
+
+    stepLabel.textContent = `Step ${current + 1} of ${TOTAL}`
+    secName.textContent = sectionNames[current]
+
+    segs.forEach((s, i) => {
+      s.classList.remove('active', 'done')
+      if (i < current) s.classList.add('done')
+      else if (i === current) s.classList.add('active')
+    })
+  }
+
+  // ── Validation ──────────────────────────────────────────────────────────────
+  function validateSlide(idx) {
+    if (idx === 0) {
+      let ok = true
+      const name = document.getElementById('full_name')
+      const email = document.getElementById('email')
+      const errName = document.getElementById('err-full_name')
+      const errEmail = document.getElementById('err-email')
+
+      if (!name.value.trim()) {
+        name.classList.add('error'); errName.classList.add('show'); ok = false
+      } else {
+        name.classList.remove('error'); errName.classList.remove('show')
+      }
+
+      const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!email.value.trim() || !emailRe.test(email.value.trim())) {
+        email.classList.add('error'); errEmail.classList.add('show'); ok = false
+      } else {
+        email.classList.remove('error'); errEmail.classList.remove('show')
+      }
+
+      return ok
+    }
+    return true
+  }
+
+  // ── Collect data ─────────────────────────────────────────────────────────────
+  function collectData() {
+    const getChecked = (name) => [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(el => el.value)
+    const getRadio   = (name) => (document.querySelector(`input[name="${name}"]:checked`) || {}).value || null
+    const getRating  = (name) => { const v = getRadio(name); return v ? parseInt(v) : null }
+    const getText    = (id)   => (document.getElementById(id) || {}).value?.trim() || null
+    const getSelect  = (id)   => { const el = document.getElementById(id); return el?.value || null }
+
+    const avChecked = getChecked('availability')
+    const availStr  = avChecked.length ? avChecked.join(', ') : null
+
+    return {
+      full_name:               getText('full_name'),
+      email:                   getText('email'),
+      phone:                   getText('phone'),
+      city_country:            getText('city_country'),
+      school:                  getText('school'),
+      current_status:          getRadio('current_status'),
+      hours_per_week:          getRadio('hours_per_week'),
+      availability:            availStr,
+      preferred_times:         getText('preferred_times'),
+      areas_of_interest:       getChecked('areas_of_interest'),
+      primary_interest:        getSelect('primary_interest'),
+      scenario_reply:          getText('scenario_reply'),
+      scenario_approach:       getText('scenario_approach'),
+      scenario_followup:       getText('scenario_followup'),
+      prior_experience:        getChecked('prior_experience'),
+      comfort_writing:         getRating('comfort_writing'),
+      comfort_strangers:       getRating('comfort_strangers'),
+      comfort_repetitive_tasks: getRating('comfort_repetitive_tasks'),
+      ok_with_repetitive:      getText('ok_with_repetitive'),
+      motivation:              getText('motivation'),
+    }
+  }
+
+  // ── Submit ───────────────────────────────────────────────────────────────────
+  async function submit() {
+    btnNext.disabled = true
+    btnNext.textContent = 'Submitting…'
+
+    const data = collectData()
+
+    try {
+      const res = await fetch(FN_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON,
+        },
+        body: JSON.stringify(data),
+      })
+
+      const json = await res.json()
+
+      if (json.success) {
+        // Hide carousel + nav, show success
+        document.querySelector('.carousel-track-wrap').style.display = 'none'
+        document.querySelector('.slide-nav').style.display = 'none'
+        successScreen.classList.add('show')
+        // Update progress to all done
+        segs.forEach(s => { s.classList.remove('active'); s.classList.add('done') })
+        stepLabel.textContent = 'Complete!'
+        secName.textContent = 'Thank you'
+      } else {
+        alert('Something went wrong: ' + (json.error || 'Unknown error. Please try again.'))
+        btnNext.disabled = false
+        btnNext.textContent = 'Submit Application ✓'
+      }
+    } catch (err) {
+      alert('Network error. Please check your connection and try again.')
+      btnNext.disabled = false
+      btnNext.textContent = 'Submit Application ✓'
+    }
+  }
+
+  // ── Button handlers ──────────────────────────────────────────────────────────
+  btnNext.addEventListener('click', () => {
+    if (!validateSlide(current)) return
+    if (current === TOTAL - 1) {
+      submit()
+    } else {
+      goTo(current + 1)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  })
+
+  btnBack.addEventListener('click', () => {
+    if (current > 0) {
+      goTo(current - 1)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  })
+
+  // Init
+  goTo(0)
+</script>
+
+</body>
+</html>
