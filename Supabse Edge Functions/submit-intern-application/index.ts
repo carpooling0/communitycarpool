@@ -104,6 +104,8 @@ function buildNotificationEmail(app: Record<string, any>): string {
       ${field('Email', app.email)}
       ${field('Phone', app.phone)}
       ${field('City / Country', app.city_country)}
+      ${app.linkedin ? field('LinkedIn', `<a href="${app.linkedin}" style="color:#16a34a;">${app.linkedin}</a>`) : ''}
+      ${app.resume_url ? field('Resume', `<a href="${app.resume_url}" style="color:#16a34a;">Download Resume</a>`) : ''}
 
       ${sectionHeader('Background', '#0369a1')}
       ${field('School / University', app.school)}
@@ -161,13 +163,27 @@ Deno.serve(async (req) => {
 
     const {
       full_name, email, phone, city_country,
-      school, current_status, hours_per_week, availability, preferred_times,
+      school, current_status, linkedin, resume_url,
+      hours_per_week, availability, preferred_times,
       areas_of_interest, scenario_reply, scenario_approach, scenario_followup,
       prior_experience, comfort_writing, comfort_strangers, comfort_repetitive_tasks,
       ok_with_repetitive, motivation, primary_interest,
+      _hp, _load_ms,
     } = body
 
-    // Validate required fields
+    // ── Bot protection ────────────────────────────────────────────────────────
+    // 1. Honeypot: hidden field that only bots fill
+    if (_hp && String(_hp).trim().length > 0) {
+      console.warn('[bot] Honeypot triggered — silently discarding submission')
+      return json({ success: true }) // silent discard
+    }
+    // 2. Time gate: real humans take at least 5 seconds to fill a 6-step form
+    if (typeof _load_ms === 'number' && _load_ms < 5000) {
+      console.warn(`[bot] Form submitted in ${_load_ms}ms — silently discarding`)
+      return json({ success: true }) // silent discard
+    }
+
+    // ── Validate required fields ──────────────────────────────────────────────
     if (!full_name || typeof full_name !== 'string' || !full_name.trim()) {
       return json({ success: false, error: 'full_name is required.' }, 400)
     }
@@ -188,6 +204,8 @@ Deno.serve(async (req) => {
         city_country: city_country || null,
         school: school || null,
         current_status: current_status || null,
+        linkedin: linkedin || null,
+        resume_url: resume_url || null,
         hours_per_week: hours_per_week || null,
         availability: availability || null,
         preferred_times: preferred_times || null,
