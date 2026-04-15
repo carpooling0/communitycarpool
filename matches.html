@@ -465,6 +465,8 @@
     .pill-mutual { background: var(--green); color: white; }
     .pill-waiting { background: var(--blue-light); color: var(--blue); }
     .pill-respond { background: #fef3c7; color: #92400e; animation: pulse-orange 2s infinite; }
+    .pill-deleted { background: #f3f4f6; color: #9ca3af; }
+    tr.row-deleted { opacity: 0.55; }
     /* Interest timestamp — hidden by default, revealed on hover (desktop) or tap (mobile) */
     .interest-date {
       display: none;
@@ -1385,8 +1387,9 @@ ${url}`)
       const fromDisplay = escapeHtml(truncatePoi(fromRaw))
       const toDisplay = escapeHtml(truncatePoi(toRaw))
       const routeTitle = escapeHtml(fromRaw + ' → ' + toRaw)
+      const deletedClass = match.status === 'user_deleted' ? ' row-deleted' : ''
       return `
-        <tr id="row-${match.matchId}">
+        <tr id="row-${match.matchId}" class="${deletedClass.trim()}">
           <td data-label="Match Id"><span class="match-num">${match.matchId}</span></td>
           <td data-label="Name">${nameHtml}</td>
           <td data-label="Their Route" class="col-route">
@@ -1403,6 +1406,7 @@ ${url}`)
     }
 
     function getMyStatusPill(match, submissionId) {
+      if (match.status === 'user_deleted') return `<span class="interest-pill pill-deleted">—</span>`
       if (match.isMutual) return `<span class="interest-pill pill-mutual">🎉 Mutual!</span>`
       if (match.myInterest === 'yes') return `<span class="interest-pill pill-yes clickable" onclick="undoInterest(${match.matchId}, ${submissionId}, event)" title="Click to undo – show Yes/No again">✓ Interested  ↺</span>`
       if (match.myInterest === 'no') return `<span class="interest-pill pill-no clickable" onclick="undoDecline(${match.matchId}, ${submissionId}, event)" title="Click to undo – show Yes/No again">✗ Declined  ↺</span>`
@@ -1411,6 +1415,7 @@ ${url}`)
     }
 
     function getTheirStatusPill(match) {
+      if (match.status === 'user_deleted') return `<span class="interest-pill pill-deleted">✕ No longer available</span>`
       const ago = timeAgo(match.theirInterestAt)
       const tap = ago ? `onclick="showInterestDate(event, this)"` : ''
       const dateSpan = ago ? `<span class="interest-date">${ago}</span>` : ''
@@ -1457,7 +1462,7 @@ ${url}`)
       let html = ''
 
       // Yes/No buttons if user hasn't responded yet (also shown when "undoing" a decline)
-      if (!match.myInterest && match.status !== 'failed') {
+      if (!match.myInterest && match.status !== 'failed' && match.status !== 'user_deleted') {
         html += `
           <button class="btn-yes" onclick="updateInterest(${match.matchId}, ${submissionId}, 'yes')">✓ Yes</button>
           <button class="btn-no" onclick="updateInterest(${match.matchId}, ${submissionId}, 'no')">✗ No</button>
