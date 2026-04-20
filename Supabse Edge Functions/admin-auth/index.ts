@@ -134,7 +134,7 @@ Deno.serve(async (req) => {
       // Generate 32-byte session token
       const token = Array.from(crypto.getRandomValues(new Uint8Array(32)))
         .map(b => b.toString(16).padStart(2, '0')).join('')
-      const expiresAt = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString()
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 
       await supabase.from('admin_sessions').insert({
         session_token: token, admin_id: admin.admin_id, expires_at: expiresAt
