@@ -113,7 +113,7 @@
         /* Radio cards */
         .radio-group {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 7px;
             margin-top: 4px;
         }
@@ -334,6 +334,10 @@
                             <input type="radio" name="requestType" value="technical" id="rdTechnical">
                             <label for="rdTechnical">Technical Issue</label>
                         </div>
+                        <div class="radio-option" id="optionEnquiry">
+                            <input type="radio" name="requestType" value="enquiry" id="rdEnquiry">
+                            <label for="rdEnquiry">Enquiry</label>
+                        </div>
                     </div>
                 </div>
 
@@ -473,7 +477,8 @@
         const detailsPlaceholders = {
             deletion:    'Tell us why you\'re leaving (optional)...',
             report_user: 'Please explain the issue in detail...',
-            technical:   'Please describe what is not working...'
+            technical:   'Please describe what is not working...',
+            enquiry:     'Please describe your enquiry...'
         };
 
         function closeDeletionPopup() {
