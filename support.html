@@ -597,9 +597,18 @@
             }
         });
 
+        function isValidEmail(v) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+        }
+
         function validateForm() {
-            if (!document.getElementById('email').value) {
+            const emailVal = document.getElementById('email').value.trim();
+            if (!emailVal) {
                 showMessage('Please enter your email address.', 'error');
+                return false;
+            }
+            if (!isValidEmail(emailVal)) {
+                showMessage('Please enter a valid email address.', 'error');
                 return false;
             }
 
@@ -610,8 +619,13 @@
             }
 
             if (type.value === 'report_user') {
-                if (!document.getElementById('subjectEmail').value) {
+                const subjectVal = document.getElementById('subjectEmail').value.trim();
+                if (!subjectVal) {
                     showMessage('Please enter the email of the person you are reporting.', 'error');
+                    return false;
+                }
+                if (!isValidEmail(subjectVal)) {
+                    showMessage('Please enter a valid email for the person you are reporting.', 'error');
                     return false;
                 }
                 if (!document.getElementById('issueDescription').value) {
