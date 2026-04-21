@@ -201,20 +201,41 @@ Another agent (Cursor) made these changes. Assessment:
 
 ---
 
-## 12. Pending Items (not yet built)
+## 12. What Was Done in Session 2026-04-20 / 2026-04-21
 
-### A. `matches.html` UI for `user_deleted` match status
+1. **email_read_at stamping** — Implemented in `get-matches-page`: stamps `email_read_at_a`/`email_read_at_b` on first page visit (non-poll). Fixed fire-and-forget bug (must use `await Promise.all`). Deployed prod v28, dev v13.
+2. **email_read_at backfill** — Backfilled historical data using first `matches_page_viewed` event per user after match creation. 233 side A + 285 side B stamped; 93 matches remain NULL (genuinely never visited). Run on both prod and dev.
+3. **Terms v1.3** — Created `legal/terms-v1.3.html` archive (NOT yet activated). 6 changes: non-commercial clause, reciprocal carpooling bullet, driver warranty, prohibited uses (passenger-only), right to refuse wording. Do NOT activate until user approves — copy to `terms.html` and set `required_terms_version=1.3` in config on both envs.
+4. **user_deleted match UI** — Confirmed already on prod (HANDOFF was stale). Greyed row + "No longer available" pill working.
+5. **Deleted test user** — anvithy09@gmail.com (user_id=419) deleted from prod. Logged to deletion_log.
+6. **support.html** — Added "Enquiry" as 4th ticket category (2×2 radio grid, left-aligned circles), email format validation on all fields. Deployed prod + dev. Edge function `submit-support-ticket` updated with `enquiry: '💬 Enquiry'` label (prod v14, dev v13).
+7. **admin-auth session** — Extended from 8h to 7 days. Deployed prod v8 + dev v8. Existing sessions unaffected until next login.
+8. **index.html OG tags** — Added `og:image:width/height/type`, changed `twitter:card` to `summary_large_image`. Deployed prod + dev. WhatsApp OG preview confirmed working with `https://communitycarpool.org` (https:// prefix required).
 
-**What happens today:** When a user confirms deletion, `manage-deletion` sets all their matches to `status = 'user_deleted'` and their submissions to `journey_status = 'deletion_pending'`. Their match partner receives a notification email ("A match is no longer available"). However, when that partner loads `matches.html`, the match row renders as if it were a normal pending match — showing Yes/No buttons — because neither `getActionsHtml`, `getMyStatusPill`, nor `getTheirStatusPill` check for `status === 'user_deleted'`.
+---
 
-**What needs building:**
-- In `getActionsHtml`: add `|| match.status === 'user_deleted'` to the condition that suppresses Yes/No buttons
-- In `getTheirStatusPill` (or a new path): render a greyed "No longer available" pill for `user_deleted`
-- Optionally dim/grey the entire row via a CSS class
-- `user_deleted` matches should not appear in `pendingCount` (they already don't — the filter only counts `notified/viewed/interest_expressed`)
-- `get-matches-page` currently returns `user_deleted` matches because the deleted user's DB rows still exist until `process-deletions` runs (up to 30 days). After that, the guard `if (!otherSub || !otherUser) return null` will silently drop them. So the UI fix covers the window between deletion-confirmed and hard-delete.
+## 13. Pending Items (not yet built)
 
-## 13. How to Start a New Session
+### A. Admin Dashboard — Analytics "last synced" label
+
+**What:** The Web Traffic analytics section shows data synced once daily from Cloudflare (at ~4 AM Dubai). When an admin selects "last 24 hours", they're actually seeing yesterday's data — which is confusing (e.g., 100% bounce rate when 85 users signed up today).
+
+**Fix:** Add a small "last synced: 19 Apr, 04:05 AM" note below the Web Traffic section header so it's clear the data is not real-time. Source: `synced_at` column in `analytics_daily` — use the most recent row's value.
+
+**File:** `admin.html` — the `if (an)` block that renders the Web Traffic KPI grid (~line 1647).
+
+---
+
+### B. Terms v1.3 Activation (when ready)
+
+1. Copy `legal/terms-v1.3.html` → `terms.html` (overwrite)
+2. Set `required_terms_version = '1.3'` in config table on both prod and dev
+3. Deploy frontend to both envs
+4. Users will be prompted to re-accept on next matches page visit
+
+---
+
+## 14. How to Start a New Session
 
 1. Check memory: `/Users/ny/.claude/projects/-Users-ny-Downloads-Carpooling-CodeBase/memory/MEMORY.md`
 2. Check this handoff: `/Users/ny/Downloads/Carpooling CodeBase/HANDOFF.md`
