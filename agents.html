@@ -261,12 +261,20 @@ async function runFetch() {
       body: '{}'
     })
     const data = await r.json()
-    btn.textContent = data.success ? `✓ Done (${data.inserted} new)` : '✗ Error'
-    if (data.success) setTimeout(() => loadPosts(), 800)
+    if (data.success) {
+      const parts = [`${data.inserted} new`]
+      if (data.processed != null) parts.push(`${data.processed} processed`)
+      if (data.skippedLowRelevance) parts.push(`${data.skippedLowRelevance} low-relevance`)
+      if (data.bedrockError) parts.push(`Bedrock: ${data.bedrockError}`)
+      btn.textContent = `✓ Done (${parts.join(', ')})`
+      setTimeout(() => loadPosts(), 800)
+    } else {
+      btn.textContent = `✗ Error: ${data.error || 'unknown'}`
+    }
   } catch(e) {
-    btn.textContent = '✗ Error'
+    btn.textContent = `✗ Error: ${e.message}`
   }
-  setTimeout(() => { btn.disabled = false; btn.textContent = '▶ Run Now' }, 3000)
+  setTimeout(() => { btn.disabled = false; btn.textContent = '▶ Run Now' }, 8000)
 }
 
 function copyReply(btn, encoded) {
