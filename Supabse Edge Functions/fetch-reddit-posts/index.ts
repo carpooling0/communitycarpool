@@ -12,7 +12,7 @@ async function callBedrock(prompt: string): Promise<string> {
     accessKeyId: Deno.env.get('AWS_BEDROCK_ACCESS_KEY_ID')!,
     secretAccessKey: Deno.env.get('AWS_BEDROCK_SECRET_ACCESS_KEY')!,
     region,
-    service: 'bedrock-runtime'
+    service: 'bedrock'
   })
 
   const modelId = 'anthropic.claude-3-haiku-20240307-v1:0'

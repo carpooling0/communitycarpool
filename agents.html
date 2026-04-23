@@ -288,12 +288,18 @@ async function runFetch() {
       await new Promise(r => setTimeout(r, 100))
     }
 
-    // Step 2: send candidates to edge function for Bedrock analysis + DB insert
-    btn.textContent = `⏳ Analysing ${candidates.length} posts…`
+    // Prioritise carpooling/commuting subreddits, shuffle the rest, cap at 40 per run
+    const priority = new Set(['carpool','commuting','rideshare'])
+    const high = candidates.filter(c => priority.has(c.subreddit))
+    const rest = candidates.filter(c => !priority.has(c.subreddit)).sort(() => Math.random() - 0.5)
+    const batch = [...high, ...rest].slice(0, 40)
+
+    // Step 2: send batch to edge function for Bedrock analysis + DB insert
+    btn.textContent = `⏳ Analysing ${batch.length} of ${candidates.length} posts…`
     const r = await fetch(`${SUPABASE_URL}/functions/v1/fetch-reddit-posts`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ posts: candidates })
+      body: JSON.stringify({ posts: batch })
     })
     const data = await r.json()
     if (data.success) {
