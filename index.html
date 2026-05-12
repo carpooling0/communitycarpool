@@ -388,6 +388,33 @@
   .ss-btn { width: 42px; height: 42px; border-radius: 10px; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform .15s, box-shadow .15s; flex-shrink: 0; }
   .ss-btn:hover { transform: scale(1.1); box-shadow: 0 3px 8px rgba(0,0,0,.18); }
 
+  /* ── ROAD TRACKER ── */
+  .road-tracker { padding: 20px 4px 8px; }
+  .road-tracker-title { font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 18px; padding-left: 2px; }
+  .road-stops { display: flex; flex-direction: column; }
+  .road-stop { display: flex; gap: 14px; position: relative; }
+  .road-stop-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 28px; }
+  .road-badge { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; z-index: 1; }
+  .road-badge.done { background: var(--green); border: 2px solid var(--green); }
+  .road-badge.done svg { color: #fff; }
+  .road-badge.active { background: #fff; border: 2.5px solid var(--green); box-shadow: 0 0 0 4px rgba(27,92,58,.1); animation: road-pulse 2s infinite; }
+  .road-badge.pending { background: #fff; border: 2px solid #d1d5db; }
+  @keyframes road-pulse { 0%,100% { box-shadow: 0 0 0 4px rgba(27,92,58,.1); } 50% { box-shadow: 0 0 0 7px rgba(27,92,58,.06); } }
+  .road-line { flex: 1; width: 2px; margin: 3px 0; min-height: 14px; }
+  .road-line.driven { background: var(--green); }
+  .road-line.ahead { background: repeating-linear-gradient(to bottom, #d1d5db 0px, #d1d5db 5px, transparent 5px, transparent 10px); }
+  .road-stop-right { padding-bottom: 20px; flex: 1; min-width: 0; }
+  .road-stop:last-child .road-stop-right { padding-bottom: 4px; }
+  .road-stop-header { display: flex; align-items: center; gap: 8px; min-height: 28px; }
+  .road-car { font-size: 17px; line-height: 1; margin-right: -2px; }
+  .road-label { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .road-label.pending { color: #9ca3af; font-weight: 600; }
+  .road-body { font-size: 13px; color: #4a5568; line-height: 1.65; margin-top: 6px; }
+  .road-info-btn { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid #d1d5db; background: #fff; color: #9ca3af; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: border-color .15s, color .15s; padding: 0; line-height: 1; font-family: inherit; }
+  .road-info-btn:hover, .road-info-btn.open { border-color: var(--green); color: var(--green); }
+  .road-expand { display: none; font-size: 13px; color: #4a5568; line-height: 1.65; margin-top: 6px; }
+  .road-expand.open { display: block; }
+
   /* ── FLOATING MOBILE CTA ── */
   .mobile-cta {
     display: none;
@@ -1076,7 +1103,107 @@
             <div style="font-size:15px;color:#64748b;margin-top:6px;">Equivalent to planting ${trees} trees</div>
             <div style="font-size:13px;color:#94a3b8;margin-top:4px;">(Based on ${km} km one-way commute)</div>
           </div>
-          <div style="background:white;border-radius:0 0 16px 16px;border:2px solid #ecfdf5;border-top:none;padding:24px 20px 24px;">
+          <div style="background:white;border-radius:0 0 0 0;border:2px solid #ecfdf5;border-top:none;border-bottom:none;padding:20px 20px 4px;">
+            <div class="road-tracker">
+              <div class="road-tracker-title">Your journey in the pool</div>
+              <div class="road-stops">
+
+                <!-- Stop 1: Done -->
+                <div class="road-stop">
+                  <div class="road-stop-left">
+                    <div class="road-badge done"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
+                    <div class="road-line driven"></div>
+                  </div>
+                  <div class="road-stop-right">
+                    <div class="road-stop-header">
+                      <span class="road-label">Route Recorded</span>
+                    </div>
+                    <div class="road-body">Your route has been added to the Community Carpool network.</div>
+                  </div>
+                </div>
+
+                <!-- Stop 2: Active -->
+                <div class="road-stop">
+                  <div class="road-stop-left">
+                    <div class="road-badge active"></div>
+                    <div class="road-line ahead"></div>
+                  </div>
+                  <div class="road-stop-right">
+                    <div class="road-stop-header">
+                      <span class="road-car">🚗</span>
+                      <span class="road-label">Waiting in the Pool</span>
+                    </div>
+                    <div class="road-body">
+                      We're continuously scanning the network for commuters whose route genuinely overlaps yours.<br><br>
+                      This step has no fixed timeline — it could be days or weeks, depending on how many people in your area have registered a similar route. The more people who join, the faster this moves.<br><br>
+                      You don't need to do anything. We'll email you the moment a match candidate is found.
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Stop 3: Pending -->
+                <div class="road-stop">
+                  <div class="road-stop-left">
+                    <div class="road-badge pending"></div>
+                    <div class="road-line ahead"></div>
+                  </div>
+                  <div class="road-stop-right">
+                    <div class="road-stop-header">
+                      <span class="road-label pending">Match Candidate Found</span>
+                      <button class="road-info-btn" onclick="toggleRoadExpand(this)" aria-label="Learn more">i</button>
+                    </div>
+                    <div class="road-expand">When we find someone whose route overlaps yours, you'll both receive an email. You'll see their general route and commute overlap — no names or contact details shared yet.</div>
+                  </div>
+                </div>
+
+                <!-- Stop 4: Pending -->
+                <div class="road-stop">
+                  <div class="road-stop-left">
+                    <div class="road-badge pending"></div>
+                    <div class="road-line ahead"></div>
+                  </div>
+                  <div class="road-stop-right">
+                    <div class="road-stop-header">
+                      <span class="road-label pending">Mutual Interest</span>
+                      <button class="road-info-btn" onclick="toggleRoadExpand(this)" aria-label="Learn more">i</button>
+                    </div>
+                    <div class="road-expand">You and your potential match each decide independently whether you'd like to connect. Only when both of you say yes does anything move forward — no awkward one-sided reveals.</div>
+                  </div>
+                </div>
+
+                <!-- Stop 5: Pending -->
+                <div class="road-stop">
+                  <div class="road-stop-left">
+                    <div class="road-badge pending"></div>
+                    <div class="road-line ahead"></div>
+                  </div>
+                  <div class="road-stop-right">
+                    <div class="road-stop-header">
+                      <span class="road-label pending">Details Exchanged</span>
+                      <button class="road-info-btn" onclick="toggleRoadExpand(this)" aria-label="Learn more">i</button>
+                    </div>
+                    <div class="road-expand">It's mutual. First names and email addresses are now shared between you two. Time to say hello and start coordinating.</div>
+                  </div>
+                </div>
+
+                <!-- Stop 6: Pending -->
+                <div class="road-stop">
+                  <div class="road-stop-left">
+                    <div class="road-badge pending"></div>
+                  </div>
+                  <div class="road-stop-right">
+                    <div class="road-stop-header">
+                      <span class="road-label pending">You're Carpooling 🎉</span>
+                      <button class="road-info-btn" onclick="toggleRoadExpand(this)" aria-label="Learn more">i</button>
+                    </div>
+                    <div class="road-expand">Coordinate your first trip, agree on a pickup point, and get on the road together. Every shared commute cuts emissions and takes one more car off the road.</div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <div style="background:white;border-radius:0 0 16px 16px;border:2px solid #ecfdf5;border-top:none;padding:20px 20px 24px;">
             <div style="text-align:center;margin-bottom:20px;">
               <div style="font-size:14px;color:#64748b;font-weight:600;margin-bottom:14px;">Get matched faster by sharing!</div>
               <div class="ss-row">
@@ -1103,6 +1230,13 @@
     }
 
     // ── Share ─────────────────────────────────────────────────────────────────
+    function toggleRoadExpand(btn) {
+      const expand = btn.closest('.road-stop-header').nextElementSibling;
+      const isOpen = expand.classList.contains('open');
+      expand.classList.toggle('open', !isOpen);
+      btn.classList.toggle('open', !isOpen);
+    }
+
     function shareTo(platform) {
       window.umami?.track('social_share', { platform, page: 'home' });
       const ref = sessionStorage.getItem('cc_ref') || '007';
