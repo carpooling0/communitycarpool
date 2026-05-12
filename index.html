@@ -406,7 +406,7 @@
   .road-stop-right { padding-bottom: 20px; flex: 1; min-width: 0; }
   .road-stop:last-child .road-stop-right { padding-bottom: 4px; }
   .road-stop-header { display: flex; align-items: center; gap: 8px; min-height: 28px; }
-  .road-car { font-size: 17px; line-height: 1; margin-right: -2px; }
+  .road-car { height: 28px; width: auto; margin-right: -2px; flex-shrink: 0; }
   .road-label { font-size: 14px; font-weight: 700; color: var(--ink); }
   .road-label.pending { color: #9ca3af; font-weight: 600; }
   .road-body { font-size: 13px; color: #4a5568; line-height: 1.65; margin-top: 6px; }
@@ -1130,7 +1130,7 @@
                   </div>
                   <div class="road-stop-right">
                     <div class="road-stop-header">
-                      <span class="road-car">🚗</span>
+                      <img class="road-car" src="/Green-car.png" alt="car">
                       <span class="road-label">Waiting in the Pool</span>
                     </div>
                     <div class="road-body">
