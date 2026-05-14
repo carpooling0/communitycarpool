@@ -1485,6 +1485,8 @@
           document.getElementById('pinEntryPhase').style.opacity = '1';
         });
         document.getElementById('pin0').focus();
+        // Start 2-minute countdown before resend becomes available
+        startResendCountdown(120);
       }, 2100);
     }
 
@@ -1572,29 +1574,49 @@
       }
     }
 
+    function startResendCountdown(secs) {
+      clearInterval(_pinResendTimer);
+      const resendBtn = document.getElementById('pinResendBtn');
+      resendBtn.disabled = true;
+      const fmt = s => `Resend in ${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+      resendBtn.textContent = fmt(secs);
+      _pinResendTimer = setInterval(() => {
+        secs--;
+        if (secs <= 0) {
+          clearInterval(_pinResendTimer);
+          resendBtn.disabled = false;
+          resendBtn.textContent = 'Resend PIN';
+        } else {
+          resendBtn.textContent = fmt(secs);
+        }
+      }, 1000);
+    }
+
     async function resendPin() {
       const resendBtn = document.getElementById('pinResendBtn');
       resendBtn.disabled = true;
+      resendBtn.textContent = 'Sending…';
       clearPinDigits();
       setPinError('');
+      try {
+        const res = await fetch(SUPABASE_URL + '/functions/v1/resend-pin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+          body: JSON.stringify({ submissionId: _pinSubmissionId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          resendBtn.textContent = 'Sent ✓';
+          setTimeout(() => startResendCountdown(120), 800);
+        } else {
+          resendBtn.textContent = 'Failed — try again';
+          setTimeout(() => { resendBtn.disabled = false; resendBtn.textContent = 'Resend PIN'; }, 2000);
+        }
+      } catch (e) {
+        resendBtn.textContent = 'Failed — try again';
+        setTimeout(() => { resendBtn.disabled = false; resendBtn.textContent = 'Resend PIN'; }, 2000);
+      }
       document.querySelector('.pin-digit').focus();
-      // Re-submit journey is not ideal — instead call a lightweight resend endpoint
-      // For now show a message; a dedicated resend endpoint can be added later
-      resendBtn.textContent = 'Sent!';
-      setTimeout(() => {
-        let secs = 30;
-        resendBtn.textContent = `Resend in ${secs}s`;
-        _pinResendTimer = setInterval(() => {
-          secs--;
-          if (secs <= 0) {
-            clearInterval(_pinResendTimer);
-            resendBtn.disabled = false;
-            resendBtn.textContent = 'Resend PIN';
-          } else {
-            resendBtn.textContent = `Resend in ${secs}s`;
-          }
-        }, 1000);
-      }, 800);
     }
 
     function skipPinVerification() {
