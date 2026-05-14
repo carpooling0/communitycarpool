@@ -372,10 +372,10 @@
   .modal-error { font-size:13px; color:#ef4444; margin-top:8px; display:none; }
   .modal-btn { margin-top:16px; width:100%; padding:12px; background:var(--green); color:#fff; border:none; border-radius:50px; font-size:15px; font-weight:600; font-family:inherit; cursor:pointer; }
 
-  /* PIN verification modal */
-  .pin-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:9100; align-items:center; justify-content:center; padding:16px; }
+  /* PIN verification modal — sits inside #right-panel (position:fixed) */
+  .pin-overlay { display:none; position:absolute; inset:0; background:rgba(0,0,0,.55); z-index:200; align-items:flex-start; justify-content:center; padding:24px 16px 16px; overflow-y:auto; }
   .pin-overlay.show { display:flex; }
-  .pin-box { background:#fff; border-radius:18px; padding:32px 28px 24px; max-width:380px; width:100%; text-align:center; box-shadow:0 24px 64px rgba(0,0,0,.18); }
+  .pin-box { background:#fff; border-radius:18px; padding:32px 28px 24px; width:100%; text-align:center; box-shadow:0 24px 64px rgba(0,0,0,.25); }
   .pin-box-header { background:#1B5C3A; margin:-32px -28px 0; padding:22px 24px 18px; border-radius:18px 18px 0 0; }
   .pin-box-header h2 { margin:0 0 4px; font-size:19px; font-weight:900; color:#fff; font-family:'Montserrat',sans-serif; }
   .pin-box-header p { margin:0; font-size:13px; color:#B4E035; }
@@ -396,21 +396,21 @@
 
   /* PIN entry */
   .pin-entry-phase { padding-top:20px; }
-  .pin-digits { display:flex; align-items:center; justify-content:center; gap:8px; margin:0 0 8px; }
-  .pin-digit { width:56px; height:66px; border:2.5px solid #D1D5DB; border-radius:12px; font-size:28px; font-weight:900; text-align:center; font-family:'Montserrat',sans-serif; color:#1B5C3A; outline:none; caret-color:transparent; transition:border-color .15s,background .15s; -moz-appearance:textfield; }
+  .pin-digits { display:flex; align-items:center; justify-content:center; gap:0; margin:0 0 8px; }
+  .pin-digit { width:54px; height:64px; border:2.5px solid #D1D5DB; border-radius:12px; font-size:28px; font-weight:900; text-align:center; font-family:'Montserrat',sans-serif; color:#1B5C3A; outline:none; caret-color:transparent; transition:border-color .15s,background .15s; margin:0 5px; appearance:none; -moz-appearance:textfield; }
   .pin-digit::-webkit-outer-spin-button,.pin-digit::-webkit-inner-spin-button { -webkit-appearance:none; }
   .pin-digit:focus { border-color:#1B5C3A; box-shadow:0 0 0 3px rgba(27,92,58,.15); }
   .pin-digit.filled { border-color:#1B5C3A; background:#f0fdf4; }
   .pin-digit.error { border-color:#ef4444; background:#fef2f2; animation:pin-shake .3s; }
-  .pin-sep { font-size:20px; color:#D1D5DB; font-weight:900; line-height:1; margin:0 2px; }
+  .pin-sep { font-size:20px; color:#D1D5DB; font-weight:900; line-height:1; margin:0 3px; }
   @keyframes pin-shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
   .pin-error { font-size:13px; color:#ef4444; min-height:18px; margin-bottom:4px; }
   .pin-submit-btn { width:100%; padding:13px; background:#1B5C3A; color:#fff; border:none; border-radius:50px; font-size:15px; font-weight:700; font-family:'Montserrat',sans-serif; cursor:pointer; margin-top:12px; transition:opacity .15s; }
   .pin-submit-btn:disabled { opacity:.5; cursor:not-allowed; }
-  .pin-resend { font-size:12px; color:#6B7280; margin-top:12px; }
-  .pin-resend button { background:none; border:none; color:#1B5C3A; font-weight:600; font-size:12px; cursor:pointer; text-decoration:underline; font-family:inherit; }
+  .pin-resend { font-size:15px; color:#6B7280; margin-top:12px; }
+  .pin-resend button { background:none; border:none; color:#1B5C3A; font-weight:600; font-size:15px; cursor:pointer; text-decoration:underline; font-family:inherit; }
   .pin-resend button:disabled { color:#9CA3AF; cursor:not-allowed; text-decoration:none; }
-  .pin-skip { font-size:12px; color:#9CA3AF; margin-top:10px; cursor:pointer; text-decoration:underline; background:none; border:none; font-family:inherit; }
+  .pin-skip { font-size:15px; color:#9CA3AF; margin-top:10px; cursor:pointer; text-decoration:underline; background:none; border:none; font-family:inherit; }
   .pin-verify-success { text-align:center; padding:24px 0 12px; }
   .pin-verify-success .pin-tick { font-size:48px; margin-bottom:8px; }
   .pin-verify-success p { font-size:15px; color:#1B5C3A; font-weight:600; }
@@ -859,6 +859,60 @@
 
     <!-- SUCCESS STATE (hidden until submit — populated by JS) -->
     <div id="success-content"></div>
+
+    <!-- PIN overlay — inside right panel so it covers only the form area -->
+    <div class="pin-overlay" id="pinOverlay">
+      <div class="pin-box">
+
+        <div class="pin-box-header">
+          <h2>Almost There!</h2>
+          <p id="pinHeaderSub">Sending your activation PIN…</p>
+        </div>
+
+        <!-- Phase 1: car animation while PIN email is in transit -->
+        <div id="pinAnimPhase" class="pin-anim-phase">
+          <div class="pin-road">
+            <img class="pin-road-car" id="pinCar" src="/green-car-sm.png" alt="">
+            <div class="pin-road-env" id="pinEnv">📧</div>
+          </div>
+          <p class="pin-anim-label" id="pinAnimLabel">Sending your activation PIN…</p>
+        </div>
+
+        <!-- Phase 2: PIN entry (shown after animation) -->
+        <div id="pinEntryPhase" class="pin-entry-phase" style="display:none;">
+          <p style="font-size:15px;color:#6B7280;margin:0 0 16px;">Enter the PIN from your email to activate your journey:</p>
+
+          <div class="pin-digits" onpaste="onPinPaste(event)">
+            <input class="pin-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin0"
+                   oninput="onPinInput(this,0)" onkeydown="onPinKeydown(this,0,event)" onpaste="onPinPaste(event)">
+            <input class="pin-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin1"
+                   oninput="onPinInput(this,1)" onkeydown="onPinKeydown(this,1,event)" onpaste="onPinPaste(event)">
+            <span class="pin-sep">·</span>
+            <input class="pin-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin2"
+                   oninput="onPinInput(this,2)" onkeydown="onPinKeydown(this,2,event)" onpaste="onPinPaste(event)">
+            <input class="pin-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin3"
+                   oninput="onPinInput(this,3)" onkeydown="onPinKeydown(this,3,event)" onpaste="onPinPaste(event)">
+          </div>
+
+          <div class="pin-error" id="pinError"></div>
+
+          <button class="pin-submit-btn" id="pinSubmitBtn" onclick="submitPin()">Verify →</button>
+
+          <div class="pin-resend">
+            Did not receive it? &nbsp;<button id="pinResendBtn" onclick="resendPin()">Resend PIN</button>
+          </div>
+          <div style="margin-top:10px;font-size:15px;color:#9CA3AF;">Check your spam folder if you do not see it within a minute.</div>
+          <button class="pin-skip" onclick="skipPinVerification()">Skip for now</button>
+        </div>
+
+        <!-- Phase 3: success tick -->
+        <div id="pinSuccessMsg" class="pin-verify-success" style="display:none;">
+          <div class="pin-tick">✅</div>
+          <p>Email verified!</p>
+        </div>
+
+      </div>
+    </div>
 
   </div><!-- /.right-sticky -->
   </div><!-- /.right -->
@@ -1424,7 +1478,7 @@
       setTimeout(() => {
         document.getElementById('pinAnimPhase').style.display  = 'none';
         document.getElementById('pinEntryPhase').style.display = 'block';
-        document.getElementById('pinHeaderSub').textContent    = 'One step away from activation';
+        document.getElementById('pinHeaderSub').textContent    = '';
         document.getElementById('pinEntryPhase').style.opacity = '0';
         document.getElementById('pinEntryPhase').style.transition = 'opacity .3s';
         requestAnimationFrame(() => {
@@ -1479,7 +1533,7 @@
       text.split('').forEach((ch, i) => {
         if (digits[i]) { digits[i].value = ch; digits[i].classList.add('filled'); }
       });
-      if (text.length === 4) { digits[3].focus(); submitPin(); }
+      if (text.length === 4) { digits[3].focus(); setTimeout(submitPin, 50); }
       else if (digits[text.length]) digits[text.length].focus();
     }
 
@@ -1833,59 +1887,6 @@
   </div>
 </div>
 
-<!-- PIN Verification Modal -->
-<div class="pin-overlay" id="pinOverlay">
-  <div class="pin-box">
-
-    <div class="pin-box-header">
-      <h2>Almost There!</h2>
-      <p id="pinHeaderSub">Sending your activation PIN…</p>
-    </div>
-
-    <!-- Phase 1: car animation while PIN email is in transit -->
-    <div id="pinAnimPhase" class="pin-anim-phase">
-      <div class="pin-road">
-        <img class="pin-road-car" id="pinCar" src="/green-car-sm.png" alt="">
-        <div class="pin-road-env" id="pinEnv">📧</div>
-      </div>
-      <p class="pin-anim-label" id="pinAnimLabel">Sending your activation PIN…</p>
-    </div>
-
-    <!-- Phase 2: PIN entry (shown after animation) -->
-    <div id="pinEntryPhase" class="pin-entry-phase" style="display:none;">
-      <p style="font-size:13px;color:#6B7280;margin:0 0 16px;">Enter the PIN from your email to activate your journey:</p>
-
-      <div class="pin-digits" onpaste="onPinPaste(event)">
-        <input class="pin-digit" type="number" inputmode="numeric" maxlength="1" id="pin0"
-               oninput="onPinInput(this,0)" onkeydown="onPinKeydown(this,0,event)">
-        <input class="pin-digit" type="number" inputmode="numeric" maxlength="1" id="pin1"
-               oninput="onPinInput(this,1)" onkeydown="onPinKeydown(this,1,event)">
-        <span class="pin-sep">·</span>
-        <input class="pin-digit" type="number" inputmode="numeric" maxlength="1" id="pin2"
-               oninput="onPinInput(this,2)" onkeydown="onPinKeydown(this,2,event)">
-        <input class="pin-digit" type="number" inputmode="numeric" maxlength="1" id="pin3"
-               oninput="onPinInput(this,3)" onkeydown="onPinKeydown(this,3,event)">
-      </div>
-
-      <div class="pin-error" id="pinError"></div>
-
-      <button class="pin-submit-btn" id="pinSubmitBtn" onclick="submitPin()">Verify →</button>
-
-      <div class="pin-resend">
-        Did not receive it? &nbsp;<button id="pinResendBtn" onclick="resendPin()">Resend PIN</button>
-      </div>
-      <div style="margin-top:10px;font-size:12px;color:#9CA3AF;">Check your spam folder if you do not see it within a minute.</div>
-      <button class="pin-skip" onclick="skipPinVerification()">Skip for now</button>
-    </div>
-
-    <!-- Phase 3: success tick -->
-    <div id="pinSuccessMsg" class="pin-verify-success" style="display:none;">
-      <div class="pin-tick">✅</div>
-      <p>Email verified!</p>
-    </div>
-
-  </div>
-</div>
 
 <!-- Feedback Modal -->
 <div id="feedbackOverlay" class="feedback-overlay hidden">
