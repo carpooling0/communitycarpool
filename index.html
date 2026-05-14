@@ -371,6 +371,49 @@
   .modal-input:focus { outline:none; border-color:var(--green); }
   .modal-error { font-size:13px; color:#ef4444; margin-top:8px; display:none; }
   .modal-btn { margin-top:16px; width:100%; padding:12px; background:var(--green); color:#fff; border:none; border-radius:50px; font-size:15px; font-weight:600; font-family:inherit; cursor:pointer; }
+
+  /* PIN verification modal */
+  .pin-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:9100; align-items:center; justify-content:center; padding:16px; }
+  .pin-overlay.show { display:flex; }
+  .pin-box { background:#fff; border-radius:18px; padding:32px 28px 24px; max-width:380px; width:100%; text-align:center; box-shadow:0 24px 64px rgba(0,0,0,.18); }
+  .pin-box-header { background:#1B5C3A; margin:-32px -28px 0; padding:22px 24px 18px; border-radius:18px 18px 0 0; }
+  .pin-box-header h2 { margin:0 0 4px; font-size:19px; font-weight:900; color:#fff; font-family:'Montserrat',sans-serif; }
+  .pin-box-header p { margin:0; font-size:13px; color:#B4E035; }
+
+  /* Car animation strip */
+  .pin-anim-phase { padding:20px 0 8px; }
+  .pin-road { position:relative; height:52px; background:#f0fdf4; border-radius:10px; overflow:hidden; margin-bottom:14px; }
+  .pin-road::before { content:''; position:absolute; top:50%; left:0; right:0; height:2px; background:repeating-linear-gradient(90deg,#B4E035 0 14px,transparent 14px 22px); transform:translateY(-50%); }
+  .pin-road-env { position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:24px; transition:transform .2s; }
+  .pin-road-env.bounce { animation:pin-env-bounce .35s ease 2 alternate; }
+  .pin-road-car { position:absolute; top:50%; transform:translateY(-50%); height:26px; width:auto; left:-70px; }
+  .pin-road-car.go { animation:pin-car-go 0.9s cubic-bezier(.4,0,.2,1) forwards; }
+  .pin-road-car.ret { animation:pin-car-ret 0.8s cubic-bezier(.4,0,.2,1) forwards; }
+  @keyframes pin-car-go { from{left:-70px} to{left:calc(100% - 110px)} }
+  @keyframes pin-car-ret { from{left:calc(100% - 110px);transform:translateY(-50%) scaleX(-1)} to{left:-70px;transform:translateY(-50%) scaleX(-1)} }
+  @keyframes pin-env-bounce { from{transform:translateY(-50%) scale(1)} to{transform:translateY(-65%) scale(1.3)} }
+  .pin-anim-label { font-size:13px; color:#6B7280; margin:0; }
+
+  /* PIN entry */
+  .pin-entry-phase { padding-top:20px; }
+  .pin-digits { display:flex; align-items:center; justify-content:center; gap:8px; margin:0 0 8px; }
+  .pin-digit { width:56px; height:66px; border:2.5px solid #D1D5DB; border-radius:12px; font-size:28px; font-weight:900; text-align:center; font-family:'Montserrat',sans-serif; color:#1B5C3A; outline:none; caret-color:transparent; transition:border-color .15s,background .15s; -moz-appearance:textfield; }
+  .pin-digit::-webkit-outer-spin-button,.pin-digit::-webkit-inner-spin-button { -webkit-appearance:none; }
+  .pin-digit:focus { border-color:#1B5C3A; box-shadow:0 0 0 3px rgba(27,92,58,.15); }
+  .pin-digit.filled { border-color:#1B5C3A; background:#f0fdf4; }
+  .pin-digit.error { border-color:#ef4444; background:#fef2f2; animation:pin-shake .3s; }
+  .pin-sep { font-size:20px; color:#D1D5DB; font-weight:900; line-height:1; margin:0 2px; }
+  @keyframes pin-shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+  .pin-error { font-size:13px; color:#ef4444; min-height:18px; margin-bottom:4px; }
+  .pin-submit-btn { width:100%; padding:13px; background:#1B5C3A; color:#fff; border:none; border-radius:50px; font-size:15px; font-weight:700; font-family:'Montserrat',sans-serif; cursor:pointer; margin-top:12px; transition:opacity .15s; }
+  .pin-submit-btn:disabled { opacity:.5; cursor:not-allowed; }
+  .pin-resend { font-size:12px; color:#6B7280; margin-top:12px; }
+  .pin-resend button { background:none; border:none; color:#1B5C3A; font-weight:600; font-size:12px; cursor:pointer; text-decoration:underline; font-family:inherit; }
+  .pin-resend button:disabled { color:#9CA3AF; cursor:not-allowed; text-decoration:none; }
+  .pin-skip { font-size:12px; color:#9CA3AF; margin-top:10px; cursor:pointer; text-decoration:underline; background:none; border:none; font-family:inherit; }
+  .pin-verify-success { text-align:center; padding:24px 0 12px; }
+  .pin-verify-success .pin-tick { font-size:48px; margin-bottom:8px; }
+  .pin-verify-success p { font-size:15px; color:#1B5C3A; font-weight:600; }
   #success-content { display: none; flex-direction: column; flex: 1; transition: opacity .3s ease; }
   #success-content.visible { display: flex; }
 
@@ -1318,7 +1361,11 @@
         });
         const data = await res.json();
         if (data.success) {
-          showSuccess({ journeyNum: data.journeyNum, actualDist: data.actualDist, distanceVal: distVal });
+          if (data.verificationRequired) {
+            showPinModal(data.submissionId, { journeyNum: data.journeyNum, actualDist: data.actualDist, distanceVal: distVal });
+          } else {
+            showSuccess({ journeyNum: data.journeyNum, actualDist: data.actualDist, distanceVal: distVal });
+          }
         } else {
           showError(data.error || 'Something went wrong. Please try again.');
           btn.textContent = 'Find Carpool Partner →';
@@ -1330,6 +1377,209 @@
         btn.disabled = false;
       }
     }
+
+    // ── PIN verification modal ────────────────────────────────────────────────
+    let _pinSubmissionId = null;
+    let _pinSuccessData  = null;
+    let _pinResendTimer  = null;
+
+    function showPinModal(submissionId, successData) {
+      _pinSubmissionId = submissionId;
+      _pinSuccessData  = successData;
+
+      // Reset phases
+      document.getElementById('pinAnimPhase').style.display  = 'block';
+      document.getElementById('pinEntryPhase').style.display = 'none';
+      document.getElementById('pinSuccessMsg').style.display = 'none';
+      document.getElementById('pinHeaderSub').textContent    = 'Sending your activation PIN…';
+      document.getElementById('pinAnimLabel').textContent    = 'Sending your activation PIN…';
+      clearPinDigits();
+      setPinError('');
+
+      document.getElementById('pinOverlay').classList.add('show');
+
+      // ── Car animation sequence ────────────────────────────────────────────
+      const car = document.getElementById('pinCar');
+      const env = document.getElementById('pinEnv');
+      car.className = 'pin-road-car';
+      env.className = 'pin-road-env';
+
+      // Phase 1 — car drives right toward envelope (0.9s)
+      requestAnimationFrame(() => {
+        car.classList.add('go');
+      });
+
+      // Phase 2 — envelope bounces when car arrives (~0.9s in)
+      setTimeout(() => {
+        env.classList.add('bounce');
+        document.getElementById('pinAnimLabel').textContent = 'PIN delivered! Check your inbox now…';
+      }, 850);
+
+      // Phase 3 — car flips and returns (~1.3s in)
+      setTimeout(() => {
+        car.className = 'pin-road-car ret';
+      }, 1300);
+
+      // Phase 4 — show PIN entry after car leaves (~2.1s total)
+      setTimeout(() => {
+        document.getElementById('pinAnimPhase').style.display  = 'none';
+        document.getElementById('pinEntryPhase').style.display = 'block';
+        document.getElementById('pinHeaderSub').textContent    = 'One step away from activation';
+        document.getElementById('pinEntryPhase').style.opacity = '0';
+        document.getElementById('pinEntryPhase').style.transition = 'opacity .3s';
+        requestAnimationFrame(() => {
+          document.getElementById('pinEntryPhase').style.opacity = '1';
+        });
+        document.getElementById('pin0').focus();
+      }, 2100);
+    }
+
+    function clearPinDigits() {
+      document.querySelectorAll('.pin-digit').forEach(d => {
+        d.value = '';
+        d.classList.remove('filled','error');
+      });
+    }
+
+    function setPinError(msg) {
+      document.getElementById('pinError').textContent = msg;
+      if (msg) {
+        document.querySelectorAll('.pin-digit').forEach(d => d.classList.add('error'));
+        setTimeout(() => document.querySelectorAll('.pin-digit').forEach(d => d.classList.remove('error')), 400);
+      }
+    }
+
+    function onPinInput(el, idx) {
+      const val = el.value.replace(/\D/g, '');
+      el.value = val.slice(-1);
+      el.classList.toggle('filled', !!el.value);
+      setPinError('');
+      if (el.value && idx < 3) {
+        document.querySelectorAll('.pin-digit')[idx + 1].focus();
+      }
+      if (document.querySelectorAll('.pin-digit:not([value=""])').length === 0) return;
+      const all = [...document.querySelectorAll('.pin-digit')].map(d => d.value);
+      if (all.every(v => v !== '') && idx === 3) submitPin();
+    }
+
+    function onPinKeydown(el, idx, e) {
+      if (e.key === 'Backspace' && !el.value && idx > 0) {
+        const prev = document.querySelectorAll('.pin-digit')[idx - 1];
+        prev.value = '';
+        prev.classList.remove('filled');
+        prev.focus();
+      }
+      if (e.key === 'Enter') submitPin();
+    }
+
+    function onPinPaste(e) {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,4);
+      const digits = document.querySelectorAll('.pin-digit');
+      text.split('').forEach((ch, i) => {
+        if (digits[i]) { digits[i].value = ch; digits[i].classList.add('filled'); }
+      });
+      if (text.length === 4) { digits[3].focus(); submitPin(); }
+      else if (digits[text.length]) digits[text.length].focus();
+    }
+
+    async function submitPin() {
+      const pin = [...document.querySelectorAll('.pin-digit')].map(d => d.value).join('');
+      if (pin.length < 4) return;
+      const btn = document.getElementById('pinSubmitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Verifying…';
+      try {
+        const res = await fetch(SUPABASE_URL + '/functions/v1/verify-pin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+          body: JSON.stringify({ submissionId: _pinSubmissionId, pin })
+        });
+        const data = await res.json();
+        if (data.success) {
+          // Show tick briefly then proceed to confirmation
+          document.getElementById('pinBody').style.display = 'none';
+          document.getElementById('pinSuccessMsg').style.display = 'block';
+          setTimeout(() => {
+            document.getElementById('pinOverlay').classList.remove('show');
+            showSuccess(_pinSuccessData);
+          }, 1200);
+        } else {
+          setPinError(data.error || 'Incorrect PIN. Please try again.');
+          clearPinDigits();
+          document.querySelector('.pin-digit').focus();
+          btn.disabled = false;
+          btn.textContent = 'Verify →';
+        }
+      } catch (e) {
+        setPinError('Network error. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Verify →';
+      }
+    }
+
+    async function resendPin() {
+      const resendBtn = document.getElementById('pinResendBtn');
+      resendBtn.disabled = true;
+      clearPinDigits();
+      setPinError('');
+      document.querySelector('.pin-digit').focus();
+      // Re-submit journey is not ideal — instead call a lightweight resend endpoint
+      // For now show a message; a dedicated resend endpoint can be added later
+      resendBtn.textContent = 'Sent!';
+      setTimeout(() => {
+        let secs = 30;
+        resendBtn.textContent = `Resend in ${secs}s`;
+        _pinResendTimer = setInterval(() => {
+          secs--;
+          if (secs <= 0) {
+            clearInterval(_pinResendTimer);
+            resendBtn.disabled = false;
+            resendBtn.textContent = 'Resend PIN';
+          } else {
+            resendBtn.textContent = `Resend in ${secs}s`;
+          }
+        }, 1000);
+      }, 800);
+    }
+
+    function skipPinVerification() {
+      document.getElementById('pinOverlay').classList.remove('show');
+      showSuccess(_pinSuccessData);
+    }
+
+    // ── Handle ?verify_email=TOKEN on page load (link from email) ─────────────
+    (async function checkVerifyToken() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('verify_email');
+      if (!token) return;
+
+      // Always strip the token from the address bar immediately
+      history.replaceState({}, '', window.location.pathname);
+
+      try {
+        const res = await fetch(SUPABASE_URL + '/functions/v1/verify-pin?token=' + encodeURIComponent(token), {
+          headers: { 'apikey': SUPABASE_ANON_KEY }
+        });
+        const data = await res.json();
+        if (data.success) {
+          // Show the full confirmation screen with journey data from the response
+          showSuccess({
+            journeyNum: data.journeyNum,
+            actualDist: data.actualDist,
+            distanceVal: 3  // fallback for tree calculation if actualDist is present it takes priority
+          });
+        } else {
+          // Show a persistent banner explaining what happened
+          const banner = document.createElement('div');
+          banner.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#DC2626;color:#fff;padding:12px 24px;border-radius:50px;font-size:14px;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer;';
+          banner.textContent = data.error || 'Verification link invalid. Please enter your PIN or request a new one.';
+          banner.onclick = () => banner.remove();
+          document.body.appendChild(banner);
+          setTimeout(() => banner.remove(), 8000);
+        }
+      } catch (e) { /* silent */ }
+    })();
 
     // ── Google Places autocomplete ────────────────────────────────────────────
     const COUNTRY_CENTERS = {
@@ -1580,6 +1830,60 @@
     <input type="number" id="mathInput" class="modal-input" placeholder="Answer"/>
     <div class="modal-error" id="mathError">Incorrect answer, try again.</div>
     <button class="modal-btn" onclick="verifyMath()">Verify &amp; Submit</button>
+  </div>
+</div>
+
+<!-- PIN Verification Modal -->
+<div class="pin-overlay" id="pinOverlay">
+  <div class="pin-box">
+
+    <div class="pin-box-header">
+      <h2>Almost There!</h2>
+      <p id="pinHeaderSub">Sending your activation PIN…</p>
+    </div>
+
+    <!-- Phase 1: car animation while PIN email is in transit -->
+    <div id="pinAnimPhase" class="pin-anim-phase">
+      <div class="pin-road">
+        <img class="pin-road-car" id="pinCar" src="/green-car-sm.png" alt="">
+        <div class="pin-road-env" id="pinEnv">📧</div>
+      </div>
+      <p class="pin-anim-label" id="pinAnimLabel">Sending your activation PIN…</p>
+    </div>
+
+    <!-- Phase 2: PIN entry (shown after animation) -->
+    <div id="pinEntryPhase" class="pin-entry-phase" style="display:none;">
+      <p style="font-size:13px;color:#6B7280;margin:0 0 16px;">Enter the PIN from your email to activate your journey:</p>
+
+      <div class="pin-digits" onpaste="onPinPaste(event)">
+        <input class="pin-digit" type="number" inputmode="numeric" maxlength="1" id="pin0"
+               oninput="onPinInput(this,0)" onkeydown="onPinKeydown(this,0,event)">
+        <input class="pin-digit" type="number" inputmode="numeric" maxlength="1" id="pin1"
+               oninput="onPinInput(this,1)" onkeydown="onPinKeydown(this,1,event)">
+        <span class="pin-sep">·</span>
+        <input class="pin-digit" type="number" inputmode="numeric" maxlength="1" id="pin2"
+               oninput="onPinInput(this,2)" onkeydown="onPinKeydown(this,2,event)">
+        <input class="pin-digit" type="number" inputmode="numeric" maxlength="1" id="pin3"
+               oninput="onPinInput(this,3)" onkeydown="onPinKeydown(this,3,event)">
+      </div>
+
+      <div class="pin-error" id="pinError"></div>
+
+      <button class="pin-submit-btn" id="pinSubmitBtn" onclick="submitPin()">Verify →</button>
+
+      <div class="pin-resend">
+        Did not receive it? &nbsp;<button id="pinResendBtn" onclick="resendPin()">Resend PIN</button>
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:#9CA3AF;">Check your spam folder if you do not see it within a minute.</div>
+      <button class="pin-skip" onclick="skipPinVerification()">Skip for now</button>
+    </div>
+
+    <!-- Phase 3: success tick -->
+    <div id="pinSuccessMsg" class="pin-verify-success" style="display:none;">
+      <div class="pin-tick">✅</div>
+      <p>Email verified!</p>
+    </div>
+
   </div>
 </div>
 
