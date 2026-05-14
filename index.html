@@ -1554,7 +1554,7 @@
         const data = await res.json();
         if (data.success) {
           // Show tick briefly then proceed to confirmation
-          document.getElementById('pinBody').style.display = 'none';
+          document.getElementById('pinEntryPhase').style.display = 'none';
           document.getElementById('pinSuccessMsg').style.display = 'block';
           setTimeout(() => {
             document.getElementById('pinOverlay').classList.remove('show');
