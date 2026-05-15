@@ -71,10 +71,10 @@ async function sendPinEmail(toEmail: string, firstName: string, pin: string, ver
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Activate your Community Carpool journey</title>
+  <title>Your Community Carpool journey PIN</title>
 </head>
 <body style="margin:0;padding:0;background:#F0F0ED;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-<div style="display:none;max-height:0;overflow:hidden;">One last step — enter this PIN to activate your carpool journey.&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;</div>
+<div style="display:none;max-height:0;overflow:hidden;">Here is your PIN to confirm your carpool journey.&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;</div>
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F0F0ED;">
 <tr><td align="center" style="padding:32px 16px 40px;">
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;">
@@ -106,7 +106,7 @@ async function sendPinEmail(toEmail: string, firstName: string, pin: string, ver
             <td style="padding:28px 28px 24px;text-align:center;">
 
               <!-- PIN boxes -->
-              <p style="margin:0 0 16px;font-size:13px;color:#6B7280;">Go back to the window and enter this PIN to activate your journey:</p>
+              <p style="margin:0 0 16px;font-size:13px;color:#6B7280;">Go back to the window and enter this PIN to confirm your journey:</p>
               <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 24px;">
                 <tr>
                   ${digits.map(d => `
@@ -121,7 +121,33 @@ async function sendPinEmail(toEmail: string, firstName: string, pin: string, ver
 
               <!-- Fallback link -->
               <p style="margin:0 0 12px;font-size:13px;color:#6B7280;">Closed the window? Click below to verify instantly:</p>
-              <a href="${verifyLink}" style="display:inline-block;padding:11px 28px;background:#1B5C3A;color:#FFFFFF;border-radius:50px;text-decoration:none;font-size:14px;font-weight:700;font-family:Montserrat,Inter,sans-serif;">Activate My Journey &rarr;</a>
+              <a href="${verifyLink}" style="display:inline-block;padding:11px 28px;background:#1B5C3A;color:#FFFFFF;border-radius:50px;text-decoration:none;font-size:14px;font-weight:700;font-family:Montserrat,Inter,sans-serif;">Confirm My Journey &rarr;</a>
+
+              <!-- Journey Tracker — Step 1 active -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;"><tr><td style="border-top:1px solid #E5E7EB;padding-bottom:16px;"></td></tr></table>
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:4px;">
+                <tr>
+                  <td align="center" width="20%">
+                    <div style="width:28px;height:28px;border-radius:50%;background:#B4E035;color:#1B5C3A;font-size:12px;font-weight:900;line-height:28px;margin:0 auto 4px;border:2px solid #1B5C3A;">1</div>
+                    <div style="font-size:9px;color:#1B5C3A;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;line-height:1.3;">Joined the Pool</div>
+                  </td>
+                  <td style="padding-bottom:16px;"><div style="height:2px;background:#E5E7EB;"></div></td>
+                  <td align="center" width="20%">
+                    <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">2</div>
+                    <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Matched</div>
+                  </td>
+                  <td style="padding-bottom:16px;"><div style="height:2px;background:#E5E7EB;"></div></td>
+                  <td align="center" width="20%">
+                    <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">3</div>
+                    <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Connected</div>
+                  </td>
+                  <td style="padding-bottom:16px;"><div style="height:2px;background:#E5E7EB;"></div></td>
+                  <td align="center" width="20%">
+                    <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">4</div>
+                    <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Carpooling!</div>
+                  </td>
+                </tr>
+              </table>
 
             </td>
           </tr>
@@ -148,7 +174,7 @@ async function sendPinEmail(toEmail: string, firstName: string, pin: string, ver
     body: JSON.stringify({
       from: `Community Carpool <${fromEmail}>`,
       to: [toEmail],
-      subject: `Activate your Community Carpool journey`,
+      subject: `Your Community Carpool journey PIN`,
       html
     })
   })
