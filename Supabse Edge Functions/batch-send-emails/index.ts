@@ -177,6 +177,32 @@ Deno.serve(async (req) => {
               <p style="color:#6b7280;margin:0 0 24px;font-size:14px;">Your Carpool Update &mdash; ${batchDate}</p>
               <table width="100%" cellpadding="0" cellspacing="0">${allJourneyRows}</table>
             </div>
+            <!-- Journey Tracker — Step 2 active -->
+            <div style="background:white;border-radius:12px;padding:20px 24px;margin-top:16px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:4px;">
+                <tr>
+                  <td align="center" width="20%">
+                    <div style="width:28px;height:28px;border-radius:50%;background:#1B5C3A;color:#fff;font-size:13px;font-weight:700;line-height:28px;margin:0 auto 4px;">&#10003;</div>
+                    <div style="font-size:9px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;line-height:1.3;">Joined the Pool</div>
+                  </td>
+                  <td style="padding-bottom:16px;"><div style="height:2px;background:#1B5C3A;"></div></td>
+                  <td align="center" width="20%">
+                    <div style="width:28px;height:28px;border-radius:50%;background:#B4E035;color:#1B5C3A;font-size:12px;font-weight:900;line-height:28px;margin:0 auto 4px;border:2px solid #1B5C3A;">2</div>
+                    <div style="font-size:9px;color:#1B5C3A;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">Matched</div>
+                  </td>
+                  <td style="padding-bottom:16px;"><div style="height:2px;background:#E5E7EB;"></div></td>
+                  <td align="center" width="20%">
+                    <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">3</div>
+                    <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Connected</div>
+                  </td>
+                  <td style="padding-bottom:16px;"><div style="height:2px;background:#E5E7EB;"></div></td>
+                  <td align="center" width="20%">
+                    <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">4</div>
+                    <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Carpooling!</div>
+                  </td>
+                </tr>
+              </table>
+            </div>
             <div style="background:white;border-radius:12px;padding:20px 24px;margin-top:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
               <p style="color:#374151;font-size:14px;font-weight:600;margin:0 0 4px;">Know someone who commutes the same way?</p>
               <p style="color:#6b7280;font-size:13px;margin:0 0 16px;">The more people in your area sign up, the better the matches get.</p>
