@@ -14,6 +14,15 @@
 set -e
 cd "$(dirname "$0")"
 
+# Load prod credentials (GITHUB_PAT etc.)
+if [ -f .env.cc_prod ]; then
+  export $(grep -v '^#' .env.cc_prod | xargs)
+fi
+if [ -z "$GITHUB_PAT" ]; then
+  echo "✗ ERROR: GITHUB_PAT not set in .env.cc_prod. Aborting."
+  exit 1
+fi
+
 # Safety check: confirm config.js points to prod project
 if grep -q "jboohdwihsiuvyrfeftp" config.js; then
   echo "✗ ERROR: config.js still has dev Supabase credentials. Aborting."
@@ -58,7 +67,7 @@ git add config.js CNAME agents.html
 git diff --cached --quiet && echo "Nothing to commit, pushing as-is..." || git commit -m "chore: apply prod config for deployment"
 
 echo "→ Pushing to origin (production)..."
-git push origin main
+git -c credential.helper= push "https://carpooling0:${GITHUB_PAT}@github.com/carpooling0/communitycarpool.git" main
 
 echo "→ Restoring agents.html (dev version)..."
 cp /tmp/agents-dev-backup.html agents.html
