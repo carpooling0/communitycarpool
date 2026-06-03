@@ -416,6 +416,79 @@
   #success-content { display: none; flex-direction: column; flex: 1; transition: opacity .3s ease; }
   #success-content.visible { display: flex; }
 
+  /* ── WHATSAPP NUMBER FIELD ── */
+  .f-wa-row { display:flex; gap:8px; }
+  .f-wa-cc {
+    width:70px; flex-shrink:0; padding:10px 8px;
+    border:1.5px solid #25D366; border-radius:9px;
+    font-size:13px; font-weight:700; color:#1B5C3A;
+    background:#f0fff8; display:flex; align-items:center;
+    justify-content:center; gap:3px; cursor:default;
+  }
+  .f-wa-input {
+    flex:1; padding:10px 12px;
+    border:1.5px solid #25D366; border-radius:9px;
+    font-size:14px; color:var(--ink); background:#f0fff8;
+    font-family:'Inter',sans-serif; outline:none; transition:border-color .15s;
+  }
+  .f-wa-input:focus { border-color:#128C7E; box-shadow:0 0 0 3px rgba(37,211,102,.15); }
+
+  /* ── COMBINED PIN MODAL ── */
+  .combo-channel { padding:16px 0 12px; }
+  .combo-channel + .combo-channel { border-top:1.5px dashed #e5e7eb; }
+  .combo-channel-hdr {
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;
+  }
+  .combo-ch-label {
+    font-size:12px; font-weight:700; color:#374151;
+    font-family:'Montserrat',sans-serif; text-transform:uppercase;
+    letter-spacing:.06em; display:flex; align-items:center; gap:6px;
+  }
+  .combo-status {
+    display:inline-flex; align-items:center; gap:4px;
+    font-size:11px; font-weight:700; padding:3px 10px;
+    border-radius:20px; font-family:'Montserrat',sans-serif;
+  }
+  .combo-status.pending  { background:#f3f4f6; color:#6b7280; }
+  .combo-status.verified { background:#dcfce7; color:#166534; }
+  .combo-status.failed   { background:#fee2e2; color:#991b1b; }
+  .combo-sent-to { font-size:12px; color:#6b7280; margin-bottom:10px; }
+  .combo-digits { display:flex; gap:8px; margin-bottom:8px; }
+  .combo-digit {
+    width:50px; height:58px;
+    border:2.5px solid #D1D5DB; border-radius:12px;
+    font-size:26px; font-weight:900; text-align:center;
+    font-family:'Montserrat',sans-serif; color:#1B5C3A;
+    outline:none; caret-color:transparent;
+    transition:border-color .15s, background .15s;
+    appearance:none; -moz-appearance:textfield;
+  }
+  .combo-digit::-webkit-outer-spin-button,
+  .combo-digit::-webkit-inner-spin-button { -webkit-appearance:none; }
+  .combo-digit:focus  { border-color:#1B5C3A; box-shadow:0 0 0 3px rgba(27,92,58,.15); }
+  .combo-digit.wa:focus { border-color:#25D366; box-shadow:0 0 0 3px rgba(37,211,102,.15); }
+  .combo-digit.filled { border-color:#1B5C3A; background:#f0fdf4; }
+  .combo-digit.wa.filled { border-color:#25D366; background:#f0fff8; }
+  .combo-digit.error  { border-color:#ef4444; background:#fef2f2; animation:pin-shake .3s; }
+  .combo-pin-error { font-size:12px; color:#ef4444; min-height:16px; margin-bottom:4px; }
+  .combo-verify-btn {
+    width:100%; padding:11px; border:none; border-radius:50px;
+    font-size:14px; font-weight:700; font-family:'Montserrat',sans-serif;
+    cursor:pointer; margin-top:8px; transition:opacity .15s; color:#fff;
+  }
+  .combo-verify-btn.email { background:#1B5C3A; }
+  .combo-verify-btn.wa    { background:#25D366; }
+  .combo-verify-btn:disabled { opacity:.45; cursor:not-allowed; }
+  .combo-resend { font-size:13px; color:#6B7280; margin-top:8px; }
+  .combo-resend button {
+    background:none; border:none; font-size:13px; cursor:pointer;
+    text-decoration:underline; font-family:inherit; padding:0;
+  }
+  .combo-resend button.email { color:#1B5C3A; font-weight:600; }
+  .combo-resend button.wa    { color:#25D366; font-weight:600; }
+  .combo-resend button:disabled { color:#9CA3AF; cursor:not-allowed; text-decoration:none; }
+  .combo-verified-line { font-size:13px; font-weight:600; color:#166534; padding:10px 0 4px; text-align:center; }
+
   /* ── CONFIRMATION CARD ── */
   .conf-header { text-align: center; margin-bottom: 10px; }
   .conf-title { font-size: 21px; font-weight: 700; color: #1a365d; display: flex; align-items: center; justify-content: center; gap: 10px; }
@@ -798,9 +871,17 @@
           <input id="first-name-input" class="f-input" type="text" placeholder="Your first name"/>
         </div>
         <div class="f-group" style="margin-top:22px;">
-          <label class="f-label">Email <span class="f-req">*</span></label>
+          <label class="f-label">Email <span class="f-req">*</span> <span style="font-weight:400;color:#9ca3af;font-size:11px;">(PIN will be sent via Email)</span></label>
           <input id="email-input" class="f-input" type="email" placeholder="you@example.com"/>
           <div class="f-email-error" id="email-error">Please enter a valid email address.</div>
+        </div>
+        <!-- WhatsApp field — injected by JS when whatsapp_verification_enabled = true -->
+        <div class="f-group" id="wa-field-group" style="margin-top:22px;display:none;">
+          <label class="f-label">WhatsApp Number <span class="f-req">*</span> <span style="font-weight:400;color:#9ca3af;font-size:11px;">(PIN will be sent via WhatsApp)</span></label>
+          <div class="f-wa-row">
+            <div class="f-wa-cc" id="wa-cc-flag">🇦🇪 +971</div>
+            <input id="wa-input" class="f-wa-input" type="tel" inputmode="numeric" placeholder="50 123 4567"/>
+          </div>
         </div>
       </div>
 
@@ -915,6 +996,64 @@
       </div>
     </div>
 
+    <!-- COMBINED PIN OVERLAY — email + WhatsApp on one screen -->
+    <div class="pin-overlay" id="pinOverlayCombined">
+      <div class="pin-box">
+
+        <div class="pin-box-header">
+          <h2>Activate Your Journey</h2>
+          <p>Your journey is saved. Verify below to activate it.</p>
+        </div>
+
+        <!-- ── Email channel ── -->
+        <div class="combo-channel" id="comboEmailChannel">
+          <div class="combo-channel-hdr">
+            <div class="combo-ch-label">✉️ Email PIN</div>
+            <span class="combo-status pending" id="comboEmailStatus">⏳ Pending</span>
+          </div>
+          <div class="combo-sent-to" id="comboEmailSentTo"></div>
+          <div id="comboEmailEntry">
+            <div class="combo-digits" onpaste="onComboPaste(event,'email')">
+              <input class="combo-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="e0" oninput="onComboInput(this,0,'email')" onkeydown="onComboKeydown(this,0,'email',event)">
+              <input class="combo-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="e1" oninput="onComboInput(this,1,'email')" onkeydown="onComboKeydown(this,1,'email',event)">
+              <input class="combo-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="e2" oninput="onComboInput(this,2,'email')" onkeydown="onComboKeydown(this,2,'email',event)">
+              <input class="combo-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="e3" oninput="onComboInput(this,3,'email')" onkeydown="onComboKeydown(this,3,'email',event)">
+            </div>
+            <div class="combo-pin-error" id="comboEmailError"></div>
+            <button class="combo-verify-btn email" id="comboEmailVerifyBtn" onclick="submitComboPin('email')">Verify Email →</button>
+            <div class="combo-resend">
+              Not received? <button class="email" id="comboEmailResendBtn" onclick="resendComboPin('email')">Resend email PIN</button>
+            </div>
+          </div>
+          <div class="combo-verified-line" id="comboEmailVerifiedLine" style="display:none;">✅ Email verified</div>
+        </div>
+
+        <!-- ── WhatsApp channel ── -->
+        <div class="combo-channel" id="comboWaChannel">
+          <div class="combo-channel-hdr">
+            <div class="combo-ch-label">💬 WhatsApp PIN</div>
+            <span class="combo-status pending" id="comboWaStatus">⏳ Pending</span>
+          </div>
+          <div class="combo-sent-to" id="comboWaSentTo"></div>
+          <div id="comboWaEntry">
+            <div class="combo-digits" onpaste="onComboPaste(event,'wa')">
+              <input class="combo-digit wa" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="w0" oninput="onComboInput(this,0,'wa')" onkeydown="onComboKeydown(this,0,'wa',event)">
+              <input class="combo-digit wa" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="w1" oninput="onComboInput(this,1,'wa')" onkeydown="onComboKeydown(this,1,'wa',event)">
+              <input class="combo-digit wa" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="w2" oninput="onComboInput(this,2,'wa')" onkeydown="onComboKeydown(this,2,'wa',event)">
+              <input class="combo-digit wa" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="w3" oninput="onComboInput(this,3,'wa')" onkeydown="onComboKeydown(this,3,'wa',event)">
+            </div>
+            <div class="combo-pin-error" id="comboWaError"></div>
+            <button class="combo-verify-btn wa" id="comboWaVerifyBtn" onclick="submitComboPin('wa')">Verify WhatsApp →</button>
+            <div class="combo-resend">
+              Not received? <button class="wa" id="comboWaResendBtn" onclick="resendComboPin('wa')">Resend WhatsApp PIN</button>
+            </div>
+          </div>
+          <div class="combo-verified-line" id="comboWaVerifiedLine" style="display:none;">✅ WhatsApp verified</div>
+        </div>
+
+      </div>
+    </div><!-- /#pinOverlayCombined -->
+
   </div><!-- /.right-sticky -->
   </div><!-- /.right -->
 
@@ -931,6 +1070,10 @@
     let orgCustomMessage = null;
     let termsVersion = null;
     let mathAnswer = 0;
+
+    // ── WhatsApp verification state ───────────────────────────────────────────
+    let _waEnabled = false;       // set from get-form-config on page load
+    let _waCountryCode = '+971';  // default UAE; updated from detected country
 
     const DISTANCE_MAP = { '1': '1 - 3 km', '2': '3 - 5 km', '3': '5 - 8 km', '4': '8 - 10 km' };
 
@@ -1162,6 +1305,31 @@
     }
     const orgModeReady = initOrgMode();
 
+    // ── Form config fetch (WA verification flag etc.) ─────────────────────────
+    async function fetchFormConfig() {
+      try {
+        const res = await fetch(SUPABASE_URL + '/functions/v1/get-form-config', {
+          headers: { 'apikey': SUPABASE_ANON_KEY }
+        });
+        const cfg = await res.json();
+        _waEnabled = !!cfg.whatsappVerificationEnabled;
+
+        if (_waEnabled) {
+          // Show the WhatsApp number field
+          document.getElementById('wa-field-group').style.display = 'block';
+          // Adjust country code flag to match detected country
+          const cc = document.getElementById('wa-cc-flag');
+          if (userCountry === 'in') { cc.textContent = '🇮🇳 +91';  _waCountryCode = '+91';  }
+          else if (userCountry === 'pk') { cc.textContent = '🇵🇰 +92'; _waCountryCode = '+92'; }
+          else { cc.textContent = '🇦🇪 +971'; _waCountryCode = '+971'; }
+        }
+      } catch (e) {
+        // Silent fail — WA field stays hidden, email-only flow continues
+        _waEnabled = false;
+      }
+    }
+    fetchFormConfig();
+
     // ── Success transition ────────────────────────────────────────────────────
     function showSuccess(data) {
       const fc = document.getElementById('form-content');
@@ -1343,15 +1511,18 @@
     });
 
     async function submitForm() {
-      const firstName = document.getElementById('first-name-input').value.trim();
-      const email     = document.getElementById('email-input').value.trim();
-      const distVal   = document.getElementById('distance-slider').value;
-      const terms     = document.getElementById('terms').checked;
+      const firstName  = document.getElementById('first-name-input').value.trim();
+      const email      = document.getElementById('email-input').value.trim();
+      const distVal    = document.getElementById('distance-slider').value;
+      const terms      = document.getElementById('terms').checked;
+      const waRaw      = _waEnabled ? document.getElementById('wa-input').value.trim() : '';
+      const waNumber   = _waEnabled ? (_waCountryCode + waRaw.replace(/\s/g, '')) : null;
 
       if (!firstName || !email) { showError('Please enter your name and email.'); return; }
       if (!fromLocationText || !fromLatLng) { showError('Please select your starting area from the suggestions.'); return; }
       if (!toLocationText || !toLatLng) { showError('Please select your destination from the suggestions.'); return; }
       if (!terms) { showError('Please agree to the Terms & Conditions to continue.'); return; }
+      if (_waEnabled && !waRaw) { showError('Please enter your WhatsApp number.'); return; }
 
       const btn = document.getElementById('submit-btn');
       btn.textContent = 'Registering…';
@@ -1382,12 +1553,15 @@
             utmSource: sessionStorage.getItem('cc_utm_source') || undefined,
             utmMedium: sessionStorage.getItem('cc_utm_medium') || undefined,
             utmCampaign: sessionStorage.getItem('cc_utm_campaign') || undefined,
-            termsAgreed: true
+            termsAgreed: true,
+            whatsappNumber: waNumber || undefined,
           })
         });
         const data = await res.json();
         if (data.success) {
-          if (data.verificationRequired) {
+          if (data.verificationChannel === 'both') {
+            showCombinedPinModal(data.submissionId, { journeyNum: data.journeyNum, actualDist: data.actualDist, distanceVal: distVal }, email, waNumber);
+          } else if (data.verificationRequired) {
             showPinModal(data.submissionId, { journeyNum: data.journeyNum, actualDist: data.actualDist, distanceVal: distVal });
           } else {
             showSuccess({ journeyNum: data.journeyNum, actualDist: data.actualDist, distanceVal: distVal });
@@ -1594,6 +1768,213 @@
     function skipPinVerification() {
       document.getElementById('pinOverlay').classList.remove('show');
       // Leave the form exactly as it is — nothing else to do
+    }
+
+    // ── Combined PIN modal (email + WhatsApp) ─────────────────────────────────
+    let _comboSubmissionId  = null;
+    let _comboSuccessData   = null;
+    let _comboEmailVerified = false;
+    let _comboWaVerified    = false;
+    let _comboEmailResendTimer = null;
+    let _comboWaResendTimer    = null;
+
+    function showCombinedPinModal(submissionId, successData, email, waNumber) {
+      _comboSubmissionId  = submissionId;
+      _comboSuccessData   = successData;
+      _comboEmailVerified = false;
+      _comboWaVerified    = false;
+
+      // Populate "sent to" labels
+      document.getElementById('comboEmailSentTo').textContent = 'Sent to ' + email;
+      document.getElementById('comboWaSentTo').textContent    = 'Sent to ' + (waNumber || '');
+
+      // Reset both channels to initial state
+      _resetComboChannel('email');
+      _resetComboChannel('wa');
+
+      document.getElementById('pinOverlayCombined').classList.add('show');
+      startComboResendCountdown('email', 120);
+      startComboResendCountdown('wa',    120);
+    }
+
+    function _resetComboChannel(ch) {
+      const isEmail = ch === 'email';
+      const pfx     = isEmail ? 'comboEmail' : 'comboWa';
+      const digitPfx = isEmail ? 'e' : 'w';
+
+      // Clear digits
+      for (let i = 0; i < 4; i++) {
+        const d = document.getElementById(digitPfx + i);
+        d.value = '';
+        d.classList.remove('filled', 'error');
+      }
+      document.getElementById(pfx + 'Error').textContent = '';
+
+      // Show entry, hide verified line
+      document.getElementById(pfx + 'Entry').style.display = 'block';
+      document.getElementById(pfx + 'VerifiedLine').style.display = 'none';
+
+      // Reset status badge
+      const badge = document.getElementById(pfx + 'Status');
+      badge.className = 'combo-status pending';
+      badge.textContent = '⏳ Pending';
+
+      // Reset verify button
+      const btn = document.getElementById(pfx + 'VerifyBtn');
+      btn.disabled = false;
+      btn.textContent = isEmail ? 'Verify Email →' : 'Verify WhatsApp →';
+    }
+
+    function onComboInput(el, idx, ch) {
+      const val = el.value.replace(/\D/g, '');
+      el.value = val.slice(-1);
+      el.classList.toggle('filled', !!el.value);
+      const pfx = ch === 'email' ? 'comboEmail' : 'comboWa';
+      document.getElementById(pfx + 'Error').textContent = '';
+      const digitPfx = ch === 'email' ? 'e' : 'w';
+      if (el.value && idx < 3) document.getElementById(digitPfx + (idx + 1)).focus();
+      // Auto-submit when last digit filled
+      const all = [0,1,2,3].map(i => document.getElementById(digitPfx + i).value);
+      if (all.every(v => v !== '') && idx === 3) submitComboPin(ch);
+    }
+
+    function onComboKeydown(el, idx, ch, e) {
+      const digitPfx = ch === 'email' ? 'e' : 'w';
+      if (e.key === 'Backspace' && !el.value && idx > 0) {
+        const prev = document.getElementById(digitPfx + (idx - 1));
+        prev.value = '';
+        prev.classList.remove('filled');
+        prev.focus();
+      }
+      if (e.key === 'Enter') submitComboPin(ch);
+    }
+
+    function onComboPaste(e, ch) {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,4);
+      const digitPfx = ch === 'email' ? 'e' : 'w';
+      text.split('').forEach((c, i) => {
+        const d = document.getElementById(digitPfx + i);
+        if (d) { d.value = c; d.classList.add('filled'); }
+      });
+      if (text.length === 4) { document.getElementById(digitPfx + '3').focus(); setTimeout(() => submitComboPin(ch), 50); }
+      else if (document.getElementById(digitPfx + text.length)) document.getElementById(digitPfx + text.length).focus();
+    }
+
+    async function submitComboPin(ch) {
+      const isEmail  = ch === 'email';
+      const pfx      = isEmail ? 'comboEmail' : 'comboWa';
+      const digitPfx = isEmail ? 'e' : 'w';
+      const channel  = isEmail ? 'email' : 'whatsapp';
+
+      const pin = [0,1,2,3].map(i => document.getElementById(digitPfx + i).value).join('');
+      if (pin.length < 4) return;
+
+      const btn = document.getElementById(pfx + 'VerifyBtn');
+      btn.disabled = true;
+      btn.textContent = 'Verifying…';
+
+      try {
+        const res = await fetch(SUPABASE_URL + '/functions/v1/verify-pin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+          body: JSON.stringify({ submissionId: _comboSubmissionId, pin, channel })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          // Mark channel verified
+          if (isEmail) _comboEmailVerified = true; else _comboWaVerified = true;
+
+          const badge = document.getElementById(pfx + 'Status');
+          badge.className = 'combo-status verified';
+          badge.textContent = '✅ Verified';
+
+          document.getElementById(pfx + 'Entry').style.display = 'none';
+          document.getElementById(pfx + 'VerifiedLine').style.display = 'block';
+
+          // If both verified, close and go to success
+          if (_comboEmailVerified && _comboWaVerified) {
+            setTimeout(() => {
+              document.getElementById('pinOverlayCombined').classList.remove('show');
+              showSuccess(_comboSuccessData);
+            }, 800);
+          }
+        } else {
+          // Mark failed, let user retry
+          const badge = document.getElementById(pfx + 'Status');
+          badge.className = 'combo-status failed';
+          badge.textContent = '❌ Wrong PIN';
+
+          document.getElementById(pfx + 'Error').textContent = data.error || 'Incorrect PIN. Please try again.';
+          for (let i = 0; i < 4; i++) {
+            const d = document.getElementById(digitPfx + i);
+            d.value = ''; d.classList.remove('filled'); d.classList.add('error');
+          }
+          setTimeout(() => { for (let i = 0; i < 4; i++) document.getElementById(digitPfx + i).classList.remove('error'); }, 400);
+          document.getElementById(digitPfx + '0').focus();
+          btn.disabled = false;
+          btn.textContent = isEmail ? 'Verify Email →' : 'Verify WhatsApp →';
+        }
+      } catch (e) {
+        document.getElementById(pfx + 'Error').textContent = 'Network error. Please try again.';
+        btn.disabled = false;
+        btn.textContent = isEmail ? 'Verify Email →' : 'Verify WhatsApp →';
+      }
+    }
+
+    function startComboResendCountdown(ch, secs) {
+      const pfx = ch === 'email' ? 'comboEmail' : 'comboWa';
+      const btn = document.getElementById(pfx + 'ResendBtn');
+      if (ch === 'email') clearInterval(_comboEmailResendTimer);
+      else clearInterval(_comboWaResendTimer);
+
+      btn.disabled = true;
+      const fmt = s => `Resend in ${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+      btn.textContent = fmt(secs);
+
+      const timer = setInterval(() => {
+        secs--;
+        if (secs <= 0) {
+          clearInterval(timer);
+          btn.disabled = false;
+          btn.textContent = ch === 'email' ? 'Resend email PIN' : 'Resend WhatsApp PIN';
+        } else {
+          btn.textContent = fmt(secs);
+        }
+      }, 1000);
+      if (ch === 'email') _comboEmailResendTimer = timer;
+      else _comboWaResendTimer = timer;
+    }
+
+    async function resendComboPin(ch) {
+      const pfx = ch === 'email' ? 'comboEmail' : 'comboWa';
+      const digitPfx = ch === 'email' ? 'e' : 'w';
+      const btn = document.getElementById(pfx + 'ResendBtn');
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      for (let i = 0; i < 4; i++) { const d = document.getElementById(digitPfx + i); d.value = ''; d.classList.remove('filled','error'); }
+      document.getElementById(pfx + 'Error').textContent = '';
+
+      try {
+        const res = await fetch(SUPABASE_URL + '/functions/v1/resend-pin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+          body: JSON.stringify({ submissionId: _comboSubmissionId, channel: ch === 'wa' ? 'whatsapp' : 'email' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          btn.textContent = 'Sent ✓';
+          setTimeout(() => startComboResendCountdown(ch, 120), 800);
+        } else {
+          btn.textContent = 'Failed — try again';
+          setTimeout(() => { btn.disabled = false; btn.textContent = ch === 'email' ? 'Resend email PIN' : 'Resend WhatsApp PIN'; }, 2000);
+        }
+      } catch (e) {
+        btn.textContent = 'Failed — try again';
+        setTimeout(() => { btn.disabled = false; btn.textContent = ch === 'email' ? 'Resend email PIN' : 'Resend WhatsApp PIN'; }, 2000);
+      }
+      document.getElementById(digitPfx + '0').focus();
     }
 
     // ── Handle ?verify_email=TOKEN on page load (link from email) ─────────────
