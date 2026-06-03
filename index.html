@@ -1214,6 +1214,16 @@
       '+211':'912 345678',    '+218':'91 234 5678',
     };
 
+    function formatWaNumber(raw, placeholder) {
+      const digits = raw.replace(/\D/g, '');
+      if (!placeholder || !digits) return digits;
+      let out = '', di = 0;
+      for (let i = 0; i < placeholder.length && di < digits.length; i++) {
+        out += placeholder[i] === ' ' ? ' ' : digits[di++];
+      }
+      return out;
+    }
+
     function initWaCountryDropdown(defaultCode) {
       const btn    = document.getElementById('wa-cc-flag');
       const drop   = document.getElementById('wa-cc-drop');
@@ -1224,8 +1234,27 @@
       function setCountry(code, flag) {
         _waCountryCode = code;
         btn.textContent = flag + ' ' + code;
-        numInput.placeholder = WA_PHONE_FMT[code] || 'Phone number';
+        const fmt = WA_PHONE_FMT[code] || '';
+        numInput.placeholder = fmt || 'Phone number';
+        if (numInput.value) numInput.value = formatWaNumber(numInput.value, fmt);
       }
+
+      numInput.addEventListener('input', () => {
+        const fmt = WA_PHONE_FMT[_waCountryCode] || '';
+        if (!fmt) return;
+        const cursor = numInput.selectionStart;
+        const before = numInput.value.slice(0, cursor).replace(/\D/g, '').length;
+        const raw = numInput.value.replace(/\D/g, '');
+        numInput.value = formatWaNumber(raw, fmt);
+        // Restore cursor past any auto-inserted space
+        let di = 0, pos = 0;
+        while (pos < numInput.value.length && di < before) {
+          if (numInput.value[pos] !== ' ') di++;
+          pos++;
+        }
+        if (numInput.value[pos] === ' ') pos++;
+        numInput.setSelectionRange(pos, pos);
+      });
 
       function renderList(filter) {
         const q = (filter || '').toLowerCase();
