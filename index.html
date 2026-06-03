@@ -500,7 +500,7 @@
     font-size:14px; font-weight:700; font-family:'Montserrat',sans-serif;
     cursor:pointer; margin-top:8px; transition:opacity .15s; color:#fff;
   }
-  .combo-verify-btn.email { background:#1B5C3A; }
+  .combo-verify-btn.email { background:#2563eb; }
   .combo-verify-btn.wa    { background:#25D366; }
   .combo-verify-btn:disabled { opacity:.45; cursor:not-allowed; }
   .combo-resend { font-size:13px; color:#6B7280; margin-top:8px; }
@@ -1293,7 +1293,7 @@
     async function fetchTermsVersion() {
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/config?select=value&key=eq.required_terms_version`,
-          { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } });
+          { headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } });
         const data = await res.json();
         if (data?.[0]?.value) termsVersion = data[0].value;
       } catch (e) { /* silent fail */ }
@@ -1730,7 +1730,6 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'apikey': SUPABASE_ANON_KEY,
             'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
           },
           body: JSON.stringify({
@@ -1889,7 +1888,7 @@
       try {
         const res = await fetch(SUPABASE_URL + '/functions/v1/verify-pin', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
           body: JSON.stringify({ submissionId: _pinSubmissionId, pin })
         });
         const data = await res.json();
@@ -1942,7 +1941,7 @@
       try {
         const res = await fetch(SUPABASE_URL + '/functions/v1/resend-pin', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
           body: JSON.stringify({ submissionId: _pinSubmissionId })
         });
         const data = await res.json();
@@ -2072,7 +2071,7 @@
       try {
         const res = await fetch(SUPABASE_URL + '/functions/v1/verify-pin', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
           body: JSON.stringify({ submissionId: _comboSubmissionId, pin, channel })
         });
         const data = await res.json();
@@ -2154,7 +2153,7 @@
       try {
         const res = await fetch(SUPABASE_URL + '/functions/v1/resend-pin', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
           body: JSON.stringify({ submissionId: _comboSubmissionId, channel: ch === 'wa' ? 'whatsapp' : 'email' })
         });
         const data = await res.json();
@@ -2183,7 +2182,7 @@
 
       try {
         const res = await fetch(SUPABASE_URL + '/functions/v1/verify-pin?token=' + encodeURIComponent(token), {
-          headers: { 'apikey': SUPABASE_ANON_KEY }
+          headers: { 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
         });
         const data = await res.json();
         if (data.success) {
