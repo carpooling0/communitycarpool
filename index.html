@@ -417,20 +417,39 @@
   #success-content.visible { display: flex; }
 
   /* ── WHATSAPP NUMBER FIELD ── */
-  .f-wa-row { display:flex; gap:8px; }
-  .f-wa-cc {
-    flex-shrink:0; padding:10px 10px;
+  .f-wa-row { display:flex; gap:8px; align-items:flex-start; }
+  .f-wa-cc-wrap { position:relative; flex-shrink:0; }
+  .f-wa-cc-btn {
+    display:flex; align-items:center; gap:4px; white-space:nowrap;
+    padding:10px 26px 10px 10px; height:42px;
     border:1.5px solid #e0e0e0; border-radius:10px;
     font-size:13px; font-weight:600; color:var(--ink);
-    background:#f9f9f9; cursor:pointer; outline:none;
-    font-family:'Inter',sans-serif; appearance:none; -webkit-appearance:none;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat:no-repeat; background-position:right 8px center;
-    padding-right:24px;
+    background:#f9f9f9 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 8px center;
+    cursor:pointer; outline:none; font-family:'Inter',sans-serif;
+    transition:border-color .15s;
   }
-  .f-wa-cc:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(27,92,58,.1); }
+  .f-wa-cc-btn:focus, .f-wa-cc-btn.open { border-color:var(--green); box-shadow:0 0 0 3px rgba(27,92,58,.1); }
+  .f-wa-cc-drop {
+    position:absolute; top:calc(100% + 4px); left:0; z-index:200;
+    background:#fff; border:1.5px solid #e0e0e0; border-radius:10px;
+    box-shadow:0 4px 20px rgba(0,0,0,.12); width:250px; overflow:hidden; display:none;
+  }
+  .f-wa-cc-drop.open { display:block; }
+  .f-wa-cc-search {
+    width:100%; padding:9px 12px; border:none; border-bottom:1px solid #f0f0f0;
+    font-size:13px; font-family:'Inter',sans-serif; outline:none;
+    background:#f9f9f9; color:var(--ink); box-sizing:border-box;
+  }
+  .f-wa-cc-list { list-style:none; margin:0; padding:4px 0; max-height:220px; overflow-y:auto; }
+  .f-wa-cc-item {
+    padding:8px 12px; font-size:13px; cursor:pointer;
+    display:flex; align-items:center; gap:8px; color:var(--ink);
+  }
+  .f-wa-cc-item:hover, .f-wa-cc-item.sel { background:#f0fdf4; }
+  .f-wa-cc-item .cc-code { margin-left:auto; color:#6b7280; font-size:12px; }
+  .f-wa-cc-empty { padding:10px 12px; font-size:13px; color:#9ca3af; }
   .f-wa-input {
-    flex:1; padding:10px 12px;
+    flex:1; padding:10px 12px; height:42px; box-sizing:border-box;
     border:1.5px solid #e0e0e0; border-radius:10px;
     font-size:14px; color:var(--ink); background:#f9f9f9;
     font-family:'Inter',sans-serif; outline:none; transition:border-color .15s;
@@ -884,17 +903,13 @@
         <div class="f-group" id="wa-field-group" style="margin-top:22px;display:none;">
           <label class="f-label">WhatsApp Number <span class="f-req">*</span> <span style="font-weight:400;color:#9ca3af;font-size:11px;">(PIN will be sent via WhatsApp)</span></label>
           <div class="f-wa-row">
-            <select class="f-wa-cc" id="wa-cc-flag">
-              <option value="+971">🇦🇪 +971</option>
-              <option value="+966">🇸🇦 +966</option>
-              <option value="+91">🇮🇳 +91</option>
-              <option value="+92">🇵🇰 +92</option>
-              <option value="+20">🇪🇬 +20</option>
-              <option value="+63">🇵🇭 +63</option>
-              <option value="+44">🇬🇧 +44</option>
-              <option value="+1">🇺🇸 +1</option>
-              <option value="+61">🇦🇺 +61</option>
-            </select>
+            <div class="f-wa-cc-wrap">
+              <button type="button" class="f-wa-cc-btn" id="wa-cc-flag">🇦🇪 +971</button>
+              <div class="f-wa-cc-drop" id="wa-cc-drop">
+                <input type="text" class="f-wa-cc-search" id="wa-cc-search" placeholder="Search country…" autocomplete="off"/>
+                <ul class="f-wa-cc-list" id="wa-cc-list"></ul>
+              </div>
+            </div>
             <input id="wa-input" class="f-wa-input" type="tel" inputmode="numeric" placeholder="50 123 4567"/>
           </div>
         </div>
@@ -1088,7 +1103,128 @@
 
     // ── WhatsApp verification state ───────────────────────────────────────────
     let _waEnabled = false;       // set from get-form-config on page load
-    let _waCountryCode = '+971';  // default UAE; updated from detected country
+    let _waCountryCode = '+971';
+
+    const WA_COUNTRIES = [
+      ['🇦🇫','Afghanistan','+93'],['🇦🇱','Albania','+355'],['🇩🇿','Algeria','+213'],
+      ['🇦🇩','Andorra','+376'],['🇦🇴','Angola','+244'],['🇦🇬','Antigua & Barbuda','+1268'],
+      ['🇦🇷','Argentina','+54'],['🇦🇲','Armenia','+374'],['🇦🇺','Australia','+61'],
+      ['🇦🇹','Austria','+43'],['🇦🇿','Azerbaijan','+994'],['🇧🇸','Bahamas','+1242'],
+      ['🇧🇭','Bahrain','+973'],['🇧🇩','Bangladesh','+880'],['🇧🇧','Barbados','+1246'],
+      ['🇧🇾','Belarus','+375'],['🇧🇪','Belgium','+32'],['🇧🇿','Belize','+501'],
+      ['🇧🇯','Benin','+229'],['🇧🇹','Bhutan','+975'],['🇧🇴','Bolivia','+591'],
+      ['🇧🇦','Bosnia & Herzegovina','+387'],['🇧🇼','Botswana','+267'],['🇧🇷','Brazil','+55'],
+      ['🇧🇳','Brunei','+673'],['🇧🇬','Bulgaria','+359'],['🇧🇫','Burkina Faso','+226'],
+      ['🇧🇮','Burundi','+257'],['🇨🇻','Cape Verde','+238'],['🇰🇭','Cambodia','+855'],
+      ['🇨🇲','Cameroon','+237'],['🇨🇦','Canada','+1'],['🇨🇫','Central African Republic','+236'],
+      ['🇹🇩','Chad','+235'],['🇨🇱','Chile','+56'],['🇨🇳','China','+86'],
+      ['🇨🇴','Colombia','+57'],['🇰🇲','Comoros','+269'],['🇨🇩','Congo (DRC)','+243'],
+      ['🇨🇬','Congo (Republic)','+242'],['🇨🇷','Costa Rica','+506'],['🇭🇷','Croatia','+385'],
+      ['🇨🇺','Cuba','+53'],['🇨🇾','Cyprus','+357'],['🇨🇿','Czech Republic','+420'],
+      ['🇩🇰','Denmark','+45'],['🇩🇯','Djibouti','+253'],['🇩🇴','Dominican Republic','+1809'],
+      ['🇪🇨','Ecuador','+593'],['🇪🇬','Egypt','+20'],['🇸🇻','El Salvador','+503'],
+      ['🇬🇶','Equatorial Guinea','+240'],['🇪🇷','Eritrea','+291'],['🇪🇪','Estonia','+372'],
+      ['🇸🇿','Eswatini','+268'],['🇪🇹','Ethiopia','+251'],['🇫🇯','Fiji','+679'],
+      ['🇫🇮','Finland','+358'],['🇫🇷','France','+33'],['🇬🇦','Gabon','+241'],
+      ['🇬🇲','Gambia','+220'],['🇬🇪','Georgia','+995'],['🇩🇪','Germany','+49'],
+      ['🇬🇭','Ghana','+233'],['🇬🇷','Greece','+30'],['🇬🇩','Grenada','+1473'],
+      ['🇬🇹','Guatemala','+502'],['🇬🇳','Guinea','+224'],['🇬🇼','Guinea-Bissau','+245'],
+      ['🇬🇾','Guyana','+592'],['🇭🇹','Haiti','+509'],['🇭🇳','Honduras','+504'],
+      ['🇭🇰','Hong Kong','+852'],['🇭🇺','Hungary','+36'],['🇮🇸','Iceland','+354'],
+      ['🇮🇳','India','+91'],['🇮🇩','Indonesia','+62'],['🇮🇷','Iran','+98'],
+      ['🇮🇶','Iraq','+964'],['🇮🇪','Ireland','+353'],['🇮🇱','Israel','+972'],
+      ['🇮🇹','Italy','+39'],['🇨🇮','Ivory Coast','+225'],['🇯🇲','Jamaica','+1876'],
+      ['🇯🇵','Japan','+81'],['🇯🇴','Jordan','+962'],['🇰🇿','Kazakhstan','+7'],
+      ['🇰🇪','Kenya','+254'],['🇰🇼','Kuwait','+965'],['🇰🇬','Kyrgyzstan','+996'],
+      ['🇱🇦','Laos','+856'],['🇱🇻','Latvia','+371'],['🇱🇧','Lebanon','+961'],
+      ['🇱🇸','Lesotho','+266'],['🇱🇷','Liberia','+231'],['🇱🇾','Libya','+218'],
+      ['🇱🇮','Liechtenstein','+423'],['🇱🇹','Lithuania','+370'],['🇱🇺','Luxembourg','+352'],
+      ['🇲🇴','Macao','+853'],['🇲🇬','Madagascar','+261'],['🇲🇼','Malawi','+265'],
+      ['🇲🇾','Malaysia','+60'],['🇲🇻','Maldives','+960'],['🇲🇱','Mali','+223'],
+      ['🇲🇹','Malta','+356'],['🇲🇷','Mauritania','+222'],['🇲🇺','Mauritius','+230'],
+      ['🇲🇽','Mexico','+52'],['🇲🇩','Moldova','+373'],['🇲🇨','Monaco','+377'],
+      ['🇲🇳','Mongolia','+976'],['🇲🇪','Montenegro','+382'],['🇲🇦','Morocco','+212'],
+      ['🇲🇿','Mozambique','+258'],['🇲🇲','Myanmar','+95'],['🇳🇦','Namibia','+264'],
+      ['🇳🇵','Nepal','+977'],['🇳🇱','Netherlands','+31'],['🇳🇿','New Zealand','+64'],
+      ['🇳🇮','Nicaragua','+505'],['🇳🇪','Niger','+227'],['🇳🇬','Nigeria','+234'],
+      ['🇲🇰','North Macedonia','+389'],['🇳🇴','Norway','+47'],['🇴🇲','Oman','+968'],
+      ['🇵🇰','Pakistan','+92'],['🇵🇸','Palestine','+970'],['🇵🇦','Panama','+507'],
+      ['🇵🇬','Papua New Guinea','+675'],['🇵🇾','Paraguay','+595'],['🇵🇪','Peru','+51'],
+      ['🇵🇭','Philippines','+63'],['🇵🇱','Poland','+48'],['🇵🇹','Portugal','+351'],
+      ['🇶🇦','Qatar','+974'],['🇷🇴','Romania','+40'],['🇷🇺','Russia','+7'],
+      ['🇷🇼','Rwanda','+250'],['🇰🇳','Saint Kitts & Nevis','+1869'],['🇱🇨','Saint Lucia','+1758'],
+      ['🇻🇨','Saint Vincent','+1784'],['🇼🇸','Samoa','+685'],['🇸🇲','San Marino','+378'],
+      ['🇸🇹','São Tomé & Príncipe','+239'],['🇸🇦','Saudi Arabia','+966'],['🇸🇳','Senegal','+221'],
+      ['🇷🇸','Serbia','+381'],['🇸🇨','Seychelles','+248'],['🇸🇱','Sierra Leone','+232'],
+      ['🇸🇬','Singapore','+65'],['🇸🇰','Slovakia','+421'],['🇸🇮','Slovenia','+386'],
+      ['🇸🇧','Solomon Islands','+677'],['🇸🇴','Somalia','+252'],['🇿🇦','South Africa','+27'],
+      ['🇰🇷','South Korea','+82'],['🇸🇸','South Sudan','+211'],['🇪🇸','Spain','+34'],
+      ['🇱🇰','Sri Lanka','+94'],['🇸🇩','Sudan','+249'],['🇸🇷','Suriname','+597'],
+      ['🇸🇪','Sweden','+46'],['🇨🇭','Switzerland','+41'],['🇸🇾','Syria','+963'],
+      ['🇹🇼','Taiwan','+886'],['🇹🇯','Tajikistan','+992'],['🇹🇿','Tanzania','+255'],
+      ['🇹🇭','Thailand','+66'],['🇹🇱','Timor-Leste','+670'],['🇹🇬','Togo','+228'],
+      ['🇹🇹','Trinidad & Tobago','+1868'],['🇹🇳','Tunisia','+216'],['🇹🇷','Turkey','+90'],
+      ['🇹🇲','Turkmenistan','+993'],['🇺🇬','Uganda','+256'],['🇺🇦','Ukraine','+380'],
+      ['🇦🇪','United Arab Emirates','+971'],['🇬🇧','United Kingdom','+44'],
+      ['🇺🇸','United States','+1'],['🇺🇾','Uruguay','+598'],['🇺🇿','Uzbekistan','+998'],
+      ['🇻🇪','Venezuela','+58'],['🇻🇳','Vietnam','+84'],['🇾🇪','Yemen','+967'],
+      ['🇿🇲','Zambia','+260'],['🇿🇼','Zimbabwe','+263'],
+    ];
+
+    function initWaCountryDropdown(defaultCode) {
+      const btn  = document.getElementById('wa-cc-flag');
+      const drop = document.getElementById('wa-cc-drop');
+      const search = document.getElementById('wa-cc-search');
+      const list   = document.getElementById('wa-cc-list');
+
+      function renderList(filter) {
+        const q = (filter || '').toLowerCase();
+        const matches = q
+          ? WA_COUNTRIES.filter(c => c[1].toLowerCase().includes(q) || c[2].includes(q))
+          : WA_COUNTRIES;
+        if (!matches.length) {
+          list.innerHTML = '<li class="f-wa-cc-empty">No results</li>';
+          return;
+        }
+        list.innerHTML = matches.map(c =>
+          `<li class="f-wa-cc-item${c[2]===_waCountryCode?' sel':''}" data-code="${c[2]}" data-flag="${c[0]}">
+            <span>${c[0]}</span><span>${c[1]}</span><span class="cc-code">${c[2]}</span>
+          </li>`
+        ).join('');
+        list.querySelectorAll('.f-wa-cc-item').forEach(li => {
+          li.addEventListener('mousedown', e => {
+            e.preventDefault();
+            _waCountryCode = li.dataset.code;
+            btn.textContent = li.dataset.flag + ' ' + li.dataset.code;
+            closeDrop();
+          });
+        });
+      }
+
+      function openDrop() {
+        renderList('');
+        drop.classList.add('open');
+        btn.classList.add('open');
+        search.value = '';
+        search.focus();
+      }
+      function closeDrop() {
+        drop.classList.remove('open');
+        btn.classList.remove('open');
+      }
+
+      btn.addEventListener('click', () => drop.classList.contains('open') ? closeDrop() : openDrop());
+      search.addEventListener('input', () => renderList(search.value));
+      search.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrop(); });
+      document.addEventListener('click', e => {
+        if (!btn.closest('.f-wa-cc-wrap').contains(e.target)) closeDrop();
+      });
+
+      // Set initial value
+      const def = WA_COUNTRIES.find(c => c[2] === defaultCode) || WA_COUNTRIES.find(c => c[2] === '+971');
+      _waCountryCode = def[2];
+      btn.textContent = def[0] + ' ' + def[2];
+    }
 
     const DISTANCE_MAP = { '1': '1 - 3 km', '2': '3 - 5 km', '3': '5 - 8 km', '4': '8 - 10 km' };
 
@@ -1332,12 +1468,8 @@
         if (_waEnabled) {
           // Show the WhatsApp number field
           document.getElementById('wa-field-group').style.display = 'block';
-          // Pre-select country code based on detected country
-          const cc = document.getElementById('wa-cc-flag');
-          if (userCountry === 'in') { cc.value = '+91';  _waCountryCode = '+91';  }
-          else if (userCountry === 'pk') { cc.value = '+92'; _waCountryCode = '+92'; }
-          else { cc.value = '+971'; _waCountryCode = '+971'; }
-          cc.addEventListener('change', () => { _waCountryCode = cc.value; });
+          const defaultCode = userCountry === 'in' ? '+91' : userCountry === 'pk' ? '+92' : '+971';
+          initWaCountryDropdown(defaultCode);
         }
       } catch (e) {
         // Silent fail — WA field stays hidden, email-only flow continues
