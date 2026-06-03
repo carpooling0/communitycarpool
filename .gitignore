@@ -1,0 +1,9 @@
+# Environment files — never commit
+.env
+.env.*
+
+# macOS
+.DS_Store
+
+# Scratch / local-only files
+*.local
