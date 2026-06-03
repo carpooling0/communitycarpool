@@ -209,13 +209,16 @@
   .press-marquee { display: flex; gap: 72px; align-items: center; width: max-content; animation: marquee 36s linear infinite; padding: 6px 0 28px; }
   .press-marquee-wrap:hover .press-marquee { animation-play-state: paused; }
   @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-  .press-logo-link { display: flex; align-items: center; flex-shrink: 0; opacity: .85; transition: opacity .2s; }
-  .press-logo-link:hover { opacity: 1; }
+  .press-logo-link { display: flex; align-items: center; flex-shrink: 0; opacity: .8; transition: opacity .2s, transform .2s, box-shadow .2s; border-radius:8px; padding:6px 10px; cursor:pointer; position:relative; }
+  .press-logo-link:hover { opacity: 1; transform:scale(1.07); box-shadow:0 4px 16px rgba(0,0,0,.13); background:rgba(255,255,255,.9); }
+  .press-logo-link::after { content:'↗'; position:absolute; top:2px; right:4px; font-size:10px; color:#1B5C3A; opacity:0; transition:opacity .2s; }
+  .press-logo-link:hover::after { opacity:1; }
   .press-logo-link img { height: 48px; width: auto; max-width: 160px; object-fit: contain; }
   .press-logo-link.gulf-news img { height: 60px; }
   .press-logo-link.zawya img { height: 56px; }
   .press-logo-link.dpg img { height: 60px; }
   .press-logo-link.on-dark { background: #D40000; padding: 6px 14px; border-radius: 6px; }
+  .press-logo-link.on-dark:hover { background: #D40000; }
 
   /* ── VALUE PROPS ── */
   .value-props { padding: 36px 48px; }
@@ -458,7 +461,7 @@
 
   /* ── COMBINED PIN MODAL ── */
   .combo-channel { padding:16px 0 12px; }
-  .combo-channel + .combo-channel { border-top:1.5px dashed #e5e7eb; }
+  .combo-channel + .combo-channel { border-top:3px solid #d1d5db; margin-top:8px; padding-top:20px; }
   .combo-channel-hdr {
     display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;
   }
@@ -476,7 +479,7 @@
   .combo-status.verified { background:#dcfce7; color:#166534; }
   .combo-status.failed   { background:#fee2e2; color:#991b1b; }
   .combo-sent-to { font-size:12px; color:#6b7280; margin-bottom:10px; }
-  .combo-digits { display:flex; gap:8px; margin-bottom:8px; }
+  .combo-digits { display:flex; gap:8px; margin-bottom:8px; justify-content:center; }
   .combo-digit {
     width:50px; height:58px;
     border:2.5px solid #D1D5DB; border-radius:12px;
@@ -1030,7 +1033,6 @@
 
         <div class="pin-box-header">
           <h2>Activate Your Journey</h2>
-          <p>Your journey is saved. Verify below to activate it.</p>
         </div>
 
         <!-- ── Email channel ── -->
