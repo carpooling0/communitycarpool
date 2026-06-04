@@ -271,6 +271,7 @@ Deno.serve(async (req) => {
 
     // ── WhatsApp match notifications (one per journey with new matches) ──────
     const waMatchesEnabled = (await getConfig('whatsapp_matches_notification_enabled')) === 'true'
+    const waResults: any[] = []
     if (waMatchesEnabled) {
       for (const [, userData] of Object.entries(userMatches) as any) {
         if (userData.unsubscribedWhatsapp || userData.deletionRequested) continue
@@ -280,18 +281,20 @@ Deno.serve(async (req) => {
           try {
             await sendWhatsAppTemplate(
               journey.waNumber,
-              'whatsapp_match_notification_cc',
+              'match_notification_cc',
               [
                 { parameter_name: 'first_name',   text: userData.name },
                 { parameter_name: 'match_count',  text: String(journey.newMatchCount) },
                 { parameter_name: 'from_location', text: journey.fromLocation },
                 { parameter_name: 'to_location',   text: journey.toLocation },
               ],
-              userData.token
+              `${userData.token}&journey=${subId}`
             )
             console.log(`[WA] Match notification sent → ${journey.waNumber} (submission ${subId})`)
+            waResults.push({ subId, to: journey.waNumber, status: 'sent' })
           } catch (waErr: any) {
             console.error(`[WA] Match notification failed for ${journey.waNumber}:`, waErr.message)
+            waResults.push({ subId, to: journey.waNumber, status: 'failed', error: waErr.message })
           }
         }
       }
@@ -312,7 +315,7 @@ Deno.serve(async (req) => {
       await supabase.from('submissions').update({ last_notified_at: new Date().toISOString() }).in('submission_id', subIds)
     }
 
-    return new Response(JSON.stringify({ success: true, emailsSent, emailsFailed, emailsSkipped, batchId, provider: 'resend', testingMode }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    return new Response(JSON.stringify({ success: true, emailsSent, emailsFailed, emailsSkipped, batchId, provider: 'resend', testingMode, waResults }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   } catch (err: any) {
     console.error('batch-send-emails error:', err)
     return new Response(JSON.stringify({ success: false, error: err.message }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 })
