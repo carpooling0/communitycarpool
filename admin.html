@@ -3052,17 +3052,11 @@ async function syncDashboardAnalytics() {
   }
   if (!dates.length) { status.textContent = 'No past dates in range'; return }
   btn.disabled = true
-  const tok = localStorage.getItem(TOKEN_KEY)
   let synced = 0, failed = 0
   for (const date of dates) {
     status.textContent = `Syncing ${date} (${synced + failed + 1}/${dates.length})…`
     try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/sync-analytics`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: tok, date })
-      })
-      const data = await res.json()
+      const data = await apiPost('analytics.sync', { date })
       if (data.success) synced++
       else { failed++; console.warn('Sync failed', date, data.error) }
     } catch (e) { failed++; console.warn('Sync error', date, e) }
