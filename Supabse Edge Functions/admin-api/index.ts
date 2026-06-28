@@ -470,16 +470,82 @@ Deno.serve(async (req) => {
     if (action === 'analytics.sync') {
       const { date } = body
       if (!date) return json({ error: 'date required' }, 400)
-      const syncSecret = Deno.env.get('SYNC_SECRET')
-      if (!syncSecret) return json({ error: 'SYNC_SECRET not configured' }, 503)
-      const supabaseUrl = Deno.env.get('DB_URL')!
-      const res = await fetch(`${supabaseUrl}/functions/v1/sync-analytics`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ secret: syncSecret, date }),
+      const umamiKey = Deno.env.get('UMAMI_API_KEY')
+      if (!umamiKey) return json({ error: 'UMAMI_API_KEY not configured' }, 503)
+      const UMAMI_BASE = 'https://api.umami.is/v1/eu'
+      const UMAMI_WEBSITE_ID = '95b6c0b0-6a71-42ea-8f2d-56ec5eb5e55a'
+      const startAt = new Date(date + 'T00:00:00.000Z').getTime()
+      const endAt   = new Date(date + 'T23:59:59.999Z').getTime()
+      const uHeaders = { 'x-umami-api-key': umamiKey }
+      const id = UMAMI_WEBSITE_ID
+      const qs = `startAt=${startAt}&endAt=${endAt}`
+      const uGet = (path: string) =>
+        fetch(`${UMAMI_BASE}${path}`, { headers: uHeaders }).then(r => r.json())
+      const gv = (s: any, f: string) => {
+        const v = s?.[f]; if (v === undefined || v === null) return 0
+        return typeof v === 'object' ? Number(v.value) || 0 : Number(v) || 0
+      }
+      const [stats, pvHourly, pages, entryPages, exitPages, referrers, channels,
+             browsers, os, devices, countries, regions, cities, languages, screens, queries, events] =
+        await Promise.all([
+          uGet(`/websites/${id}/stats?${qs}`),
+          uGet(`/websites/${id}/pageviews?${qs}&unit=hour`),
+          uGet(`/websites/${id}/metrics?${qs}&type=url`),
+          uGet(`/websites/${id}/metrics?${qs}&type=entry`),
+          uGet(`/websites/${id}/metrics?${qs}&type=exit`),
+          uGet(`/websites/${id}/metrics?${qs}&type=referrer`),
+          uGet(`/websites/${id}/metrics?${qs}&type=channel`),
+          uGet(`/websites/${id}/metrics?${qs}&type=browser`),
+          uGet(`/websites/${id}/metrics?${qs}&type=os`),
+          uGet(`/websites/${id}/metrics?${qs}&type=device`),
+          uGet(`/websites/${id}/metrics?${qs}&type=country`),
+          uGet(`/websites/${id}/metrics?${qs}&type=region`),
+          uGet(`/websites/${id}/metrics?${qs}&type=city`),
+          uGet(`/websites/${id}/metrics?${qs}&type=language`),
+          uGet(`/websites/${id}/metrics?${qs}&type=screen`),
+          uGet(`/websites/${id}/metrics?${qs}&type=query`),
+          uGet(`/websites/${id}/metrics?${qs}&type=event`),
+        ])
+      const pvCount = gv(stats, 'pageviews'), visitors = gv(stats, 'visitors')
+      const visits = gv(stats, 'visits'), bounces = gv(stats, 'bounces'), totaltime = gv(stats, 'totaltime')
+      const hourMap: Record<number, { pageviews: number; sessions: number }> = {}
+      ;(pvHourly.pageviews || []).forEach((d: any) => {
+        const h = new Date(d.x).getUTCHours()
+        if (!hourMap[h]) hourMap[h] = { pageviews: 0, sessions: 0 }
+        hourMap[h].pageviews += d.y
       })
-      const data = await res.json()
-      return json(data)
+      ;(pvHourly.sessions || []).forEach((d: any) => {
+        const h = new Date(d.x).getUTCHours()
+        if (!hourMap[h]) hourMap[h] = { pageviews: 0, sessions: 0 }
+        hourMap[h].sessions += d.y
+      })
+      const pageviews_hourly = Array.from({ length: 24 }, (_, h) => ({
+        hour: h, pageviews: hourMap[h]?.pageviews || 0, sessions: hourMap[h]?.sessions || 0,
+      }))
+      const { error } = await supabase.from('analytics_daily').upsert({
+        date, pageviews: pvCount, visitors, visits, bounces, totaltime,
+        bounce_rate: visits > 0 ? bounces / visits : 0,
+        avg_duration: visits > 0 ? totaltime / visits : 0,
+        pages: Array.isArray(pages) ? pages : [],
+        entry_pages: Array.isArray(entryPages) ? entryPages : [],
+        exit_pages: Array.isArray(exitPages) ? exitPages : [],
+        referrers: Array.isArray(referrers) ? referrers : [],
+        channels: Array.isArray(channels) ? channels : [],
+        browsers: Array.isArray(browsers) ? browsers : [],
+        os: Array.isArray(os) ? os : [],
+        devices: Array.isArray(devices) ? devices : [],
+        countries: Array.isArray(countries) ? countries : [],
+        regions: Array.isArray(regions) ? regions : [],
+        cities: Array.isArray(cities) ? cities : [],
+        languages: Array.isArray(languages) ? languages : [],
+        screens: Array.isArray(screens) ? screens : [],
+        queries: Array.isArray(queries) ? queries : [],
+        events: Array.isArray(events) ? events : [],
+        pageviews_hourly,
+        synced_at: new Date().toISOString(),
+      }, { onConflict: 'date' })
+      if (error) throw error
+      return json({ success: true, date, pageviews: pvCount, visitors, visits })
     }
 
     if (action === 'analytics.archive') {
