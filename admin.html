@@ -393,7 +393,7 @@
     <div class="nav-body">
       <div class="nav-section-label">Overview</div>
       <button class="nav-item active" data-panel="dashboard" onclick="switchPanel('dashboard')">Dashboard</button>
-      <button class="nav-item" data-panel="traffic" onclick="switchPanel('traffic')">📊 Web Traffic</button>
+      <button class="nav-item" data-panel="traffic" onclick="switchPanel('traffic')">📊 Umami Analytics</button>
 
       <div class="nav-section-label">Support</div>
       <button class="nav-item" data-panel="tickets" onclick="switchPanel('tickets')">Tickets</button>
@@ -805,14 +805,17 @@
       </div>
     </div>
 
-    <!-- WEB TRAFFIC (Umami embed) -->
-    <div id="panel-traffic" class="panel hidden" style="display:flex;flex-direction:column;height:100%">
-      <iframe
-        src="https://cloud.umami.is/analytics/eu/share/pLzd0HUQsDeDiOCm?unit=day"
-        style="flex:1;width:100%;border:none;min-height:calc(100vh - 56px)"
-        allow="fullscreen"
-        title="Web Traffic — Umami Analytics">
-      </iframe>
+    <!-- UMAMI ANALYTICS -->
+    <div id="panel-traffic" class="panel hidden">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:calc(100vh - 120px);gap:16px;text-align:center">
+        <div style="font-size:48px">📊</div>
+        <div style="font-size:18px;font-weight:700;color:var(--text)">Umami Analytics</div>
+        <div style="font-size:13px;color:var(--text-muted);max-width:320px">Web traffic dashboard — opens in a new tab. Umami does not allow embedding.</div>
+        <a href="https://cloud.umami.is/analytics/eu/share/pLzd0HUQsDeDiOCm?unit=day" target="_blank"
+           style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:var(--green-dark);color:white;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none">
+          Open Umami Dashboard ↗
+        </a>
+      </div>
     </div>
 
     <!-- ANALYTICS -->
@@ -1385,7 +1388,7 @@ function applyTemplate(ticketId) {
 // ═══════════════════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════════════════
-const PANEL_TITLES = { dashboard:'Dashboard', traffic:'Web Traffic', analytics:'Analytics', tickets:'Support Tickets', deletions:'Deletion Requests', users:'User Lookup', audit:'Audit Log', team:'Team Management' }
+const PANEL_TITLES = { dashboard:'Dashboard', traffic:'Umami Analytics', analytics:'Analytics', tickets:'Support Tickets', deletions:'Deletion Requests', users:'User Lookup', audit:'Audit Log', team:'Team Management' }
 
 function switchPanel(panel) {
   currentPanel = panel
