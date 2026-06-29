@@ -584,6 +584,23 @@ Deno.serve(async (req) => {
       }
     }
 
+    if (action === 'reddit.list') {
+      const { status, limit } = body
+      let q = supabase.from('reddit_digest').select('*').order('relevance_score', { ascending: false }).order('post_created_at', { ascending: false }).limit(limit || 50)
+      if (status && status !== 'all') q = q.eq('status', status)
+      const { data, error } = await q
+      if (error) return json({ error: error.message }, 400)
+      return json({ success: true, posts: data })
+    }
+
+    if (action === 'reddit.update') {
+      const { id, status } = body
+      if (!id || !status) return json({ error: 'id and status required' }, 400)
+      const { error } = await supabase.from('reddit_digest').update({ status }).eq('id', id)
+      if (error) return json({ error: error.message }, 400)
+      return json({ success: true })
+    }
+
     return json({ error: `Unknown action: ${action}` }, 400)
 
   } catch (err: any) {
