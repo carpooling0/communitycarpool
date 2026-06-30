@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
     const region   = Deno.env.get('AWS_REGION')             || 'us-east-1'
     const keyId    = Deno.env.get('AWS_ACCESS_KEY_ID')!
     const secret   = Deno.env.get('AWS_SECRET_ACCESS_KEY')!
-    const from     = 'Community Carpool <noreply@communitycarpool.org>'
+    const from     = `Community Carpool <${Deno.env.get('SES_FROM_EMAIL') || 'hello@email.communitycarpool.org'}>`
     const to       = 'yalama@gmail.com'
 
     const aws = new AwsClient({ accessKeyId: keyId, secretAccessKey: secret, region, service: 'ses' })

@@ -48,6 +48,8 @@ export async function sendWhatsAppPin(to: string, pin: string): Promise<void> {
   if (!res.ok) throw new Error(`WhatsApp API error ${res.status}: ${await res.text()}`)
 }
 
+import { sendEmail } from './send-email.ts'
+
 // ── Initial PIN email (submit-journey) ───────────────────────────────────────
 export async function sendInitialPinEmail(
   toEmail: string,
@@ -56,9 +58,6 @@ export async function sendInitialPinEmail(
   verifyToken: string,
   siteUrl: string
 ): Promise<void> {
-  const resendKey = Deno.env.get('RESEND_API_KEY')
-  const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || ''
-  if (!resendKey) throw new Error('RESEND_API_KEY not set')
 
   const verifyLink = `${siteUrl}/?verify_email=${verifyToken}`
   const digits = pin.split('')
@@ -139,17 +138,7 @@ export async function sendInitialPinEmail(
 </table>
 </body></html>`
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from: `Community Carpool <${fromEmail}>`,
-      to: [toEmail],
-      subject: `Your Community Carpool journey PIN`,
-      html
-    })
-  })
-  if (!res.ok) throw new Error(`Resend error ${res.status}: ${await res.text()}`)
+  await sendEmail(toEmail, `Your Community Carpool journey PIN`, html)
 }
 
 // ── Resend PIN email (resend-pin) ─────────────────────────────────────────────
@@ -160,9 +149,6 @@ export async function sendResendPinEmail(
   verifyToken: string,
   siteUrl: string
 ): Promise<void> {
-  const resendKey = Deno.env.get('RESEND_API_KEY')
-  const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || ''
-  if (!resendKey) throw new Error('RESEND_API_KEY not set')
 
   const verifyLink = `${siteUrl}/?verify_email=${verifyToken}`
   const digits = pin.split('')
@@ -232,15 +218,5 @@ export async function sendResendPinEmail(
 </table>
 </body></html>`
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from: `Community Carpool <${fromEmail}>`,
-      to: [toEmail],
-      subject: `Your new Community Carpool journey PIN`,
-      html
-    })
-  })
-  if (!res.ok) throw new Error(`Resend error ${res.status}: ${await res.text()}`)
+  await sendEmail(toEmail, `Your new Community Carpool journey PIN`, html)
 }
