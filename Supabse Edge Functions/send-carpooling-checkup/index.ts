@@ -146,16 +146,9 @@ Deno.serve(async (req) => {
         'Dubai Marina', 'Dubai International Financial Centre (DIFC)',
         'preview-token-000', 0, 0
       )
-      const resendKey = Deno.env.get('RESEND_API_KEY')
-      const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || ''
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: `Community Carpool <${fromEmail}>`, to: [testTo], subject: 'Are you carpooling yet? 🚗', html })
-      })
-      const body = await res.json()
-      return new Response(JSON.stringify({ preview: true, to: testTo, resend: body }), {
-        headers: { 'Content-Type': 'application/json' }, status: res.ok ? 200 : 500
+      await sendEmail(testTo, 'Are you carpooling yet? 🚗', html)
+      return new Response(JSON.stringify({ preview: true, to: testTo }), {
+        headers: { 'Content-Type': 'application/json' }
       })
     }
 

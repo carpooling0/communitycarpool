@@ -232,8 +232,6 @@ Deno.serve(async (req) => {
 
     // Preview/test mode: ?test_to=email&test_num=0..4
     if (testTo) {
-      const resendKey = Deno.env.get('RESEND_API_KEY')
-      const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || ''
       let previewToken = testToken || 'preview-token-000'
       let previewJourney = Number.isFinite(testJourney) ? testJourney : 0
 
@@ -313,21 +311,15 @@ Deno.serve(async (req) => {
           : testNum === 3
           ? `Your Match Is Still Waiting`
           : `Last Reminder: Your Match Is Waiting`
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: `Community Carpool <${fromEmail}>`, to: [testTo], subject, html })
-      })
-      const body = await res.json()
+      await sendEmail(testTo, subject, html)
       return new Response(JSON.stringify({
         preview: true,
         reminder_num: testNum,
         to: testTo,
         preview_token: previewToken,
         preview_journey: previewJourney,
-        resend: body
       }), {
-        headers: { 'Content-Type': 'application/json' }, status: res.ok ? 200 : 500
+        headers: { 'Content-Type': 'application/json' }
       })
     }
 
