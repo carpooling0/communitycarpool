@@ -7,6 +7,7 @@
   <title>Join the Team — Community Carpool</title>
   <link rel="icon" href="/favicon.ico">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="config.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -671,8 +672,10 @@ buildCustomSelect({
 })
 
 // ── Config ────────────────────────────────────────────────────────────────────
-const SUPABASE_URL  = 'https://tbkjealpnoriwdosvmju.supabase.co'
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRia2plYWxwbm9yaXdkb3N2bWp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMTg2ODAsImV4cCI6MjA4Njg5NDY4MH0.K0iS87GLgAZhYwFIQNphVFrarMzFxECkFYFvxpeVcsA'
+// SUPABASE_URL and SUPABASE_ANON_KEY come from config.js, which deploy-dev.sh
+// and deploy-prod.sh swap per environment. They used to be hardcoded to the prod
+// project here, which meant the dev page wrote applications to the live database.
+const SUPABASE_ANON = SUPABASE_ANON_KEY
 const FN_URL = `${SUPABASE_URL}/functions/v1/submit-intern-application`
 const TOTAL = 4
 const SECTION_NAMES = ['Basic Info', 'Availability & Interests', 'Skills & Reliability', 'Scenarios & Motivation']

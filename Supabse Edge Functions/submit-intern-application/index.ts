@@ -1,14 +1,22 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendEmail } from '../_shared/send-email.ts'
 
+// Fall back to the auto-injected vars so the module still boots if the
+// DB_URL / DB_SERVICE_KEY vault secrets are ever absent. createClient throws
+// at module scope on a falsy url or key, which would take the whole function down.
 const supabase = createClient(
-  Deno.env.get('DB_URL')!,
-  Deno.env.get('DB_SERVICE_KEY')!
+  Deno.env.get('DB_URL') || Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('DB_SERVICE_KEY') || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 )
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
+
+// Where new applications are announced. Unchanged from the previous Resend call,
+// so notifications keep landing in the same inbox after this migration.
+const NOTIFY_EMAIL = 'carpooling0@gmail.com'
 
 function json(body: object, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -229,33 +237,19 @@ Deno.serve(async (req) => {
       throw new Error(`Database error: ${insertError.message}`)
     }
 
-    // Send notification email via Resend
-    const resendKey = Deno.env.get('RESEND_API_KEY')
-    const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@communitycarpool.org'
-
-    if (resendKey) {
-      const html = buildNotificationEmail(inserted)
-      const emailRes = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${resendKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: `Community Carpool <${fromEmail}>`,
-          to: ['carpooling0@gmail.com'],
-          subject: `New Intern Application \u2014 ${inserted.full_name}`,
-          html,
-        }),
-      })
-      if (!emailRes.ok) {
-        // Log but don't fail the request — the application is already saved
-        console.error(`Resend notification failed ${emailRes.status}: ${await emailRes.text()}`)
-      } else {
-        console.log(`Intern application notification sent for ID ${inserted.id}`)
-      }
-    } else {
-      console.warn('RESEND_API_KEY not set — notification email skipped')
+    // Send the notification through the shared sender so it follows the
+    // `email_service` config key (prod runs on SES) rather than hardcoding
+    // Resend. A failure is logged but never fails the request: the application
+    // is already saved.
+    try {
+      await sendEmail(
+        NOTIFY_EMAIL,
+        `New Intern Application \u2014 ${inserted.full_name}`,
+        buildNotificationEmail(inserted)
+      )
+      console.log(`Intern application notification sent for ID ${inserted.id}`)
+    } catch (e: any) {
+      console.error(`[submit-intern-application] Notification failed for ID ${inserted.id}:`, e.message)
     }
 
     return json({ success: true, id: inserted.id })
