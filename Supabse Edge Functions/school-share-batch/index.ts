@@ -1,6 +1,13 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendEmail as sendViaProvider } from '../_shared/send-email.ts'
 
-const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
+// Falls back to the auto-injected vars so the module still boots if the
+// DB_URL / DB_SERVICE_KEY vault secrets are absent — createClient throws at
+// module scope on a falsy value, which would take the whole function down.
+const supabase = createClient(
+  Deno.env.get('DB_URL') || Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('DB_SERVICE_KEY') || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+)
 const SITE_URL = 'https://communitycarpool.org'
 const PROD_REF_URL = 'https://communitycarpool.org?ref=013'
 const KEYWORDS = ['school', 'nursery', 'academy', 'kindergarten', 'preschool', 'pre-school']
@@ -91,31 +98,43 @@ ${PROD_REF_URL}</div>
   </body></html>`
 }
 
+// Records which provider actually sent, rather than assuming Resend.
+async function currentProvider(): Promise<string> {
+  const { data } = await supabase.from('config').select('value').eq('key', 'email_service').single()
+  return data?.value || 'resend'
+}
+
+// Routes through the shared sender so this follows the `email_service` config
+// key. Returns the same { ok, body } shape the caller already destructures.
 async function sendEmail(to: string, subject: string, html: string, schoolName: string) {
-  const resendKey = Deno.env.get('RESEND_API_KEY')
-  const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || ''
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: `Community Carpool <${fromEmail}>`, to: [to], subject, html })
-  })
-  const body = await res.json()
-  const eventType = res.ok ? 'email.sent' : 'email.failed'
+  let ok = true
+  let messageId: string | null = null
+  let errorMessage: string | null = null
+  try {
+    messageId = await sendViaProvider(to, subject, html)
+  } catch (e: any) {
+    ok = false
+    errorMessage = e.message
+    console.error(`[school-share-batch] send failed for ${to}:`, e.message)
+  }
+
   await supabase.from('email_events').insert({
-    event_type: eventType,
-    message_id: body?.id || null,
-    provider: 'resend',
+    event_type: ok ? 'email.sent' : 'email.failed',
+    message_id: messageId,
+    provider: await currentProvider(),
     recipient: to.toLowerCase(),
     batch_id: 'school-share-prod-batch',
     raw_payload: {
       subject,
       school_name: schoolName,
       school_share: true,
-      referral_url: PROD_REF_URL
+      referral_url: PROD_REF_URL,
+      ...(errorMessage ? { error: errorMessage } : {})
     },
     occurred_at: new Date().toISOString()
   })
-  return { ok: res.ok, body }
+
+  return { ok, body: { id: messageId } }
 }
 
 Deno.serve(async (req) => {
