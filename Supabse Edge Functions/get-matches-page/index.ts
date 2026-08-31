@@ -32,6 +32,14 @@ Deno.serve(async (req) => {
       .single()
     if (userError || !user) return new Response(JSON.stringify({ success: false, error: 'Invalid or expired token. Please request a new match email.' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 })
 
+    // Sliding expiry: any successful real visit (not a poll) resets the clock so an
+    // engaged user's link keeps working. Must be awaited — Deno Edge Functions can
+    // terminate the isolate as soon as the response is sent, killing an un-awaited
+    // background write before it reaches the DB.
+    if (!isPoll) {
+      await supabase.from('users').update({ token_created_at: new Date().toISOString() }).eq('user_id', user.user_id)
+    }
+
     // Fetch unread notifications for this user, then mark them read
     const { data: rawNotifs } = await supabase.from('user_notifications')
       .select('notification_id, message, type, created_at')
@@ -60,6 +68,7 @@ Deno.serve(async (req) => {
         .select(`
           match_id, match_strength, created_at, status, sub_a_id, sub_b_id,
           interest_a, interest_b, interest_a_at, interest_b_at, success_reported,
+          email_read_at_a, email_read_at_b,
           sub_a:submissions!sub_a_id (submission_id, from_location, to_location, from_lat, from_lng, to_lat, to_lng, users(name, email)),
           sub_b:submissions!sub_b_id (submission_id, from_location, to_location, from_lat, from_lng, to_lat, to_lng, users(name, email))
         `)
@@ -133,6 +142,16 @@ Deno.serve(async (req) => {
     // Track event — only on initial load, not polls
     if (!isPoll) {
       await supabase.from('events').insert({ event_type: 'matches_page_viewed', user_id: user.user_id, metadata: { token_used: true } })
+
+      // Stamp email_read_at on first page visit — more reliable than email open pixels
+      const subIdSet = new Set(subIds)
+      const readAtAIds = allMatchesRaw.filter((m: any) => subIdSet.has(m.sub_a_id) && !m.email_read_at_a).map((m: any) => m.match_id)
+      const readAtBIds = allMatchesRaw.filter((m: any) => subIdSet.has(m.sub_b_id) && !m.email_read_at_b).map((m: any) => m.match_id)
+      const now = new Date().toISOString()
+      await Promise.all([
+        readAtAIds.length > 0 ? supabase.from('matches').update({ email_read_at_a: now }).in('match_id', readAtAIds) : Promise.resolve(),
+        readAtBIds.length > 0 ? supabase.from('matches').update({ email_read_at_b: now }).in('match_id', readAtBIds) : Promise.resolve()
+      ])
     }
 
     // Check if user needs to re-accept updated T&Cs

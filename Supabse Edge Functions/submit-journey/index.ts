@@ -115,7 +115,11 @@ Deno.serve(async (req) => {
       }
       userId = existingUser.user_id
       userJourneyLimit = existingUser.journey_limit
-      const updates: Record<string, any> = { last_seen_at: new Date().toISOString(), name: firstName, terms_accepted_version: resolvedTermsVersion, terms_accepted_at: new Date().toISOString() }
+      // Refresh token_created_at on every new journey — match_page_token expiry is a
+      // sliding window based on activity, not a fixed 120 days from original signup.
+      // Without this, long-tenured active users get emailed match links that are
+      // already dead on arrival once their account crosses match_token_expiry_days old.
+      const updates: Record<string, any> = { last_seen_at: new Date().toISOString(), name: firstName, terms_accepted_version: resolvedTermsVersion, terms_accepted_at: new Date().toISOString(), token_created_at: new Date().toISOString() }
       if (!existingUser.ref_code && refCode) updates.ref_code = refCode
       await supabase.from('users').update(updates).eq('user_id', userId)
       if (!existingUser.ref_code && (utmSource || utmMedium || utmCampaign)) {

@@ -7,3 +7,8 @@
 
 # Scratch / local-only files
 *.local
+marketing/
+
+# Supabase CLI local cache (project-ref, version stamps)
+supabase/.temp/
+**/supabase/.temp/
