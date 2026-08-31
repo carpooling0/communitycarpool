@@ -222,7 +222,13 @@ Deno.serve(async (req) => {
         .select('user_id, name, email, deletion_requested_at, deletion_token_expires_at')
         .not('deletion_requested_at', 'is', null).order('deletion_requested_at', { ascending: true })
       if (error) throw error
-      return json({ success: true, deletions: data })
+      // Scheduled-deletion dates are derived client-side from
+      // deletion_requested_at + this window. deletion_token_expires_at is the
+      // 24h confirmation-link expiry and is nulled on confirm, so it must not
+      // be used for that.
+      const { data: cfg } = await supabase.from('config').select('value').eq('key', 'data_retention_days').single()
+      const retentionDays = parseInt(cfg?.value || '30', 10)
+      return json({ success: true, deletions: data, retentionDays })
     }
 
     if (action === 'deletions.cancel') {
@@ -257,15 +263,27 @@ Deno.serve(async (req) => {
         const { data: matchRows } = await supabase.from('matches').select('match_id').or(`sub_a_id.in.(${subIds.join(',')}),sub_b_id.in.(${subIds.join(',')})`)
         matchIds = (matchRows || []).map((m: any) => m.match_id)
       }
-      // Delete in FK-safe order
-      await supabase.from('events').delete().eq('user_id', userId)
-      if (matchIds.length) await supabase.from('events').delete().in('match_id', matchIds)
-      if (matchIds.length) await supabase.from('matches').delete().in('match_id', matchIds)
-      if (subIds.length) await supabase.from('submissions').delete().in('submission_id', subIds)
-      await supabase.from('user_notifications').delete().eq('user_id', userId)
+      // Delete in FK-safe order.
+      // Every delete is error-checked: previously none of these inspected
+      // { error }, so an FK violation left the user in place while the handler
+      // still returned success and wrote a deletion_log row.
+      const del = async (label: string, query: Promise<{ error: any }>) => {
+        const { error } = await query
+        if (error) throw new Error(`${label}: ${error.message}`)
+      }
+
+      await del('events(user_id)', supabase.from('events').delete().eq('user_id', userId))
+      // Events can reference a submission with NO user_id and NO match_id
+      // (match_detected, journey_expired, email_verified). Those were previously
+      // unreachable and blocked the submissions delete. Mirrors process-deletions.
+      if (subIds.length) await del('events(submission_id)', supabase.from('events').delete().in('submission_id', subIds))
+      if (matchIds.length) await del('events(match_id)', supabase.from('events').delete().in('match_id', matchIds))
+      if (matchIds.length) await del('matches', supabase.from('matches').delete().in('match_id', matchIds))
+      await del('user_notifications', supabase.from('user_notifications').delete().eq('user_id', userId))
+      if (subIds.length) await del('submissions', supabase.from('submissions').delete().in('submission_id', subIds))
       // Delete support tickets submitted by this user (GDPR — email is PII)
-      await supabase.from('support_tickets').delete().eq('email', user.email.toLowerCase())
-      await supabase.from('users').delete().eq('user_id', userId)
+      await del('support_tickets', supabase.from('support_tickets').delete().eq('email', user.email.toLowerCase()))
+      await del('users', supabase.from('users').delete().eq('user_id', userId))
       // Log to deletion_log with all required fields
       await supabase.from('deletion_log').insert({
         user_id: userId,
