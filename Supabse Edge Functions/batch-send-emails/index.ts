@@ -103,6 +103,12 @@ Deno.serve(async (req) => {
 
     // Check testing mode (default: true until explicitly set to 'false')
     const testingMode = (await getConfig('testing_mode')) !== 'false'
+    // The provider that will actually be used, read from the same config key
+    // _shared/send-email.ts routes on. Previously this was hardcoded to
+    // 'resend' in the response, and inferred backwards from whether a message
+    // id came back when writing events — sendEmail returns an id for BOTH
+    // providers, so those event rows were mislabelled.
+    const emailProvider = (await getConfig('email_service')) || 'resend'
 
     const { data: unsentMatches, error } = await supabase.from('matches')
       .select(`
@@ -151,6 +157,12 @@ Deno.serve(async (req) => {
       }
 
       try {
+        // Refresh token_created_at before sending — otherwise a long-tenured active
+        // user whose account is already past match_token_expiry_days gets emailed a
+        // link that's dead on arrival (expiry is measured from token_created_at, which
+        // was previously only ever set once, at signup).
+        await supabase.from('users').update({ token_created_at: new Date().toISOString() }).eq('user_id', userData.userId)
+
         // Fetch ALL active journeys for this user (not just ones with new matches)
         const { data: allSubs } = await supabase.from('submissions')
           .select('submission_id, journey_num, from_location, to_location, journey_status')
@@ -254,8 +266,10 @@ Deno.serve(async (req) => {
           { name: 'type',     value: 'match_notification' }
         ])
         emailsSent++
-        // Log to general events table (lightweight record)
-        supabase.from('events').insert({ event_type: 'match_email_sent', metadata: { email, batch_id: batchId, message_id: emailMsgId, provider: emailMsgId ? 'resend' : 'ses' } })
+        // Log to general events table — must be awaited, otherwise the Deno isolate
+        // can be torn down right after the response is sent, silently dropping this
+        // write even though the actual email above sent successfully.
+        await supabase.from('events').insert({ event_type: 'match_email_sent', metadata: { email, batch_id: batchId, message_id: emailMsgId, provider: emailProvider } })
 
         for (const match of unsentMatches) {
           if (match.sub_a.users.email === email || match.sub_b.users.email === email) {
@@ -265,7 +279,7 @@ Deno.serve(async (req) => {
       } catch (emailErr: any) {
         emailsFailed++
         console.error(`Email failed for ${email}:`, emailErr.message)
-        supabase.from('events').insert({ event_type: 'match_email_failed', metadata: { email, error: emailErr.message, batch_id: batchId } })
+        await supabase.from('events').insert({ event_type: 'match_email_failed', metadata: { email, error: emailErr.message, batch_id: batchId } })
       }
     }
 
@@ -315,7 +329,7 @@ Deno.serve(async (req) => {
       await supabase.from('submissions').update({ last_notified_at: new Date().toISOString() }).in('submission_id', subIds)
     }
 
-    return new Response(JSON.stringify({ success: true, emailsSent, emailsFailed, emailsSkipped, batchId, provider: 'resend', testingMode, waResults }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    return new Response(JSON.stringify({ success: true, emailsSent, emailsFailed, emailsSkipped, batchId, provider: emailProvider, testingMode, waResults }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   } catch (err: any) {
     console.error('batch-send-emails error:', err)
     return new Response(JSON.stringify({ success: false, error: err.message }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 })
