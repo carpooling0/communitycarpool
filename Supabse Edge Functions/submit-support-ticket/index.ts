@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendEmail } from '../_shared/send-email.ts'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
 const corsHeaders = {
@@ -24,10 +25,6 @@ async function sendAdminEmail(ticket: any): Promise<void> {
   const notifyEmail = await getConfig('support_notify_email')
   if (!notifyEmail) return
 
-  const resendKey = Deno.env.get('RESEND_API_KEY')
-  if (!resendKey) return
-
-  const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || ''
   const typeLabel: Record<string, string> = {
     deletion:    '🗑️ Data Deletion',
     report_user: '⚠️ Report a User',
@@ -57,16 +54,11 @@ async function sendAdminEmail(ticket: any): Promise<void> {
       </div>
     </div></body></html>`
 
-  await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from: `Community Carpool Support <${fromEmail}>`,
-      to: [notifyEmail],
-      subject: `[Support #${ticket.ticket_id}] ${typeLabel[ticket.request_type] || ticket.request_type}${ticket.email ? ' — ' + ticket.email : ''}`,
-      html
-    })
-  })
+  await sendEmail(
+    notifyEmail,
+    `[Support #${ticket.ticket_id}] ${typeLabel[ticket.request_type] || ticket.request_type}${ticket.email ? ' \u2014 ' + ticket.email : ''}`,
+    html
+  )
 }
 
 Deno.serve(async (req) => {
@@ -104,7 +96,7 @@ Deno.serve(async (req) => {
 
     if (error) throw error
 
-    sendAdminEmail(ticket).catch((e: any) => console.error(`[submit-support-ticket] Admin email failed for ticket ${ticket.ticket_id}:`, e.message))
+    await sendAdminEmail(ticket).catch((e: any) => console.error(`[submit-support-ticket] Admin email failed for ticket ${ticket.ticket_id}:`, e.message))
 
     return new Response(JSON.stringify({ success: true, ticketId: ticket.ticket_id }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

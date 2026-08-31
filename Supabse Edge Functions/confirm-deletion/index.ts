@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendEmail } from '../_shared/send-email.ts'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
 const corsHeaders = {
@@ -72,10 +73,8 @@ Deno.serve(async (req) => {
 
     // Notify admin
     const notifyEmail = await getConfig('support_notify_email')
-    const resendKey   = Deno.env.get('RESEND_API_KEY')
-    const fromEmail   = Deno.env.get('RESEND_FROM_EMAIL') || ''
 
-    if (notifyEmail && resendKey && fromEmail) {
+    if (notifyEmail) {
       const html = `<div style="font-family:Inter,sans-serif;padding:24px;max-width:600px;">
         <h2 style="color:#dc2626;margin-bottom:16px;">⚠️ Data Deletion Confirmed</h2>
         <table style="border-collapse:collapse;width:100%;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
@@ -88,16 +87,17 @@ Deno.serve(async (req) => {
         <p style="color:#374151;font-size:14px;margin-top:16px;">Please process this data deletion within 30 days per your privacy policy. Delete all submissions, matches, events, and the user record for user_id = ${user.user_id}.</p>
       </div>`
 
-      await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          from: `Community Carpool <${fromEmail}>`,
-          to: [notifyEmail],
-          subject: `[Data Deletion] ${user.name} (${user.email}) — confirmed`,
+      // Non-throwing: an admin-notification failure must not fail the user's
+      // deletion confirmation, which has already been committed.
+      try {
+        await sendEmail(
+          notifyEmail,
+          `[Data Deletion] ${user.name} (${user.email}) \u2014 confirmed`,
           html
-        })
-      })
+        )
+      } catch (e: any) {
+        console.error('[confirm-deletion] Admin notification failed:', e.message)
+      }
     }
 
     return new Response(JSON.stringify({ success: true }), {
