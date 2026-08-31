@@ -1012,6 +1012,15 @@ let ticketSortCol = 'created_at'
 let ticketSortDir = 'desc'
 let cachedDeletions = null
 let delSortCol = 'deletion_requested_at'
+let cachedRetentionDays = 30
+// Scheduled deletion = when the request was confirmed + the retention window.
+// Do NOT use deletion_token_expires_at: that is the 24h confirmation-link
+// expiry and is set to null the moment the user confirms, so it is always
+// null for every row this table shows.
+function scheduledDeletion(it) {
+  if (!it.deletion_requested_at) return null
+  return new Date(new Date(it.deletion_requested_at).getTime() + cachedRetentionDays * 86400000).toISOString()
+}
 let delSortDir = 'asc'
 let auditPage = 1
 let allAuditEntries = []
@@ -2312,6 +2321,7 @@ async function loadDeletions() {
   const data = await apiPost('deletions.list')
   if (!data.success) { document.getElementById('deletionsContent').innerHTML = `<div class="empty-state"><p>${esc(data.error)}</p></div>`; return }
   cachedDeletions = data.deletions || []
+  cachedRetentionDays = data.retentionDays || 30
   renderDeletionsFromCache()
 }
 
@@ -2327,7 +2337,7 @@ function renderDeletionsFromCache() {
   if (!allItems.length) { document.getElementById('deletionsContent').innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>No pending deletion requests</p></div>'; return }
 
   // For "days left" sorting, attach a numeric value to each item
-  const items = allItems.map(it => ({ ...it, _days: daysLeft(it.deletion_token_expires_at) ?? 9999 }))
+  const items = allItems.map(it => ({ ...it, _sched: scheduledDeletion(it), _days: daysLeft(scheduledDeletion(it)) ?? 9999 }))
   const sortCol = delSortCol === 'days_left' ? '_days' : delSortCol
   const sorted = [...items].sort((a, b) => sortCompare(a, b, sortCol, delSortDir))
 
@@ -2335,7 +2345,7 @@ function renderDeletionsFromCache() {
     ${thSort('Name', 'name', delSortCol, delSortDir, 'sortDeletions')}
     ${thSort('Email', 'email', delSortCol, delSortDir, 'sortDeletions')}
     ${thSort('Requested', 'deletion_requested_at', delSortCol, delSortDir, 'sortDeletions')}
-    ${thSort('Scheduled Deletion', 'deletion_token_expires_at', delSortCol, delSortDir, 'sortDeletions')}
+    ${thSort('Scheduled Deletion', '_sched', delSortCol, delSortDir, 'sortDeletions')}
     ${thSort('Days Left', 'days_left', delSortCol, delSortDir, 'sortDeletions')}
     <th>Actions</th>
   </tr></thead><tbody>`
@@ -2345,7 +2355,7 @@ function renderDeletionsFromCache() {
     const chipCls = days != null ? (days <= 3 ? 'chip-red' : days <= 7 ? 'chip-amber' : 'chip-green') : 'chip-green'
     html += `<tr>
       <td>${esc(it.name)}</td><td>${esc(it.email)}</td>
-      <td>${fmtDate(it.deletion_requested_at)}</td><td>${fmtDate(it.deletion_token_expires_at)}</td>
+      <td>${fmtDate(it.deletion_requested_at)}</td><td>${fmtDate(it._sched)}</td>
       <td><span class="days-chip ${chipCls}">${days != null ? days+'d' : '—'}</span></td>
       <td style="white-space:nowrap">
         <button class="btn btn-ghost btn-sm" style="margin-right:6px" onclick="cancelDeletion(${it.user_id},'${esc(it.email)}')">Cancel</button>
