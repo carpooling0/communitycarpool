@@ -17,6 +17,7 @@
 
 ## admin-api (CRITICAL)
 - **Deploy with `--no-verify-jwt`** — uses hex session tokens, not Supabase JWTs; gateway rejects otherwise
+- **CRITICAL, verified on prod 2026-08-31: `admin-api` is NOT the only function with verify_jwt off.** Seven of the nine deletion/email functions run with `verify_jwt: false` — `admin-api`, `admin-auth`, `confirm-deletion`, `manage-deletion`, `request-deletion`, `school-share-batch`, `submit-support-ticket`. Only `batch-send-emails` and `process-deletions` have it **on**. There is no `config.toml`, so the flag is set per deploy: redeploying any of the seven WITHOUT `--no-verify-jwt` silently re-enables JWT verification and breaks them. **Always run `supabase functions list` and read the `verify_jwt` column before deploying, then match it per function.**
 - **CORRECTED 2026-08-30: `DB_URL`/`DB_SERVICE_KEY` ARE set in prod.** Proven by probing `submit-intern-application` and `submit-support-ticket`: both call `createClient(Deno.env.get('DB_URL')!, ...)` at module scope, and supabase-js 2.112.4 throws `supabaseUrl is required.` on a falsy value, so the clean `400` they return proves the module booted with real values. The old "not set in prod" claim was wrong, or scoped only to `admin-api`/`sync-analytics`. Do not repeat it without re-probing.
 - `admin-api` and `sync-analytics` use the `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` fallbacks (fixed 2026-06-28)
 - Same fallbacks in `sync-analytics` and `admin-api` analytics.sync handler (fixed 2026-06-28)
@@ -41,9 +42,11 @@
 - admin.html: dedicated "Umami Analytics" nav panel with lazy-loaded iframe; Safari content blocker blocks it
 - Web Traffic KPI section removed from Dashboard; `analytics_daily` table has all-zero June data
 
-## Edge Function Inventory — Parity Notes (updated 2026-08-03)
+## Edge Function Inventory — Parity Notes (updated 2026-08-31)
+- **Counts confirmed 2026-08-31: prod 33, dev 36.** Every deployed function now has source in the repo (36 local dirs, no gap either direction) after commit `7ed536e`
 - Dev-only, deliberate: `fetch-reddit-posts`, `school-share-test`, `email-events-query` — Reddit agent tooling is intentionally dev-only, not a gap to close
-- Prod-only: `school-share-batch`
+- `school-share-batch` was prod-only; it is now on both and version-controlled
+- Recover any source-less deployed function with `supabase functions download <fn> --project-ref <ref>` run from the repo root (the `supabase/functions` symlink puts it in the right place)
 - `get-form-config` (WA field visibility flag) was dev-only, causing a silent 404 on every prod page load — deployed to prod 2026-08-03, now live on both
 - `ezbr_sha256` in `list_edge_functions`/`get_edge_function` is a hash of the deployed bundle artifact, NOT the source text — it embeds the project ref + build path, so it will always differ between prod and dev even for byte-identical source. Don't use it to judge drift; diff actual source via `get_edge_function` instead
 - Both: all core functions + `carpool-confirm`
@@ -129,10 +132,11 @@
 ## Partners Page (new 2026-08-30)
 - [Partners marketing page](project_partners_page.md) — partners.html done, Supabase table + function written but NOT applied
 - [Brand typography drift](project_brand_typography_drift.md) — index.html headings still Playfair, guideline says Montserrat
-- [Supabase CLI auth blocked](reference_supabase_cli_auth.md) — CLI + MCP on wrong account, cannot reach carpool projects
+- [Supabase CLI auth](reference_supabase_cli_auth.md) — CORRECTED: use `SUPABASE_ACCESS_TOKEN=$(cat ~/.supabase/carpool-token)`; `--profile` silently falls back to the wrong account
 - [CLI multi-account](reference_supabase_cli_multi_account.md) — `--profile` / `SUPABASE_ACCESS_TOKEN` to reach carpooling0 without logging out
 - [Resend/SES drift](project_resend_ses_drift.md) — RESOLVED on dev 2026-08-31, all 7 functions now use the shared sender; NOT on prod
 - [Deletion architecture](project_deletion_architecture.md) — the two paths, the 30-day clock, why the split is not ready, Delete Now is a deliberate override
+- [Intern page rebrand](project_intern_page_rebrand.md) — intern.html rebuilt on the brand system, on dev 2026-08-31, NOT on prod; partners.html is the canonical brand reference
 
 ## Other Projects
 - [Community Carpool GitHub portfolio cleanup](project_communitycarpool_portfolio.md) — `AYDXB09/communitycarpool-dev` fork, separate from the real business repos above; cleanup done 2026-08-07, stays private until check-in 2026-11-15
