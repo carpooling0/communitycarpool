@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendEmail as sendViaProvider } from '../_shared/send-email.ts'
 
 const supabase = createClient(
   Deno.env.get('DB_URL') || Deno.env.get('SUPABASE_URL')!,
@@ -92,21 +93,14 @@ function buildReplyEmail(ticketId: number, noteText: string, firstName: string):
 </body></html>`
 }
 
+// Routes via the shared sender so it follows the `email_service` config key.
+// Keeps the boolean contract: true on success, false on any failure.
 async function sendEmail(to: string, subject: string, html: string): Promise<boolean> {
-  const apiKey = Deno.env.get('RESEND_API_KEY')
-  const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || ''
-  if (!apiKey) { console.error('[admin-api] RESEND_API_KEY not set'); return false }
-  if (!fromEmail) { console.error('[admin-api] RESEND_FROM_EMAIL not set'); return false }
   try {
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: fromEmail, to, subject, html })
-    })
-    if (!res.ok) { console.error('[admin-api] Resend error:', await res.text()); return false }
+    await sendViaProvider(to, subject, html)
     return true
   } catch (e: any) {
-    console.error('[admin-api] Resend exception:', e.message)
+    console.error('[admin-api] Email send failed:', e.message)
     return false
   }
 }

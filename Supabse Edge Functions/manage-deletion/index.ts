@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendEmail as sendViaProvider } from '../_shared/send-email.ts'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
 const SITE_URL = Deno.env.get('SITE_URL') || 'https://communitycarpool.org'
@@ -12,15 +13,15 @@ async function getConfig(key: string): Promise<string> {
   return data?.value || ''
 }
 
+// Routes via the shared sender so it follows the `email_service` config key.
+// Kept non-throwing: the previous fetch never threw on a provider error, and
+// callers rely on that, so a failure is logged rather than propagated.
 async function sendEmail(to: string, subject: string, html: string): Promise<void> {
-  const resendKey = Deno.env.get('RESEND_API_KEY')
-  const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || ''
-  if (!resendKey || !fromEmail) return
-  await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: `Community Carpool <${fromEmail}>`, to: [to], subject, html })
-  })
+  try {
+    await sendViaProvider(to, subject, html)
+  } catch (e: any) {
+    console.error('[manage-deletion] Email send failed:', e.message)
+  }
 }
 
 function formatDate(date: Date): string {

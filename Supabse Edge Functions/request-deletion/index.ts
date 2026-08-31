@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendEmail } from '../_shared/send-email.ts'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
 const SITE_URL = Deno.env.get('SITE_URL') || 'https://communitycarpool.org'
@@ -47,11 +48,9 @@ Deno.serve(async (req) => {
       deletion_token_expires_at: expiresAt
     }).eq('user_id', user.user_id)
 
-    // Send confirmation email via Resend
-    const resendKey = Deno.env.get('RESEND_API_KEY')
-    const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || ''
-
-    if (resendKey && fromEmail) {
+    // Send confirmation email via the shared sender, which follows the
+    // `email_service` config key rather than hardcoding a provider.
+    {
       const confirmUrl = `${SITE_URL}/confirm-deletion.html?token=${deletionToken}`
       const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
       <body style="margin:0;padding:0;background:#f9fafb;font-family:Inter,system-ui,sans-serif;">
@@ -78,16 +77,18 @@ Deno.serve(async (req) => {
         </div>
       </body></html>`
 
-      await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          from: `Community Carpool <${fromEmail}>`,
-          to: [cleanEmail],
-          subject: 'Confirm your data deletion request — Community Carpool',
+      // Non-throwing on purpose: the previous fetch never threw on a provider
+      // error, so the caller still receives success. Letting it throw here would
+      // surface a 500 to a user whose deletion token was already written.
+      try {
+        await sendEmail(
+          cleanEmail,
+          'Confirm your data deletion request \u2014 Community Carpool',
           html
-        })
-      })
+        )
+      } catch (e: any) {
+        console.error('[request-deletion] Confirmation email failed:', e.message)
+      }
     }
 
     return new Response(JSON.stringify({ success: true }), {

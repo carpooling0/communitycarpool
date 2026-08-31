@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendEmail as sendViaProvider } from '../_shared/send-email.ts'
 
 const supabase = createClient(
   Deno.env.get('DB_URL')!,
@@ -43,15 +44,14 @@ function json(data: unknown, status = 200) {
 }
 
 // ── Email helper ───────────────────────────────────────────────────────────────
+// Routes via the shared sender so it follows the `email_service` config key.
+// Kept non-throwing to preserve the previous behaviour for callers.
 async function sendEmail(to: string, subject: string, html: string): Promise<void> {
-  const resendKey = Deno.env.get('RESEND_API_KEY')
-  const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || ''
-  if (!resendKey || !fromEmail) { console.warn('[admin-auth] Resend not configured — email not sent'); return }
-  await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: fromEmail, to, subject, html })
-  })
+  try {
+    await sendViaProvider(to, subject, html)
+  } catch (e: any) {
+    console.error('[admin-auth] Email send failed:', e.message)
+  }
 }
 
 function passwordResetEmail(name: string, resetUrl: string): string {
