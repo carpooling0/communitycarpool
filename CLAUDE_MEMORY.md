@@ -127,7 +127,7 @@
 - [Verify before quoting config values](feedback_verify_before_quoting_config.md) — a remembered address/secret is not live state; check it or label it unverified
 
 ## Session state 31 Aug 2026 — READ THIS FIRST when resuming
-- [Session 31 Aug state](project_session_2026_08_31.md) — what is on dev vs prod, the Delete Now bug, lifecycle test results, what is still pending
+- [Session 31 Aug state](project_session_2026_08_31.md) — prod is now fully synced with dev (frontend + migration + all 9 functions), full lifecycle test passed for real against prod (not just dev), Partners/Interns test data cleaned on both envs, the 3 real historical intern applications confirmed already in prod
 
 ## Partners Page (new 2026-08-30)
 - [Partners marketing page](project_partners_page.md) — partners.html done, Supabase table + function written but NOT applied
