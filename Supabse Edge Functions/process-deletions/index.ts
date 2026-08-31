@@ -32,6 +32,63 @@ Deno.serve(async (req) => {
     const retentionDays = parseInt(await getConfig('data_retention_days') || '30', 10)
     const cutoff = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000).toISOString()
 
+    // ── PASS 1: warn the admin about accounts due for deletion tomorrow ───────
+    // The grace period exists so a user can come back and reclaim their data.
+    // The admin is told one day before that window closes, giving a last chance
+    // to intervene, rather than at confirmation time when nothing is imminent.
+    // deletion_admin_notified_at makes this fire exactly once per user.
+    const warnCutoff = new Date(Date.now() - (retentionDays - 1) * 24 * 60 * 60 * 1000).toISOString()
+    try {
+      const { data: dueSoon } = await supabase
+        .from('users')
+        .select('user_id, email, name, deletion_requested_at')
+        .not('deletion_requested_at', 'is', null)
+        .is('deletion_admin_notified_at', null)
+        .gte('deletion_requested_at', cutoff)   // not already past the window
+        .lt('deletion_requested_at', warnCutoff) // one day or less remaining
+
+      if (dueSoon && dueSoon.length > 0) {
+        const notifyEmail = await getConfig('support_notify_email')
+        if (notifyEmail) {
+          const rows = dueSoon.map((u: any) => {
+            const goes = new Date(new Date(u.deletion_requested_at).getTime() + retentionDays * 86400000)
+            return `<tr>
+              <td style="padding:8px 12px;font-size:13px;">${u.name || ''}</td>
+              <td style="padding:8px 12px;font-size:13px;">${u.email}</td>
+              <td style="padding:8px 12px;font-size:13px;">${goes.toISOString().slice(0, 10)}</td>
+            </tr>`
+          }).join('')
+          const html = `<div style="font-family:Inter,sans-serif;padding:24px;max-width:640px;">
+            <h2 style="color:#b45309;margin-bottom:8px;">Deletion grace period ends tomorrow</h2>
+            <p style="color:#374151;font-size:14px;line-height:1.7;">
+              ${dueSoon.length} account(s) reach the end of their ${retentionDays} day grace period within the next day
+              and will then be permanently deleted automatically. No action is required.
+              To stop a deletion, use Cancel in the admin panel before the window closes.
+            </p>
+            <table style="border-collapse:collapse;width:100%;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+              <tr style="background:#f9fafb;">
+                <th style="padding:8px 12px;text-align:left;font-size:12px;color:#9ca3af;">NAME</th>
+                <th style="padding:8px 12px;text-align:left;font-size:12px;color:#9ca3af;">EMAIL</th>
+                <th style="padding:8px 12px;text-align:left;font-size:12px;color:#9ca3af;">DELETED ON</th>
+              </tr>
+              ${rows}
+            </table>
+          </div>`
+          await sendEmail(notifyEmail, `[Data Deletion] ${dueSoon.length} account(s) will be deleted tomorrow`, html)
+          await supabase.from('users')
+            .update({ deletion_admin_notified_at: new Date().toISOString() })
+            .in('user_id', dueSoon.map((u: any) => u.user_id))
+          console.log(`[process-deletions] Warned admin about ${dueSoon.length} account(s) due tomorrow`)
+        } else {
+          console.warn('[process-deletions] support_notify_email not set — advance warning skipped')
+        }
+      }
+    } catch (e: any) {
+      // Never let the warning stop the deletion run itself.
+      console.error('[process-deletions] Advance warning failed:', e.message)
+    }
+
+    // ── PASS 2: delete accounts whose window has closed ───────────────────────
     // Find users whose retention window has passed
     const { data: usersToDelete, error: fetchErr } = await supabase
       .from('users')
@@ -76,24 +133,36 @@ Deno.serve(async (req) => {
           supabase.from('feedback').select('*', { count: 'exact', head: true }).eq('submitted_by_user_id', user.user_id)
         ])
 
-        // 4. Delete in FK-safe order
+        // 4. Delete in FK-safe order. Every delete is error-checked — the Supabase JS
+        // client does not throw on a DB error, it returns { error }, so each one must
+        // be checked explicitly or a failed delete silently passes as "success".
+        const del = async (label: string, query: Promise<{ error: any }>) => {
+          const { error } = await query
+          if (error) throw new Error(`${label}: ${error.message}`)
+        }
+
         // Step A: delete user's own data in parallel (no cross-table FK dependencies here)
         await Promise.all([
-          supabase.from('events').delete().eq('user_id', user.user_id),
-          supabase.from('feedback').delete().eq('submitted_by_user_id', user.user_id),
-          supabase.from('support_tickets').delete().eq('email', user.email) // GDPR
+          del('events(user_id)', supabase.from('events').delete().eq('user_id', user.user_id)),
+          del('feedback', supabase.from('feedback').delete().eq('submitted_by_user_id', user.user_id)),
+          del('support_tickets', supabase.from('support_tickets').delete().eq('email', user.email)) // GDPR
         ])
 
-        // Step B: delete all events referencing the user's matches (from partner side too)
-        // Must happen before deleting matches to avoid FK constraint violations
+        // Step B: delete all events referencing the user's submissions or matches
+        // (from partner side too). Must happen before deleting submissions/matches
+        // to avoid FK constraint violations — a submission-linked event (e.g.
+        // journey_expired with no user_id) blocks the submissions delete otherwise.
+        if (subIds.length > 0) {
+          await del('events(submission_id)', supabase.from('events').delete().in('submission_id', subIds))
+        }
         if (matchIds.length > 0) {
-          await supabase.from('events').delete().in('match_id', matchIds)
-          await supabase.from('matches').delete().in('match_id', matchIds)
+          await del('events(match_id)', supabase.from('events').delete().in('match_id', matchIds))
+          await del('matches', supabase.from('matches').delete().in('match_id', matchIds))
         }
         if (subIds.length > 0) {
-          await supabase.from('submissions').delete().in('submission_id', subIds)
+          await del('submissions', supabase.from('submissions').delete().in('submission_id', subIds))
         }
-        await supabase.from('users').delete().eq('user_id', user.user_id)
+        await del('users', supabase.from('users').delete().eq('user_id', user.user_id))
 
         // 5. Write to deletion_log (audit trail)
         await supabase.from('deletion_log').insert({

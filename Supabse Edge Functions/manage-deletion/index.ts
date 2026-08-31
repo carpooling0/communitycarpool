@@ -271,40 +271,10 @@ Deno.serve(async (req) => {
       const matchesUrl = `${SITE_URL}/matches.html?token=${user.match_page_token}`
       await sendEmail(user.email, `Deletion scheduled for ${formatDate(deletionDate)} — Community Carpool`, deletionScheduledEmail(user.name, matchesUrl, deletionDate, retentionDays))
 
-      // 5. Notify admin that a deletion was confirmed.
-      //    Ported from confirm-deletion, which held this logic but is not
-      //    reachable from any page. Enriched with the real scheduled date and
-      //    retention window, which confirm-deletion did not have access to.
-      const notifyEmail = await getConfig('support_notify_email')
-      if (notifyEmail) {
-        const row = (label: string, value: string) =>
-          `<tr><td style="padding:8px 12px;color:#6b7280;font-size:13px;">${label}</td><td style="padding:8px 12px;font-size:13px;">${value}</td></tr>`
-        const adminHtml = `<div style="font-family:Inter,sans-serif;padding:24px;max-width:600px;">
-          <h2 style="color:#dc2626;margin-bottom:16px;">Data Deletion Confirmed</h2>
-          <table style="border-collapse:collapse;width:100%;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
-            <tr style="background:#f9fafb;"><th style="padding:8px 12px;text-align:left;font-size:12px;color:#9ca3af;">FIELD</th><th style="padding:8px 12px;text-align:left;font-size:12px;color:#9ca3af;">VALUE</th></tr>
-            ${row('Name', user.name)}
-            ${row('Email', user.email)}
-            ${row('User ID', String(user.user_id))}
-            ${row('Confirmed At', now)}
-            ${row('Journeys affected', String(subIds.length))}
-            ${row('Scheduled deletion', formatDate(deletionDate))}
-            ${row('Retention window', `${retentionDays} days`)}
-          </table>
-          <p style="color:#374151;font-size:14px;margin-top:16px;">process-deletions will remove this account on its next run after ${formatDate(deletionDate)}. No manual action is required.</p>
-        </div>`
-        // Non-throwing: the deletion is already committed, so a failed
-        // notification must not turn a successful confirmation into an error.
-        try {
-          await sendEmail(
-            notifyEmail,
-            `[Data Deletion] ${user.name} (${user.email}) \u2014 confirmed`,
-            adminHtml
-          )
-        } catch (e: any) {
-          console.error('[manage-deletion] Admin notification failed:', e.message)
-        }
-      }
+      // The admin is deliberately NOT notified here. The grace period exists so
+      // the user can come back and reclaim their data, and nothing is imminent
+      // at confirmation time. process-deletions warns the admin one day before
+      // the window closes instead, which is the point where intervening matters.
 
       return json({ success: true, deletionDate: deletionDate.toISOString(), retentionDays })
     }
