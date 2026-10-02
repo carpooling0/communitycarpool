@@ -2429,8 +2429,10 @@
         btn.disabled = false; btn.textContent = 'Submit Rating';
       }
     }
-    document.getElementById('feedbackOverlay').addEventListener('click', function(e) {
-      if (e.target === this) closeFeedbackModal();
+    // The overlay element is defined further down the page, so wait for the DOM
+    document.addEventListener('DOMContentLoaded', function() {
+      const overlay = document.getElementById('feedbackOverlay');
+      if (overlay) overlay.addEventListener('click', function(e) { if (e.target === this) closeFeedbackModal(); });
     });
   </script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyARzmbbhT0ki5-bZ-43pkkPyJNmOCTz4P0&libraries=places&loading=async&callback=initAutocomplete" async defer></script>

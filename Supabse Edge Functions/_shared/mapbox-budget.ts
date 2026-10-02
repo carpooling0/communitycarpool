@@ -8,7 +8,7 @@
 
 import { sendEmail } from './send-email.ts'
 
-const DEFAULT_LIMIT = 80000
+const DEFAULT_LIMIT = 90000
 let cachedLimit = DEFAULT_LIMIT
 let cachedAt = 0
 

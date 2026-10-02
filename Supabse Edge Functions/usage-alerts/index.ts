@@ -3,7 +3,7 @@
 // toward a free-tier limit or looks like abuse. Each alert fires once per period
 // (deduplicated with rate_limit_hit), so a problem produces one email, not one per hour.
 //
-//   Mapbox requests     50% / 80% / 100% of mapbox_monthly_limit        (once a month each)
+//   Mapbox requests     80% / 100% of mapbox_monthly_limit               (once a month each)
 //   Database size       70% / 85% of the 500 MB free limit               (once a week each)
 //   File storage        50% / 80% of the 1 GB free limit                 (once a week each)
 //   Match emails        more than alert_match_emails_per_day in 24 hours (once a day)
@@ -38,10 +38,10 @@ Deno.serve(async (req) => {
     const mapboxLimit = await getConfigNumber(supabase, 'mapbox_monthly_limit', 80000)
     const { data: mu } = await supabase.from('mapbox_usage').select('request_count').eq('month', month).maybeSingle()
     const used = mu?.request_count || 0
-    for (const pct of [100, 80, 50]) {
+    for (const pct of [100, 80]) {
       if (mapboxLimit > 0 && used >= mapboxLimit * pct / 100) {
         if (await once(`mapbox:${pct}:${month}`, 35 * 86400)) {
-          alerts.push({ title: `Mapbox usage at ${pct}% of the monthly cap`, detail: `${used.toLocaleString()} of ${mapboxLimit.toLocaleString()} requests used in ${month}. At 100% distance checks switch to straight-line (haversine) until next month.` })
+          alerts.push({ title: `Mapbox usage at ${pct}% of the monthly cap`, detail: `${used.toLocaleString()} of ${mapboxLimit.toLocaleString()} requests used in ${month}. At 100% the cap is reached and distance checks switch to straight-line (haversine) until next month.` })
         }
         break   // only the highest threshold reached
       }

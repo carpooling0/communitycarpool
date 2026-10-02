@@ -62,8 +62,8 @@ grant execute on function public.mapbox_reserve(integer, integer) to service_rol
 
 -- ── Config ────────────────────────────────────────────────────────────────────
 insert into public.config (key, value, options, description) values
-  ('mapbox_monthly_limit', '80000', 'integer',
-   'Hard monthly cap on Mapbox Directions requests (free tier is 100,000). Once reached, distance calculations fall back to haversine until the next UTC month and one alert email goes to support_notify_email. Counter lives in the mapbox_usage table.')
+  ('mapbox_monthly_limit', '90000', 'integer',
+   'Hard monthly cap on Mapbox Directions requests (free tier is 100,000, so 90,000 leaves a 10% margin). Once reached, distance calculations fall back to haversine until the next UTC month and one alert email goes to support_notify_email. Counter lives in the mapbox_usage table.')
 on conflict (key) do nothing;
 
 -- ── Verify ────────────────────────────────────────────────────────────────────
