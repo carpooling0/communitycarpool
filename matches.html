@@ -1163,7 +1163,7 @@ ${url}`)
         journeys = data.journeys
 
         // Set header user
-        document.getElementById('headerUser').innerHTML = `Welcome, <strong>${userData.name}</strong>`
+        document.getElementById('headerUser').innerHTML = `Welcome, <strong>${escapeHtml(userData.name)}</strong>`
 
         // Render page
         renderPage(journeyParam)
@@ -1306,9 +1306,9 @@ ${url}`)
           <div class="journey-header">
             <div class="journey-header-content">
               <div class="journey-route">
-                <span>${journey.fromLocation}</span>
+                <span>${escapeHtml(journey.fromLocation)}</span>
                 <span class="arrow">→</span>
-                <span>${journey.toLocation}</span>
+                <span>${escapeHtml(journey.toLocation)}</span>
               </div>
               <div class="journey-meta">
                 Journey #${journey.journeyNum} · ${journey.distanceKm ? journey.distanceKm + ' km' : ''} · ${statusBadge}
@@ -1929,7 +1929,7 @@ ${url}`)
 
     function escapeHtml(str) {
       if (!str) return ''
-      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')
     }
 
     // Toggle carpool reported state (undo supported)

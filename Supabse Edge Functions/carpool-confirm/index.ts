@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { escapeHtml } from '../_shared/security.ts'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
 const SITE_URL = Deno.env.get('SITE_URL') || 'https://communitycarpool.org'
@@ -27,13 +28,50 @@ function htmlPage(title: string, emoji: string, heading: string, body: string, c
 </body></html>`, { headers: { 'Content-Type': 'text/html;charset=utf-8' } })
 }
 
-Deno.serve(async (req) => {
-  const url = new URL(req.url)
-  const token   = url.searchParams.get('token')
-  const matchId = parseInt(url.searchParams.get('matchId') || '0')
-  const answer  = url.searchParams.get('answer') // 'yes' | 'no'
+function confirmFormPage(token: string, matchId: number, answer: string): Response {
+  const yes = answer === 'yes'
+  const action = `${Deno.env.get('DB_URL')}/functions/v1/carpool-confirm`
+  return new Response(`<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Confirm — Community Carpool</title></head>
+<body style="margin:0;padding:0;background:#f9fafb;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;">
+  <div style="max-width:460px;margin:40px auto;padding:0 20px;text-align:center;">
+    <img src="${SITE_URL}/logo-email.png" alt="Community Carpool" style="height:48px;width:auto;margin-bottom:28px;" />
+    <div style="background:white;border-radius:16px;padding:36px 28px;box-shadow:0 2px 16px rgba(0,0,0,0.08);">
+      <div style="font-size:52px;margin-bottom:16px;">${yes ? '&#x1F697;' : '&#x1F44D;'}</div>
+      <h1 style="color:#111827;font-size:22px;font-weight:800;margin:0 0 12px;">${yes ? 'Are you carpooling together?' : 'Not carpooling yet?'}</h1>
+      <p style="color:#6b7280;font-size:15px;line-height:1.6;margin:0 0 24px;">Tap the button below to confirm your answer.</p>
+      <form method="POST" action="${action}">
+        <input type="hidden" name="token" value="${escapeHtml(token)}">
+        <input type="hidden" name="matchId" value="${matchId}">
+        <input type="hidden" name="answer" value="${yes ? 'yes' : 'no'}">
+        <button type="submit" style="display:inline-block;border:0;cursor:pointer;background:${yes ? '#1B5C3A' : '#6b7280'};color:white;padding:14px 32px;border-radius:8px;font-weight:700;font-size:15px;">${yes ? "Yes, we're carpooling" : 'No, not carpooling'}</button>
+      </form>
+    </div>
+  </div>
+</body></html>`, { headers: { 'Content-Type': 'text/html;charset=utf-8' } })
+}
 
-  if (!token || !matchId || !['yes', 'no'].includes(answer || '')) {
+Deno.serve(async (req) => {
+  let token = '', matchId = 0, answer = ''
+  if (req.method === 'POST') {
+    // Only a POST changes anything. Mail scanners and link previews follow GET links
+    // automatically; a form submit needs a real person pressing the button.
+    const form = await req.formData().catch(() => null)
+    token = String(form?.get('token') || '')
+    matchId = parseInt(String(form?.get('matchId') || '0'))
+    answer = String(form?.get('answer') || '')
+  } else {
+    const url = new URL(req.url)
+    token = url.searchParams.get('token') || ''
+    matchId = parseInt(url.searchParams.get('matchId') || '0')
+    answer = url.searchParams.get('answer') || ''
+    if (/^[0-9a-fA-F]{32,128}$/.test(token) && matchId > 0 && ['yes', 'no'].includes(answer)) {
+      return confirmFormPage(token, matchId, answer)
+    }
+  }
+
+  if (!/^[0-9a-fA-F]{32,128}$/.test(token) || !matchId || !['yes', 'no'].includes(answer)) {
     return htmlPage('Invalid Link', '&#x1F615;', 'Invalid Link', 'This link appears to be broken or expired. Please check your email for the correct link.', '#6b7280')
   }
 

@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { requireInternal } from '../_shared/security.ts'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
 const SITE_URL = 'https://communitycarpool.org'
@@ -100,6 +101,10 @@ async function sendEmail(to: string, subject: string, html: string, schoolName: 
 }
 
 Deno.serve(async (req) => {
+  // Sends real email: internal only
+  const denied = await requireInternal(req, supabase, 'school-share-test')
+  if (denied) return denied
+
   const url = new URL(req.url)
   const testTo = url.searchParams.get('test_to')
 

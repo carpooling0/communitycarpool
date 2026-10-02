@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { sendEmail as sendViaProvider } from '../_shared/send-email.ts'
+import { escapeHtml } from '../_shared/security.ts'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
 const SITE_URL = Deno.env.get('SITE_URL') || 'https://communitycarpool.org'
@@ -33,6 +34,7 @@ function formatDate(date: Date): string {
 // ─── Email templates ──────────────────────────────────────────────────────────
 
 function confirmRequestEmail(name: string, confirmUrl: string): string {
+  name = escapeHtml(name)
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
   <body style="margin:0;padding:0;background:#f9fafb;font-family:Inter,system-ui,sans-serif;">
     <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
@@ -60,6 +62,7 @@ function confirmRequestEmail(name: string, confirmUrl: string): string {
 }
 
 function deletionAlreadyScheduledEmail(name: string, deletionDate: Date): string {
+  name = escapeHtml(name)
   const dateStr = formatDate(deletionDate)
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
   <body style="margin:0;padding:0;background:#f9fafb;font-family:Inter,system-ui,sans-serif;">
@@ -81,6 +84,7 @@ function deletionAlreadyScheduledEmail(name: string, deletionDate: Date): string
 }
 
 function deletionScheduledEmail(name: string, matchesUrl: string, deletionDate: Date, retentionDays: number): string {
+  name = escapeHtml(name)
   const dateStr = formatDate(deletionDate)
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
   <body style="margin:0;padding:0;background:#f9fafb;font-family:Inter,system-ui,sans-serif;">
@@ -107,6 +111,7 @@ function deletionScheduledEmail(name: string, matchesUrl: string, deletionDate: 
 }
 
 function partnerNotificationEmail(partnerName: string, matchesUrl: string): string {
+  partnerName = escapeHtml(partnerName)
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
   <body style="margin:0;padding:0;background:#f9fafb;font-family:Inter,system-ui,sans-serif;">
     <div style="max-width:600px;margin:0 auto;padding:40px 20px;">

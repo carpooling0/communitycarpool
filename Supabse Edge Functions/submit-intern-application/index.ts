@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { sendEmail } from '../_shared/send-email.ts'
+import { escapeHtml, cleanText, clientIp, rateLimit, logSecurityEvent, isValidEmail } from '../_shared/security.ts'
 
 // Fall back to the auto-injected vars so the module still boots if the
 // DB_URL / DB_SERVICE_KEY vault secrets are ever absent. createClient throws
@@ -34,19 +35,23 @@ function ratingBar(value: number | null | undefined): string {
   return `${dots} <span style="color:#374151;font-size:13px;margin-left:4px;">${filled}/5</span>`
 }
 
+// Pre-built, already-safe HTML (for example a link we constructed ourselves). Everything else
+// passed to field() is treated as untrusted applicant text and escaped.
+class SafeHtml { constructor(public html: string) {} }
+
 function listField(value: string[] | null | undefined): string {
   if (!value || value.length === 0) return '<span style="color:#9ca3af;">None</span>'
-  return value.join(', ')
+  return value.map(v => escapeHtml(v)).join(', ')
 }
 
-function field(label: string, value: string | number | null | undefined, type: 'text' | 'rating' | 'list' | 'textarea' = 'text'): string {
+function field(label: string, value: string | number | SafeHtml | null | undefined, type: 'text' | 'rating' | 'list' | 'textarea' = 'text'): string {
   let renderedValue: string
   if (type === 'rating') {
     renderedValue = ratingBar(value as number | null | undefined)
   } else if (type === 'list') {
     renderedValue = listField(value as string[] | null | undefined)
   } else if (type === 'textarea') {
-    const text = value ? String(value).replace(/\n/g, '<br>') : '<span style="color:#9ca3af;">Not answered</span>'
+    const text = value ? escapeHtml(value instanceof SafeHtml ? value.html : String(value)).replace(/\n/g, '<br>') : '<span style="color:#9ca3af;">Not answered</span>'
     renderedValue = `<div style="color:#374151;font-size:14px;line-height:1.6;white-space:pre-wrap;">${text}</div>`
     return `
       <tr>
@@ -57,7 +62,7 @@ function field(label: string, value: string | number | null | undefined, type: '
       </tr>`
   } else {
     renderedValue = value != null && value !== ''
-      ? `<span style="color:#111827;">${String(value)}</span>`
+      ? `<span style="color:#111827;">${value instanceof SafeHtml ? value.html : escapeHtml(String(value))}</span>`
       : '<span style="color:#9ca3af;">Not provided</span>'
   }
   return `
@@ -80,7 +85,7 @@ function sectionHeader(title: string, color = '#16a34a'): string {
     </tr>`
 }
 
-function buildNotificationEmail(app: Record<string, any>): string {
+function buildNotificationEmail(app: Record<string, any>, resumeLink: string | null): string {
   const submittedAt = new Date(app.submitted_at || Date.now()).toLocaleString('en-GB', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
     hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Dubai'
@@ -112,8 +117,8 @@ function buildNotificationEmail(app: Record<string, any>): string {
       ${field('Email', app.email)}
       ${field('Phone', app.phone)}
       ${field('City / Country', app.city_country)}
-      ${app.linkedin ? field('LinkedIn', `<a href="${app.linkedin}" style="color:#16a34a;">${app.linkedin}</a>`) : ''}
-      ${app.resume_url ? field('Resume', `<a href="${app.resume_url}" style="color:#16a34a;">Download Resume</a>`) : ''}
+      ${app.linkedin && /^https?:\/\//i.test(app.linkedin) ? field('LinkedIn', new SafeHtml(`<a href="${escapeHtml(app.linkedin)}" style="color:#16a34a;">${escapeHtml(app.linkedin)}</a>`)) : (app.linkedin ? field('LinkedIn', app.linkedin) : '')}
+      ${resumeLink ? field('Resume', new SafeHtml(`<a href="${escapeHtml(resumeLink)}" style="color:#16a34a;">Download Resume</a> <span style="color:#9ca3af;font-size:12px;">(link valid for 30 days)</span>`)) : ''}
 
       ${sectionHeader('Background', '#0369a1')}
       ${field('School / University', app.school)}
@@ -169,9 +174,31 @@ Deno.serve(async (req) => {
       return json({ success: false, error: 'Invalid JSON body.' }, 400)
     }
 
+    const ip = clientIp(req)
+
+    // ── Step 1 of a resume upload: hand out a one-time signed upload URL ─────────
+    // The bucket is private and has no public write policy. The file name is random (never the
+    // applicant's own), and uploads are limited per IP so storage cannot be filled.
+    if (body.action === 'create_upload') {
+      if (ip !== 'unknown') {
+        const h = await rateLimit(supabase, `resume:ip:${ip}:h`, 3600, 3)
+        const d = await rateLimit(supabase, `resume:ip:${ip}:d`, 86400, 10)
+        if (!h.allowed || !d.allowed) {
+          await logSecurityEvent(supabase, 'resume_upload_rate_limited', ip, null, {})
+          return json({ success: false, error: 'Too many uploads. Please try again later.' }, 429)
+        }
+      }
+      const ext = String(body.filename || '').toLowerCase().match(/\.(pdf|docx?)$/)?.[1]
+      if (!ext) return json({ success: false, error: 'Please upload a PDF or Word document.' }, 400)
+      const path = `${crypto.randomUUID()}.${ext}`
+      const { data, error } = await supabase.storage.from('intern-resumes').createSignedUploadUrl(path)
+      if (error || !data) { console.error('createSignedUploadUrl failed:', error?.message); return json({ success: false, error: 'Upload is unavailable right now.' }, 500) }
+      return json({ success: true, path, signedUrl: data.signedUrl })
+    }
+
     const {
       full_name, email, phone, city_country,
-      school, current_status, linkedin, resume_url,
+      school, current_status, linkedin, resume_path,
       hours_per_week, availability, preferred_times,
       areas_of_interest, scenario_reply, scenario_approach, scenario_followup,
       prior_experience, comfort_writing, comfort_strangers, comfort_repetitive_tasks,
@@ -198,36 +225,53 @@ Deno.serve(async (req) => {
     if (!email || typeof email !== 'string' || !email.trim()) {
       return json({ success: false, error: 'email is required.' }, 400)
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+    if (!isValidEmail(email.trim())) {
       return json({ success: false, error: 'email is not valid.' }, 400)
     }
+
+    // Per-IP and per-address limits keep the form from being used to flood the support inbox
+    if (ip !== 'unknown') {
+      const h = await rateLimit(supabase, `intern:ip:${ip}:h`, 3600, 5)
+      const d = await rateLimit(supabase, `intern:ip:${ip}:d`, 86400, 15)
+      if (!h.allowed || !d.allowed) {
+        await logSecurityEvent(supabase, 'intern_rate_limited', ip, email, {})
+        return json({ success: false, error: 'Too many submissions. Please try again later.' }, 429)
+      }
+    }
+    const perAddr = await rateLimit(supabase, `intern:email:${email.trim().toLowerCase()}`, 86400, 3)
+    if (!perAddr.allowed) return json({ success: false, error: 'This email has already submitted recently.' }, 429)
+
+    // A resume is referenced by storage path only (issued by create_upload), never a URL
+    const resumePath = typeof resume_path === 'string' && /^[0-9a-f-]{36}\.(pdf|docx?)$/.test(resume_path) ? resume_path : null
+    const txt = (v: unknown, n: number) => (v ? cleanText(v, n) : null)
+    const list = (v: unknown) => Array.isArray(v) ? v.slice(0, 20).map(x => cleanText(x, 100)) : []
 
     // Insert into DB
     const { data: inserted, error: insertError } = await supabase
       .from('intern_applications')
       .insert({
-        full_name: full_name.trim(),
+        full_name: cleanText(full_name, 100),
         email: email.trim().toLowerCase(),
-        phone: phone || null,
-        city_country: city_country || null,
-        school: school || null,
-        current_status: current_status || null,
-        linkedin: linkedin || null,
-        resume_url: resume_url || null,
-        hours_per_week: hours_per_week || null,
-        availability: availability || null,
-        preferred_times: preferred_times || null,
-        areas_of_interest: Array.isArray(areas_of_interest) ? areas_of_interest : [],
-        scenario_reply: scenario_reply || null,
-        scenario_approach: scenario_approach || null,
-        scenario_followup: scenario_followup || null,
-        prior_experience: Array.isArray(prior_experience) ? prior_experience : [],
+        phone: txt(phone, 40),
+        city_country: txt(city_country, 100),
+        school: txt(school, 150),
+        current_status: txt(current_status, 100),
+        linkedin: txt(linkedin, 300),
+        resume_url: resumePath ? `intern-resumes/${resumePath}` : null,
+        hours_per_week: txt(hours_per_week, 50),
+        availability: txt(availability, 200),
+        preferred_times: txt(preferred_times, 200),
+        areas_of_interest: list(areas_of_interest),
+        scenario_reply: scenario_reply ? String(scenario_reply).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F<>]/g, ' ').slice(0, 3000) : null,
+        scenario_approach: scenario_approach ? String(scenario_approach).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F<>]/g, ' ').slice(0, 3000) : null,
+        scenario_followup: scenario_followup ? String(scenario_followup).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F<>]/g, ' ').slice(0, 3000) : null,
+        prior_experience: list(prior_experience),
         comfort_writing: typeof comfort_writing === 'number' ? comfort_writing : null,
         comfort_strangers: typeof comfort_strangers === 'number' ? comfort_strangers : null,
         comfort_repetitive_tasks: typeof comfort_repetitive_tasks === 'number' ? comfort_repetitive_tasks : null,
-        ok_with_repetitive: ok_with_repetitive || null,
-        motivation: motivation || null,
-        primary_interest: primary_interest || null,
+        ok_with_repetitive: txt(ok_with_repetitive, 100),
+        motivation: motivation ? String(motivation).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F<>]/g, ' ').slice(0, 3000) : null,
+        primary_interest: txt(primary_interest, 150),
       })
       .select()
       .single()
@@ -242,10 +286,15 @@ Deno.serve(async (req) => {
     // Resend. A failure is logged but never fails the request: the application
     // is already saved.
     try {
+      let resumeLink: string | null = null
+      if (resumePath) {
+        const { data: signed } = await supabase.storage.from('intern-resumes').createSignedUrl(resumePath, 60 * 60 * 24 * 30)
+        resumeLink = signed?.signedUrl || null
+      }
       await sendEmail(
         NOTIFY_EMAIL,
-        `New Intern Application \u2014 ${inserted.full_name}`,
-        buildNotificationEmail(inserted)
+        `New Intern Application \u2014 ${String(inserted.full_name).replace(/[\r\n]/g, ' ')}`,
+        buildNotificationEmail(inserted, resumeLink)
       )
       console.log(`Intern application notification sent for ID ${inserted.id}`)
     } catch (e: any) {
@@ -256,6 +305,6 @@ Deno.serve(async (req) => {
 
   } catch (err: any) {
     console.error('submit-intern-application error:', err)
-    return json({ success: false, error: err.message }, 500)
+    return json({ success: false, error: 'Something went wrong. Please try again.' }, 500)
   }
 })

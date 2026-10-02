@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { sendEmail } from '../_shared/send-email.ts'
+import { escapeHtml } from '../_shared/security.ts'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
 const corsHeaders = {
@@ -79,8 +80,8 @@ Deno.serve(async (req) => {
         <h2 style="color:#dc2626;margin-bottom:16px;">⚠️ Data Deletion Confirmed</h2>
         <table style="border-collapse:collapse;width:100%;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
           <tr style="background:#f9fafb;"><th style="padding:8px 12px;text-align:left;font-size:12px;color:#9ca3af;">FIELD</th><th style="padding:8px 12px;text-align:left;font-size:12px;color:#9ca3af;">VALUE</th></tr>
-          <tr><td style="padding:8px 12px;color:#6b7280;font-size:13px;">Name</td><td style="padding:8px 12px;font-size:13px;">${user.name}</td></tr>
-          <tr><td style="padding:8px 12px;color:#6b7280;font-size:13px;">Email</td><td style="padding:8px 12px;font-size:13px;">${user.email}</td></tr>
+          <tr><td style="padding:8px 12px;color:#6b7280;font-size:13px;">Name</td><td style="padding:8px 12px;font-size:13px;">${escapeHtml(user.name)}</td></tr>
+          <tr><td style="padding:8px 12px;color:#6b7280;font-size:13px;">Email</td><td style="padding:8px 12px;font-size:13px;">${escapeHtml(user.email)}</td></tr>
           <tr><td style="padding:8px 12px;color:#6b7280;font-size:13px;">User ID</td><td style="padding:8px 12px;font-size:13px;">${user.user_id}</td></tr>
           <tr><td style="padding:8px 12px;color:#6b7280;font-size:13px;">Confirmed At</td><td style="padding:8px 12px;font-size:13px;">${now}</td></tr>
         </table>

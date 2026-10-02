@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { sendEmail } from '../_shared/send-email.ts'
+import { escapeHtml, clientIp, rateLimit, getConfigNumber, logSecurityEvent } from '../_shared/security.ts'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
 const SITE_URL = Deno.env.get('SITE_URL') || 'https://communitycarpool.org'
@@ -21,6 +22,18 @@ Deno.serve(async (req) => {
     }
 
     const cleanEmail = String(email).toLowerCase().trim()
+
+    // Limits stop this form being used to email-bomb someone with deletion links (and to
+    // keep rotating their deletion token). The reply is the same "success" either way, so
+    // limits cannot be used to learn which addresses are registered.
+    const ip = clientIp(req)
+    const perAddress = await getConfigNumber(supabase, 'deletion_request_max_per_address_per_day', 3)
+    const addrLimit = await rateLimit(supabase, `delreq:email:${cleanEmail}`, 86400, perAddress)
+    const ipLimit = ip !== 'unknown' ? await rateLimit(supabase, `delreq:ip:${ip}`, 3600, 10) : { allowed: true }
+    if (!addrLimit.allowed || !ipLimit.allowed) {
+      await logSecurityEvent(supabase, 'deletion_request_rate_limited', ip, cleanEmail, {})
+      return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
 
     // Look up user by email
     const { data: user } = await supabase
@@ -62,7 +75,7 @@ Deno.serve(async (req) => {
           </div>
           <div style="background:white;border-radius:16px;padding:36px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
             <h2 style="color:#111827;font-size:20px;margin:0 0 20px;">Confirm Data Deletion</h2>
-            <p style="color:#374151;font-size:15px;margin:0 0 12px;">Hi ${user.name},</p>
+            <p style="color:#374151;font-size:15px;margin:0 0 12px;">Hi ${escapeHtml(user.name)},</p>
             <p style="color:#374151;font-size:15px;margin:0 0 12px;">We received a request to permanently delete your Community Carpool account and all associated data, including your journey registrations and match history.</p>
             <p style="color:#374151;font-size:15px;margin:0 0 24px;">To confirm this request, click the button below. <strong>This link expires in 24 hours.</strong></p>
             <div style="text-align:center;margin-bottom:28px;">
@@ -97,7 +110,7 @@ Deno.serve(async (req) => {
 
   } catch (err: any) {
     console.error('request-deletion error:', err)
-    return new Response(JSON.stringify({ success: false, error: err.message }), {
+    return new Response(JSON.stringify({ success: false, error: 'Something went wrong. Please try again.' }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
   }

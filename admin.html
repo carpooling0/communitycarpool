@@ -1032,7 +1032,7 @@ let charts = {}
 // ═══════════════════════════════════════════════════════════════
 // UTILS
 // ═══════════════════════════════════════════════════════════════
-function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;') }
 
 // Floating tooltip for data-tip elements
 document.addEventListener('mouseover', e => {
@@ -2354,8 +2354,8 @@ function renderDeletionsFromCache() {
       <td>${fmtDate(it.deletion_requested_at)}</td><td>${fmtDate(it._sched)}</td>
       <td><span class="days-chip ${chipCls}">${days != null ? days+'d' : '—'}</span></td>
       <td style="white-space:nowrap">
-        <button class="btn btn-ghost btn-sm" style="margin-right:6px" onclick="cancelDeletion(${it.user_id},'${esc(it.email)}')">Cancel</button>
-        <button class="btn btn-danger btn-sm" onclick="openDeleteModal(${it.user_id},'${esc(it.email)}')">Delete Now</button>
+        <button class="btn btn-ghost btn-sm" style="margin-right:6px" data-email="${esc(it.email)}" onclick="cancelDeletion(${it.user_id}, this.dataset.email)">Cancel</button>
+        <button class="btn btn-danger btn-sm" data-email="${esc(it.email)}" onclick="openDeleteModal(${it.user_id}, this.dataset.email)">Delete Now</button>
       </td>
     </tr>`
   }
@@ -2441,8 +2441,8 @@ async function searchUser() {
         ${isBlacklisted && blInfo ? `<div style="margin-top:6px;font-size:12px;color:var(--text-muted)">Blacklisted by <strong>${esc(blInfo.blacklisted_by||'—')}</strong> on ${fmtDate(blInfo.created_at)}${blInfo.reason ? ` · <em>${esc(blInfo.reason)}</em>` : ''}</div>` : ''}
       </div>
       ${isBlacklisted
-        ? `<button class="btn btn-ghost btn-sm" style="border-color:var(--green-dark);color:var(--green-dark)" onclick="removeFromBlacklist('${esc(u.email)}')">✓ Remove from Blacklist</button>`
-        : `<button class="btn btn-ghost-red btn-sm" onclick="addToBlacklist('${esc(u.email)}')">+ Blacklist</button>`}
+        ? `<button class="btn btn-ghost btn-sm" style="border-color:var(--green-dark);color:var(--green-dark)" data-email="${esc(u.email)}" onclick="removeFromBlacklist(this.dataset.email)">✓ Remove from Blacklist</button>`
+        : `<button class="btn btn-ghost-red btn-sm" data-email="${esc(u.email)}" onclick="addToBlacklist(this.dataset.email)">+ Blacklist</button>`}
     </div>`
 
   if (!subs.length) {

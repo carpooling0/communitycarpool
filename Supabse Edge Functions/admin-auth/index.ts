@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { sendEmail as sendViaProvider } from '../_shared/send-email.ts'
+import { clientIp, rateLimit, logSecurityEvent, getConfigNumber, escapeHtml } from '../_shared/security.ts'
 
 const supabase = createClient(
   Deno.env.get('DB_URL')!,
@@ -32,9 +33,9 @@ async function verifySecret(secret: string, stored: string): Promise<boolean> {
   return computed === hashHex
 }
 
+// Cloudflare's header first; x-forwarded-for can be spoofed and must never decide access.
 function getClientIP(req: Request): string {
-  return req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
-         req.headers.get('x-real-ip') || 'unknown'
+  return clientIp(req)
 }
 
 function json(data: unknown, status = 200) {
@@ -61,7 +62,7 @@ function passwordResetEmail(name: string, resetUrl: string): string {
         <h2 style="color:#fff;margin:0;font-size:20px">Community Carpool Admin</h2>
       </div>
       <div style="padding:32px;background:#fff;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
-        <p>Dear ${name},</p>
+        <p>Dear ${escapeHtml(name)},</p>
         <p>We received a request to reset your admin password${name ? '' : ' and/or deletion PIN'}. Click the button below to proceed:</p>
         <div style="text-align:center;margin:32px 0">
           <a href="${resetUrl}" style="background:#15803d;color:#fff;text-decoration:none;padding:12px 28px;border-radius:6px;font-weight:bold;font-size:15px">
@@ -115,32 +116,55 @@ Deno.serve(async (req) => {
       const { email, password } = body
       if (!email || !password) return json({ error: 'Email and password required' }, 400)
 
+      // ── Lockout: per account and per IP. Fails CLOSED: if the limiter cannot be reached,
+      // login is refused rather than left open to guessing.
+      const emailKey = String(email).toLowerCase().trim()
+      const maxAttempts = await getConfigNumber(supabase, 'admin_login_max_attempts', 5)
+      const byAccount = await rateLimit(supabase, `adminlogin:acct:${emailKey}`, 900, maxAttempts, true)
+      const byIp = await rateLimit(supabase, `adminlogin:ip:${clientIP}`, 900, 30, true)
+      if (!byAccount.allowed || !byIp.allowed) {
+        await logSecurityEvent(supabase, 'admin_login_locked', clientIP, emailKey, {})
+        return json({ error: 'Too many login attempts. Please wait 15 minutes and try again.' }, 429)
+      }
+
       const { data: admin } = await supabase.from('admin_users')
         .select('admin_id, name, role, password_hash, allowed_ips, is_active, role_expires_at')
-        .eq('email', email.toLowerCase().trim()).single()
+        .eq('email', emailKey).single()
 
-      // Vague error for security — don't reveal whether email exists
-      if (!admin || !admin.is_active) return json({ error: 'Invalid email or password' }, 401)
+      // Vague error for security: don't reveal whether the email exists. A dummy hash check
+      // keeps the response time the same whether or not the account exists.
+      if (!admin || !admin.is_active) {
+        await verifySecret(password, '00000000000000000000000000000000:' + '0'.repeat(64))
+        await logSecurityEvent(supabase, 'admin_login_failed', clientIP, emailKey, { reason: 'unknown_or_inactive' })
+        return json({ error: 'Invalid email or password' }, 401)
+      }
 
       const valid = await verifySecret(password, admin.password_hash)
-      if (!valid) return json({ error: 'Invalid email or password' }, 401)
+      if (!valid) {
+        await logSecurityEvent(supabase, 'admin_login_failed', clientIP, emailKey, { reason: 'bad_password' })
+        return json({ error: 'Invalid email or password' }, 401)
+      }
 
       if (admin.role_expires_at && new Date(admin.role_expires_at) < new Date())
         return json({ error: 'Your access has expired. Contact Super-Admin.' }, 403)
 
-      if (admin.allowed_ips?.length && !admin.allowed_ips.includes(clientIP))
+      if (admin.allowed_ips?.length && !admin.allowed_ips.includes(clientIP)) {
+        await logSecurityEvent(supabase, 'admin_ip_blocked', clientIP, emailKey, { at: 'login' })
         return json({ error: 'Access not allowed from this IP address.' }, 403)
+      }
 
       // Generate 32-byte session token
       const token = Array.from(crypto.getRandomValues(new Uint8Array(32)))
         .map(b => b.toString(16).padStart(2, '0')).join('')
-      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      const sessionHours = await getConfigNumber(supabase, 'admin_session_hours', 24)
+      const expiresAt = new Date(Date.now() + sessionHours * 60 * 60 * 1000).toISOString()
 
       await supabase.from('admin_sessions').insert({
         session_token: token, admin_id: admin.admin_id, expires_at: expiresAt
       })
       await supabase.from('admin_users')
         .update({ last_login_at: new Date().toISOString() }).eq('admin_id', admin.admin_id)
+      await logSecurityEvent(supabase, 'admin_login', clientIP, emailKey, {})
 
       return json({ success: true, token, role: admin.role, name: admin.name, expiresAt })
     }
@@ -185,6 +209,11 @@ Deno.serve(async (req) => {
     if (action === 'forgot_password') {
       const { email } = body
       if (!email) return json({ error: 'Email required' }, 400)
+      // Stops the reset form being used to email-bomb an admin. Always answers "success"
+      // so it also cannot be used to discover which addresses are admins.
+      const fpAcct = await rateLimit(supabase, `adminreset:acct:${String(email).toLowerCase().trim()}`, 3600, 3)
+      const fpIp = await rateLimit(supabase, `adminreset:ip:${clientIP}`, 3600, 10)
+      if (!fpAcct.allowed || !fpIp.allowed) return json({ success: true })
 
       const { data: admin } = await supabase.from('admin_users')
         .select('admin_id, name, is_active')
@@ -219,6 +248,8 @@ Deno.serve(async (req) => {
     if (action === 'reset_password') {
       const { reset_token, new_password, new_pin } = body
       if (!reset_token || !new_password) return json({ error: 'reset_token and new_password required' }, 400)
+      const rpIp = await rateLimit(supabase, `adminresetuse:ip:${clientIP}`, 3600, 10, true)
+      if (!rpIp.allowed) return json({ error: 'Too many attempts. Please try again later.' }, 429)
       if (new_password.length < 8) return json({ error: 'Password must be at least 8 characters' }, 400)
       if (new_pin !== undefined && new_pin !== null && new_pin !== '') {
         if (!/^\d{6}$/.test(String(new_pin))) return json({ error: 'PIN must be exactly 6 digits' }, 400)

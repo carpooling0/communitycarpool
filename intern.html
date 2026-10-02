@@ -915,7 +915,7 @@ const TOTAL = 4
 const SECTION_NAMES = ['Basic Info', 'Availability & Interests', 'Skills & Reliability', 'Scenarios & Motivation']
 const FORM_LOAD_TIME = Date.now()
 
-let current = 0, resumeUrl = null, resumeUploadPending = false
+let current = 0, resumePath = null, resumeUploadPending = false
 
 const track    = document.getElementById('track')
 const btnBack  = document.getElementById('btn-back')
@@ -955,13 +955,21 @@ resumeInput.addEventListener('change', async () => {
   resumeStatus.className = 'uploading'; resumeStatus.textContent = '⏳ Uploading…'
   resumeUploadPending = true
   try {
-    const path = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/intern-resumes/${path}`, {
-      method: 'POST',
-      headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`, 'Content-Type': file.type || 'application/octet-stream', 'x-upsert': 'false' },
+    // 1. Ask the server for a one-time signed upload URL. The bucket is private and has no
+    //    public write access; the stored file name is random, never the applicant's own.
+    const authHeaders = { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` }
+    const slot = await fetch(`${SUPABASE_URL}/functions/v1/submit-intern-application`, {
+      method: 'POST', headers: { ...authHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'create_upload', filename: file.name })
+    }).then(r => r.json())
+    if (!slot.success) throw new Error(slot.error || 'upload unavailable')
+    // 2. Upload straight to storage with that URL
+    const res = await fetch(slot.signedUrl, {
+      method: 'PUT',
+      headers: { ...authHeaders, 'Content-Type': file.type || 'application/octet-stream', 'x-upsert': 'false' },
       body: file
     })
-    if (res.ok) { resumeUrl = `${SUPABASE_URL}/storage/v1/object/public/intern-resumes/${path}`; resumeStatus.className = 'ok'; resumeStatus.textContent = '✓ Uploaded successfully' }
+    if (res.ok) { resumePath = slot.path; resumeStatus.className = 'ok'; resumeStatus.textContent = '✓ Uploaded successfully' }
     else { resumeStatus.className = 'err'; resumeStatus.textContent = 'Upload failed — you can still submit without it.' }
   } catch { resumeStatus.className = 'err'; resumeStatus.textContent = 'Upload error — you can still submit without it.' }
   resumeUploadPending = false
@@ -1012,7 +1020,7 @@ function collectData() {
     phone: phoneNum ? `${phoneCode} ${phoneNum}` : null,
     city_country: [city, country].filter(Boolean).join(', ') || null,
     school: getText('school'), current_status: getRadio('current_status'),
-    linkedin: getText('linkedin'), resume_url: resumeUrl,
+    linkedin: getText('linkedin'), resume_path: resumePath,
     hours_per_week: getRadio('hours_per_week'),
     availability: getChecked('availability').join(', ') || null,
     preferred_times: getText('preferred_times'),

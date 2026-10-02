@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { sendEmail } from '../_shared/send-email.ts'
+import { requireInternal, escapeHtml } from '../_shared/security.ts'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
 const SITE_URL = Deno.env.get('SITE_URL') || 'https://communitycarpool.org'
@@ -47,6 +48,9 @@ function buildReminderEmail(
   submissionId: number,
   reminderNum: number
 ): string {
+  recipientName = escapeHtml(recipientName)
+  fromLocation = escapeHtml(fromLocation)
+  toLocation = escapeHtml(toLocation)
   const matchesUrl = `${SITE_URL}/matches.html?token=${token}&journey=${submissionId}`
   const trees      = calcTrees(distanceKm)
   const variant =
@@ -223,6 +227,10 @@ function buildReminderEmail(
 
 // ── Main handler ───────────────────────────────────────────────────────────────
 Deno.serve(async (req) => {
+  // Privileged: only the cron jobs and our own functions (service-role key) may call this.
+  const denied = await requireInternal(req, supabase, 'send-interest-reminders')
+  if (denied) return denied
+
   try {
     const url     = new URL(req.url)
     const testTo  = url.searchParams.get('test_to')

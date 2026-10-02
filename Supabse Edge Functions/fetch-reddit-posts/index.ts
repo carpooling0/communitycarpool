@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { AwsClient } from 'https://esm.sh/aws4fetch@1.0.19'
+import { requireInternal } from '../_shared/security.ts'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
 const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' }
@@ -72,6 +73,10 @@ Rules:
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+
+  // Calls paid AWS Bedrock: internal only (the dev cron job sends the service-role key)
+  const denied = await requireInternal(req, supabase, 'fetch-reddit-posts', corsHeaders)
+  if (denied) return denied
 
   try {
     const body = await req.json()

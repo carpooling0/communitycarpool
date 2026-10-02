@@ -435,6 +435,7 @@
   .pin-digit:focus { border-color:#1B5C3A; box-shadow:0 0 0 3px rgba(27,92,58,.15); }
   .pin-digit.filled { border-color:#1B5C3A; background:#f0fdf4; }
   .pin-digit.error { border-color:#ef4444; background:#fef2f2; animation:pin-shake .3s; }
+  @media (max-width:430px) { .pin-digit { width:44px; height:56px; font-size:24px; } .combo-digit { width:40px !important; } .pin-digits { gap:6px !important; } }
   @keyframes pin-shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
   .pin-error { font-size:13px; color:#ef4444; min-height:18px; margin-bottom:4px; }
   .pin-submit-btn { width:100%; padding:13px; background:#1B5C3A; color:#fff; border:none; border-radius:50px; font-size:15px; font-weight:700; font-family:'Montserrat',sans-serif; cursor:pointer; margin-top:12px; transition:opacity .15s; }
@@ -1035,10 +1036,10 @@
 
         <!-- Phase 2: PIN entry (shown after animation) -->
         <div id="pinEntryPhase" class="pin-entry-phase" style="display:none;">
-          <p style="font-size:15px;color:#6B7280;margin:0 0 16px;">Enter the PIN from your email to activate your journey:</p>
+          <p style="font-size:15px;color:#6B7280;margin:0 0 16px;">Enter the 6-digit code from your email to activate your journey:</p>
 
           <div class="pin-digits" onpaste="onPinPaste(event)">
-            <input class="pin-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin0"
+            <input class="pin-digit" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="1" id="pin0"
                    oninput="onPinInput(this,0)" onkeydown="onPinKeydown(this,0,event)" onpaste="onPinPaste(event)">
             <input class="pin-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin1"
                    oninput="onPinInput(this,1)" onkeydown="onPinKeydown(this,1,event)" onpaste="onPinPaste(event)">
@@ -1046,6 +1047,10 @@
                    oninput="onPinInput(this,2)" onkeydown="onPinKeydown(this,2,event)" onpaste="onPinPaste(event)">
             <input class="pin-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin3"
                    oninput="onPinInput(this,3)" onkeydown="onPinKeydown(this,3,event)" onpaste="onPinPaste(event)">
+            <input class="pin-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin4"
+                   oninput="onPinInput(this,4)" onkeydown="onPinKeydown(this,4,event)" onpaste="onPinPaste(event)">
+            <input class="pin-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin5"
+                   oninput="onPinInput(this,5)" onkeydown="onPinKeydown(this,5,event)" onpaste="onPinPaste(event)">
           </div>
 
           <div class="pin-error" id="pinError"></div>
@@ -1088,6 +1093,8 @@
               <input class="combo-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="e1" oninput="onComboInput(this,1,'email')" onkeydown="onComboKeydown(this,1,'email',event)">
               <input class="combo-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="e2" oninput="onComboInput(this,2,'email')" onkeydown="onComboKeydown(this,2,'email',event)">
               <input class="combo-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="e3" oninput="onComboInput(this,3,'email')" onkeydown="onComboKeydown(this,3,'email',event)">
+              <input class="combo-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="e4" oninput="onComboInput(this,4,'email')" onkeydown="onComboKeydown(this,4,'email',event)">
+              <input class="combo-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="e5" oninput="onComboInput(this,5,'email')" onkeydown="onComboKeydown(this,5,'email',event)">
             </div>
             <div class="combo-pin-error" id="comboEmailError"></div>
             <button class="combo-verify-btn email" id="comboEmailVerifyBtn" onclick="submitComboPin('email')">Verify Email →</button>
@@ -1111,6 +1118,8 @@
               <input class="combo-digit wa" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="w1" oninput="onComboInput(this,1,'wa')" onkeydown="onComboKeydown(this,1,'wa',event)">
               <input class="combo-digit wa" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="w2" oninput="onComboInput(this,2,'wa')" onkeydown="onComboKeydown(this,2,'wa',event)">
               <input class="combo-digit wa" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="w3" oninput="onComboInput(this,3,'wa')" onkeydown="onComboKeydown(this,3,'wa',event)">
+              <input class="combo-digit wa" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="w4" oninput="onComboInput(this,4,'wa')" onkeydown="onComboKeydown(this,4,'wa',event)">
+              <input class="combo-digit wa" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="w5" oninput="onComboInput(this,5,'wa')" onkeydown="onComboKeydown(this,5,'wa',event)">
             </div>
             <div class="combo-pin-error" id="comboWaError"></div>
             <button class="combo-verify-btn wa" id="comboWaVerifyBtn" onclick="submitComboPin('wa')">Verify WhatsApp →</button>
@@ -1825,9 +1834,9 @@
         const data = await res.json();
         if (data.success) {
           if (data.verificationChannel === 'both') {
-            showCombinedPinModal(data.submissionId, { journeyNum: data.journeyNum, actualDist: data.actualDist, distanceVal: distVal }, email, waNumber);
+            showCombinedPinModal(data.submissionId, { journeyNum: data.journeyNum, actualDist: data.actualDist, distanceVal: distVal }, email, waNumber, data.verifySecret);
           } else if (data.verificationRequired) {
-            showPinModal(data.submissionId, { journeyNum: data.journeyNum, actualDist: data.actualDist, distanceVal: distVal });
+            showPinModal(data.submissionId, { journeyNum: data.journeyNum, actualDist: data.actualDist, distanceVal: distVal }, data.verifySecret);
           } else {
             showSuccess({ journeyNum: data.journeyNum, actualDist: data.actualDist, distanceVal: distVal });
           }
@@ -1845,11 +1854,13 @@
 
     // ── PIN verification modal ────────────────────────────────────────────────
     let _pinSubmissionId = null;
+    let _pinVerifySecret = null;   // private to this browser; verify-pin and resend-pin require it
     let _pinSuccessData  = null;
     let _pinResendTimer  = null;
 
-    function showPinModal(submissionId, successData) {
+    function showPinModal(submissionId, successData, verifySecret) {
       _pinSubmissionId = submissionId;
+      _pinVerifySecret = verifySecret || null;
       _pinSuccessData  = successData;
 
       // Reset phases
@@ -1921,12 +1932,12 @@
       el.value = val.slice(-1);
       el.classList.toggle('filled', !!el.value);
       setPinError('');
-      if (el.value && idx < 3) {
+      if (el.value && idx < 5) {
         document.querySelectorAll('.pin-digit')[idx + 1].focus();
       }
       if (document.querySelectorAll('.pin-digit:not([value=""])').length === 0) return;
       const all = [...document.querySelectorAll('.pin-digit')].map(d => d.value);
-      if (all.every(v => v !== '') && idx === 3) submitPin();
+      if (all.every(v => v !== '') && idx === 5) submitPin();
     }
 
     function onPinKeydown(el, idx, e) {
@@ -1941,18 +1952,18 @@
 
     function onPinPaste(e) {
       e.preventDefault();
-      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,4);
+      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
       const digits = document.querySelectorAll('.pin-digit');
       text.split('').forEach((ch, i) => {
         if (digits[i]) { digits[i].value = ch; digits[i].classList.add('filled'); }
       });
-      if (text.length === 4) { digits[3].focus(); setTimeout(submitPin, 50); }
+      if (text.length === 6) { digits[5].focus(); setTimeout(submitPin, 50); }
       else if (digits[text.length]) digits[text.length].focus();
     }
 
     async function submitPin() {
       const pin = [...document.querySelectorAll('.pin-digit')].map(d => d.value).join('');
-      if (pin.length < 4) return;
+      if (pin.length < 6) return;
       const btn = document.getElementById('pinSubmitBtn');
       btn.disabled = true;
       btn.textContent = 'Verifying…';
@@ -1960,7 +1971,7 @@
         const res = await fetch(SUPABASE_URL + '/functions/v1/verify-pin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
-          body: JSON.stringify({ submissionId: _pinSubmissionId, pin })
+          body: JSON.stringify({ submissionId: _pinSubmissionId, pin, clientSecret: _pinVerifySecret })
         });
         const data = await res.json();
         if (data.success) {
@@ -1972,7 +1983,7 @@
             showSuccess(_pinSuccessData);
           }, 1200);
         } else {
-          setPinError(data.error || 'Incorrect PIN. Please try again.');
+          setPinError(data.error || 'Incorrect code. Please try again.');
           clearPinDigits();
           document.querySelector('.pin-digit').focus();
           btn.disabled = false;
@@ -2013,7 +2024,7 @@
         const res = await fetch(SUPABASE_URL + '/functions/v1/resend-pin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
-          body: JSON.stringify({ submissionId: _pinSubmissionId })
+          body: JSON.stringify({ submissionId: _pinSubmissionId, clientSecret: _pinVerifySecret })
         });
         const data = await res.json();
         if (data.success) {
@@ -2032,14 +2043,16 @@
 
     // ── Combined PIN modal (email + WhatsApp) ─────────────────────────────────
     let _comboSubmissionId  = null;
+    let _comboVerifySecret  = null;
     let _comboSuccessData   = null;
     let _comboEmailVerified = false;
     let _comboWaVerified    = false;
     let _comboEmailResendTimer = null;
     let _comboWaResendTimer    = null;
 
-    function showCombinedPinModal(submissionId, successData, email, waNumber) {
+    function showCombinedPinModal(submissionId, successData, email, waNumber, verifySecret) {
       _comboSubmissionId  = submissionId;
+      _comboVerifySecret  = verifySecret || null;
       _comboSuccessData   = successData;
       _comboEmailVerified = false;
       _comboWaVerified    = false;
@@ -2063,7 +2076,7 @@
       const digitPfx = isEmail ? 'e' : 'w';
 
       // Clear digits
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 6; i++) {
         const d = document.getElementById(digitPfx + i);
         d.value = '';
         d.classList.remove('filled', 'error');
@@ -2092,10 +2105,10 @@
       const pfx = ch === 'email' ? 'comboEmail' : 'comboWa';
       document.getElementById(pfx + 'Error').textContent = '';
       const digitPfx = ch === 'email' ? 'e' : 'w';
-      if (el.value && idx < 3) document.getElementById(digitPfx + (idx + 1)).focus();
+      if (el.value && idx < 5) document.getElementById(digitPfx + (idx + 1)).focus();
       // Auto-submit when last digit filled
-      const all = [0,1,2,3].map(i => document.getElementById(digitPfx + i).value);
-      if (all.every(v => v !== '') && idx === 3) submitComboPin(ch);
+      const all = [0,1,2,3,4,5].map(i => document.getElementById(digitPfx + i).value);
+      if (all.every(v => v !== '') && idx === 5) submitComboPin(ch);
     }
 
     function onComboKeydown(el, idx, ch, e) {
@@ -2111,13 +2124,13 @@
 
     function onComboPaste(e, ch) {
       e.preventDefault();
-      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,4);
+      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
       const digitPfx = ch === 'email' ? 'e' : 'w';
       text.split('').forEach((c, i) => {
         const d = document.getElementById(digitPfx + i);
         if (d) { d.value = c; d.classList.add('filled'); }
       });
-      if (text.length === 4) { document.getElementById(digitPfx + '3').focus(); setTimeout(() => submitComboPin(ch), 50); }
+      if (text.length === 6) { document.getElementById(digitPfx + '5').focus(); setTimeout(() => submitComboPin(ch), 50); }
       else if (document.getElementById(digitPfx + text.length)) document.getElementById(digitPfx + text.length).focus();
     }
 
@@ -2127,8 +2140,8 @@
       const digitPfx = isEmail ? 'e' : 'w';
       const channel  = isEmail ? 'email' : 'whatsapp';
 
-      const pin = [0,1,2,3].map(i => document.getElementById(digitPfx + i).value).join('');
-      if (pin.length < 4) return;
+      const pin = [0,1,2,3,4,5].map(i => document.getElementById(digitPfx + i).value).join('');
+      if (pin.length < 6) return;
 
       const btn = document.getElementById(pfx + 'VerifyBtn');
       btn.disabled = true;
@@ -2138,7 +2151,7 @@
         const res = await fetch(SUPABASE_URL + '/functions/v1/verify-pin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
-          body: JSON.stringify({ submissionId: _comboSubmissionId, pin, channel })
+          body: JSON.stringify({ submissionId: _comboSubmissionId, pin, channel, clientSecret: _comboVerifySecret })
         });
         const data = await res.json();
 
@@ -2167,11 +2180,11 @@
           badge.textContent = '❌ Wrong PIN';
 
           document.getElementById(pfx + 'Error').textContent = data.error || 'Incorrect PIN. Please try again.';
-          for (let i = 0; i < 4; i++) {
+          for (let i = 0; i < 6; i++) {
             const d = document.getElementById(digitPfx + i);
             d.value = ''; d.classList.remove('filled'); d.classList.add('error');
           }
-          setTimeout(() => { for (let i = 0; i < 4; i++) document.getElementById(digitPfx + i).classList.remove('error'); }, 400);
+          setTimeout(() => { for (let i = 0; i < 6; i++) document.getElementById(digitPfx + i).classList.remove('error'); }, 400);
           document.getElementById(digitPfx + '0').focus();
           btn.disabled = false;
           btn.textContent = isEmail ? 'Verify Email →' : 'Verify WhatsApp →';
@@ -2213,14 +2226,14 @@
       const btn = document.getElementById(pfx + 'ResendBtn');
       btn.disabled = true;
       btn.textContent = 'Sending…';
-      for (let i = 0; i < 4; i++) { const d = document.getElementById(digitPfx + i); d.value = ''; d.classList.remove('filled','error'); }
+      for (let i = 0; i < 6; i++) { const d = document.getElementById(digitPfx + i); d.value = ''; d.classList.remove('filled','error'); }
       document.getElementById(pfx + 'Error').textContent = '';
 
       try {
         const res = await fetch(SUPABASE_URL + '/functions/v1/resend-pin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
-          body: JSON.stringify({ submissionId: _comboSubmissionId, channel: ch === 'wa' ? 'whatsapp' : 'email' })
+          body: JSON.stringify({ submissionId: _comboSubmissionId, channel: ch === 'wa' ? 'whatsapp' : 'email', clientSecret: _comboVerifySecret })
         });
         const data = await res.json();
         if (data.success) {

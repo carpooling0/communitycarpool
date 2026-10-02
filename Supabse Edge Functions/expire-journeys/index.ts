@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { sendEmail } from '../_shared/send-email.ts'
+import { requireInternal, escapeHtml } from '../_shared/security.ts'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
 const SITE_URL = Deno.env.get('SITE_URL') || 'https://communitycarpool.org'
@@ -12,6 +13,10 @@ async function getConfig(key: string): Promise<string> {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+
+  // Privileged: only the cron jobs and our own functions (service-role key) may call this.
+  const denied = await requireInternal(req, supabase, 'expire-journeys', corsHeaders)
+  if (denied) return denied
 
   // ── Preview / test mode ──────────────────────────────────────────────────────
   if (req.method === 'GET') {
@@ -140,8 +145,8 @@ Deno.serve(async (req) => {
 <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
   <div style="text-align:center;margin-bottom:32px;"><a href="${SITE_URL}" style="text-decoration:none;"><img src="${SITE_URL}/logo-email.png" alt="Community Carpool" style="height:56px;width:auto;display:block;margin:0 auto;" /></a></div>
   <div style="background:white;border-radius:16px;padding:32px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-    <h2 style="color:#111827;margin:0 0 12px;">Hi ${sub.users.name}!</h2>
-    <p style="color:#6b7280;margin:0 0 8px;">Your Journey #${sub.journey_num} (${sub.from_location} → ${sub.to_location}) will expire on <strong>${expiryDate}</strong>.</p>
+    <h2 style="color:#111827;margin:0 0 12px;">Hi ${escapeHtml(sub.users.name)}!</h2>
+    <p style="color:#6b7280;margin:0 0 8px;">Your Journey #${sub.journey_num} (${escapeHtml(sub.from_location)} → ${escapeHtml(sub.to_location)}) will expire on <strong>${expiryDate}</strong>.</p>
     <p style="color:#6b7280;margin:0 0 20px;">Still commuting? No action needed — it stays active. Otherwise you can deactivate it from your matches page.</p>
     <div style="text-align:center;margin-bottom:24px;"><a href="${SITE_URL}/matches.html?token=${sub.users.match_page_token}" style="display:inline-block;background:#16a34a;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">View My Journeys &#x2192;</a></div>
     <!-- Journey Tracker — Step 1 active -->
@@ -200,7 +205,7 @@ Deno.serve(async (req) => {
   <div style="text-align:center;margin-bottom:32px;"><a href="${SITE_URL}" style="text-decoration:none;"><img src="${SITE_URL}/logo-email.png" alt="Community Carpool" style="height:56px;width:auto;display:block;margin:0 auto;" /></a></div>
   <div style="background:white;border-radius:16px;padding:32px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
     <h2 style="color:#f59e0b;margin:0 0 12px;">⚡ Someone is interested!</h2>
-    <p style="color:#6b7280;margin:0 0 20px;">Your Journey #${sub.journey_num} (${sub.from_location} → ${sub.to_location}) is currently inactive, but someone on your route has expressed interest.</p>
+    <p style="color:#6b7280;margin:0 0 20px;">Your Journey #${sub.journey_num} (${escapeHtml(sub.from_location)} → ${escapeHtml(sub.to_location)}) is currently inactive, but someone on your route has expressed interest.</p>
     <div style="text-align:center;margin-bottom:24px;"><a href="${SITE_URL}/matches.html?token=${sub.users.match_page_token}&journey=${sub.submission_id}" style="display:inline-block;background:#f59e0b;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">View &amp; Reactivate &#x2192;</a></div>
     <!-- Journey Tracker — Step 2 active -->
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;"><tr><td style="border-top:1px solid #E5E7EB;padding-bottom:16px;"></td></tr></table>

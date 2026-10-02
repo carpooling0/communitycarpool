@@ -1,6 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { sendEmail } from '../_shared/send-email.ts'
 import { sendWhatsAppTemplate } from '../_shared/send-whatsapp.ts'
+import { escapeHtml, getConfigNumber } from '../_shared/security.ts'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
 const SITE_URL = Deno.env.get('SITE_URL') || 'https://communitycarpool.org'
@@ -13,6 +14,9 @@ function buildImmediateInterestEmail(
   myToken: string,
   mySubmissionId: number
 ): string {
+  recipientName = escapeHtml(recipientName)
+  fromLocation = escapeHtml(fromLocation)
+  toLocation = escapeHtml(toLocation)
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
   <body style="margin:0;padding:0;background:#f9fafb;font-family:Inter,system-ui,sans-serif;">
   <div style="max-width:600px;margin:0 auto;padding:32px 20px;">
@@ -91,6 +95,11 @@ function buildImmediateInterestEmail(
 
 // ── Build mutual match email HTML for one recipient ──
 function buildMutualEmail(recipientName: string, otherName: string, otherEmail: string, otherFrom: string, otherTo: string, myToken: string, mySubmissionId: number): string {
+  recipientName = escapeHtml(recipientName)
+  otherName = escapeHtml(otherName)
+  otherEmail = escapeHtml(otherEmail)
+  otherFrom = escapeHtml(otherFrom)
+  otherTo = escapeHtml(otherTo)
   const shareUrl = SITE_URL
   const shareWA  = encodeURIComponent(`Hey! I just signed up on CommunityCarpool.org to find carpooling partners for my commute.\n\nIt matches neighbors going the same route — completely FREE, No Cookies, No App, and you only connect when both sides are interested. Everything over email.\n\nThe more people sign up in our area, the better the matches get. Takes 30 seconds!\n${shareUrl}`)
   const shareTW  = encodeURIComponent(`Just joined communitycarpool.org to find carpooling neighbors on my route. Free, no app, email-only. The more locals sign up, the better the matches! Check it out 👇\n${shareUrl}`)
@@ -176,28 +185,18 @@ function buildMutualEmail(recipientName: string, otherName: string, otherEmail: 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
-  if (req.method === 'GET') {
-    const url = new URL(req.url)
-    const testTo = url.searchParams.get('test_to')
-    const type = url.searchParams.get('type') || 'interest'
-    if (testTo) {
-      if (type === 'mutual') {
-        const html = buildMutualEmail('Alex', 'Jordan', 'jordan@example.com', 'Dubai Marina', 'Dubai International Financial Centre (DIFC)', 'preview-token-000', 0)
-        await sendEmail(testTo, '🎉 You have a mutual match! Contact details revealed', html)
-      } else {
-        const html = buildImmediateInterestEmail('Alex', 'Dubai Marina', 'Dubai International Financial Centre (DIFC)', 'preview-token-000', 0)
-        await sendEmail(testTo, 'Someone Just Said YES to Your Match!', html)
-      }
-      return new Response(JSON.stringify({ preview: true, to: testTo, type }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-    }
-  }
-
   try {
     const { token, action, matchId, submissionId, interest, termsVersion } = await req.json()
 
+    if (typeof token !== 'string' || !/^[0-9a-fA-F]{32,128}$/.test(token))
+      return new Response(JSON.stringify({ success: false, error: 'Invalid token' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 })
+
+    // Same sliding-expiry policy as get-matches-page: an expired link no longer works here either
+    const expiryDays = await getConfigNumber(supabase, 'match_token_expiry_days', 120)
+    const tokenCutoff = new Date(Date.now() - expiryDays * 86400000).toISOString()
     const { data: user, error: userError } = await supabase.from('users')
-      .select('user_id, name, email').eq('match_page_token', token).single()
-    if (userError || !user) return new Response(JSON.stringify({ success: false, error: 'Invalid token' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 })
+      .select('user_id, name, email').eq('match_page_token', token).gt('token_created_at', tokenCutoff).single()
+    if (userError || !user) return new Response(JSON.stringify({ success: false, error: 'Invalid or expired token. Please request a new match email.' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 })
 
     // ── Accept updated Terms & Conditions ─────────────────────────────────────
     if (action === 'accept_terms') {
@@ -208,8 +207,8 @@ Deno.serve(async (req) => {
 
     const { data: match } = await supabase.from('matches').select(`
       match_id, status, sub_a_id, sub_b_id, interest_a, interest_b,
-      sub_a:submissions!sub_a_id (submission_id, user_id, journey_num, from_location, to_location, journey_status, whatsapp_number, whatsapp_verification_status, users(name, email, match_page_token, email_whitelist, email_bounced, unsubscribed_matches, unsubscribed_whatsapp, deletion_requested_at)),
-      sub_b:submissions!sub_b_id (submission_id, user_id, journey_num, from_location, to_location, journey_status, whatsapp_number, whatsapp_verification_status, users(name, email, match_page_token, email_whitelist, email_bounced, unsubscribed_matches, unsubscribed_whatsapp, deletion_requested_at))
+      sub_a:submissions!sub_a_id (submission_id, user_id, email_verification_status, journey_num, from_location, to_location, journey_status, whatsapp_number, whatsapp_verification_status, users(name, email, match_page_token, email_whitelist, email_bounced, unsubscribed_matches, unsubscribed_whatsapp, deletion_requested_at)),
+      sub_b:submissions!sub_b_id (submission_id, user_id, email_verification_status, journey_num, from_location, to_location, journey_status, whatsapp_number, whatsapp_verification_status, users(name, email, match_page_token, email_whitelist, email_bounced, unsubscribed_matches, unsubscribed_whatsapp, deletion_requested_at))
     `).eq('match_id', matchId).single()
 
     if (!match) return new Response(JSON.stringify({ success: false, error: 'Match not found' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 })
@@ -265,7 +264,8 @@ Deno.serve(async (req) => {
       interest === 'yes' &&
       myExistingInterest !== 'yes' &&
       !otherInterest &&
-      otherSub.journey_status === 'active'
+      otherSub.journey_status === 'active' &&
+      ['email_verified', 'verification_skipped'].includes(otherSub.email_verification_status)   // never email an unverified address
 
     if (shouldSendImmediateYesNudge) {
       ;(async () => {

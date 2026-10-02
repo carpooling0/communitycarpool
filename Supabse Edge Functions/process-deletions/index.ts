@@ -9,6 +9,7 @@
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { sendEmail } from '../_shared/send-email.ts'
+import { requireInternal, escapeHtml } from '../_shared/security.ts'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
 const corsHeaders = {
@@ -24,6 +25,10 @@ async function getConfig(key: string): Promise<string> {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+
+  // Privileged: only the cron jobs and our own functions (service-role key) may call this.
+  const denied = await requireInternal(req, supabase, 'process-deletions', corsHeaders)
+  if (denied) return denied
 
   const json = (data: object, status = 200) =>
     new Response(JSON.stringify(data), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
@@ -53,8 +58,8 @@ Deno.serve(async (req) => {
           const rows = dueSoon.map((u: any) => {
             const goes = new Date(new Date(u.deletion_requested_at).getTime() + retentionDays * 86400000)
             return `<tr>
-              <td style="padding:8px 12px;font-size:13px;">${u.name || ''}</td>
-              <td style="padding:8px 12px;font-size:13px;">${u.email}</td>
+              <td style="padding:8px 12px;font-size:13px;">${escapeHtml(u.name || '')}</td>
+              <td style="padding:8px 12px;font-size:13px;">${escapeHtml(u.email)}</td>
               <td style="padding:8px 12px;font-size:13px;">${goes.toISOString().slice(0, 10)}</td>
             </tr>`
           }).join('')
@@ -193,7 +198,7 @@ Deno.serve(async (req) => {
     const notifyEmail = await getConfig('support_notify_email')
     if (notifyEmail && deleted > 0) {
       const rows = results.map(r =>
-        `<tr><td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;">${r.userId}</td><td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;">${r.email}</td><td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;">${r.status}</td></tr>`
+        `<tr><td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;">${r.userId}</td><td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;">${escapeHtml(r.email)}</td><td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;">${r.status}</td></tr>`
       ).join('')
 
       const html = `<div style="font-family:sans-serif;padding:24px;">

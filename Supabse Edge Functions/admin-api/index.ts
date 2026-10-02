@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { sendEmail as sendViaProvider } from '../_shared/send-email.ts'
+import { clientIp, logSecurityEvent, escapeHtml } from '../_shared/security.ts'
 
 const supabase = createClient(
   Deno.env.get('DB_URL') || Deno.env.get('SUPABASE_URL')!,
@@ -18,8 +19,7 @@ function json(data: unknown, status = 200) {
 }
 
 function getClientIP(req: Request): string {
-  return req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
-         req.headers.get('x-real-ip') || 'unknown'
+  return clientIp(req)   // Cloudflare header; x-forwarded-for is spoofable
 }
 
 async function verifySecret(secret: string, stored: string): Promise<boolean> {
@@ -50,9 +50,16 @@ async function validateSession(req: Request): Promise<{ admin: any; error?: stri
   if (!session || new Date(session.expires_at) < new Date())
     return { admin: null, error: 'Session expired or invalid', status: 401 }
   const { data: admin } = await supabase.from('admin_users')
-    .select('admin_id, name, role, is_active, role_expires_at, deletion_pin_hash')
+    .select('admin_id, name, role, is_active, role_expires_at, deletion_pin_hash, allowed_ips')
     .eq('admin_id', session.admin_id).single()
   if (!admin || !admin.is_active) return { admin: null, error: 'Account deactivated', status: 401 }
+  // IP restriction is enforced on EVERY request, not just at login, so a stolen session
+  // token is useless from anywhere else.
+  const ip = clientIp(req)
+  if (admin.allowed_ips?.length && !admin.allowed_ips.includes(ip)) {
+    await logSecurityEvent(supabase, 'admin_ip_blocked', ip, String(admin.admin_id), { at: 'request' })
+    return { admin: null, error: 'Access not allowed from this IP address.', status: 403 }
+  }
   if (admin.role_expires_at && new Date(admin.role_expires_at) < new Date())
     return { admin: null, error: 'Access expired', status: 403 }
   return { admin }
@@ -76,7 +83,7 @@ async function logAction(admin: any, action: string, entityEmail?: string, detai
 
 function buildReplyEmail(ticketId: number, noteText: string, firstName: string): string {
   const escaped = noteText.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')
-  const greeting = firstName ? `Dear ${firstName},` : 'Dear valued member,'
+  const greeting = firstName ? `Dear ${escapeHtml(firstName)},` : 'Dear valued member,'
   return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f3f4f6;font-family:Inter,Arial,sans-serif">
   <div style="max-width:560px;margin:32px auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08)">
     <div style="background:#15803d;padding:20px 28px"><span style="color:white;font-size:17px;font-weight:700">Community Carpool</span></div>
@@ -190,7 +197,7 @@ Deno.serve(async (req) => {
       if (notifyUser && ticket.email) {
         const { data: userRow } = await supabase.from('users').select('name').eq('email', ticket.email.toLowerCase()).single()
         const firstName = userRow?.name?.split(' ')[0] || ''
-        const greeting = firstName ? `Dear ${firstName},` : 'Dear valued member,'
+        const greeting = firstName ? `Dear ${escapeHtml(firstName)},` : 'Dear valued member,'
         emailSent = await sendEmail(ticket.email, `Your support ticket #${ticketId} has been closed`,
           `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f3f4f6;font-family:Inter,Arial,sans-serif">
           <div style="max-width:560px;margin:32px auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08)">

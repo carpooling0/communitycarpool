@@ -1,4 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { reserveMapboxRequest } from '../_shared/mapbox-budget.ts'
+import { requireInternal, getConfigNumber, runInBackground } from '../_shared/security.ts'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
 const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' }
@@ -45,6 +47,10 @@ async function calcDistance(
     console.error(`MAPBOX_TOKEN not set but distance_method='${method}' — falling back to haversine. Set MAPBOX_TOKEN in Edge Function secrets.`)
     return haversineDistance(lat1, lng1, lat2, lng2)
   }
+  // Hard monthly cap: past mapbox_monthly_limit, fall back to haversine
+  if (!(await reserveMapboxRequest(supabase))) {
+    return haversineDistance(lat1, lng1, lat2, lng2)
+  }
   try {
     return await mapboxDistance(lat1, lng1, lat2, lng2, mapboxToken)
   } catch (err: any) {
@@ -53,209 +59,246 @@ async function calcDistance(
   }
 }
 
-// disambiguateDirection: picks same vs reverse for candidates appearing in both spatial lists.
-// 'mapbox'              → 4 Mapbox calls (fully accurate road distances)
-// 'haversine' | 'hybrid' → haversine (O(1), sufficient — relative comparison only)
-async function disambiguateDirection(
+// ── Proximity with minimal Mapbox use ────────────────────────────────────────
+// A road is never shorter than the straight line, so:
+//   straight > radius            → cannot qualify, no Mapbox needed
+//   straight <= trust * radius   → comfortably inside, accept the straight-line figure
+//   in between                   → borderline, ask Mapbox for the real road distance
+// Only the borderline band costs a request, and calcDistance() still enforces the
+// monthly Mapbox cap (mapbox_usage) before every call.
+async function proximity(
+  lat1: number, lng1: number, lat2: number, lng2: number,
+  maxRadius: number, method: string, mapboxToken: string, trustRatio: number
+): Promise<number> {
+  const straight = haversineDistance(lat1, lng1, lat2, lng2)
+  if (method === 'haversine') return straight
+  if (straight > maxRadius) return straight
+  if (straight <= trustRatio * maxRadius) return straight
+  return await calcDistance(lat1, lng1, lat2, lng2, method, mapboxToken)
+}
+
+// Direction is decided on straight-line distance: it only compares two totals, so road
+// accuracy adds nothing and would cost four Mapbox requests per ambiguous candidate.
+function isReversedCandidate(
   fromLat: number, fromLng: number, toLat: number, toLng: number,
-  candFromLat: number, candFromLng: number, candToLat: number, candToLng: number,
-  method: string, mapboxToken: string
-): Promise<boolean> {  // returns true if reversed
-  if (method === 'mapbox' && mapboxToken) {
-    // All 4 legs via Mapbox — parallel calls
-    const [sdStart, sdEnd, rvStart, rvEnd] = await Promise.all([
-      calcDistance(fromLat, fromLng, candFromLat, candFromLng, method, mapboxToken),
-      calcDistance(toLat,   toLng,   candToLat,   candToLng,   method, mapboxToken),
-      calcDistance(fromLat, fromLng, candToLat,   candToLng,   method, mapboxToken),
-      calcDistance(toLat,   toLng,   candFromLat, candFromLng, method, mapboxToken),
-    ])
-    return (rvStart + rvEnd) < (sdStart + sdEnd)
-  }
-  // haversine or hybrid: straight-line is sufficient for relative direction comparison
-  const sameDirTotal  = haversineDistance(fromLat, fromLng, candFromLat, candFromLng)
-                      + haversineDistance(toLat,   toLng,   candToLat,   candToLng)
-  const reversedTotal = haversineDistance(fromLat, fromLng, candToLat,   candToLng)
-                      + haversineDistance(toLat,   toLng,   candFromLat, candFromLng)
+  cFromLat: number, cFromLng: number, cToLat: number, cToLng: number
+): boolean {
+  const sameDirTotal  = haversineDistance(fromLat, fromLng, cFromLat, cFromLng) + haversineDistance(toLat, toLng, cToLat, cToLng)
+  const reversedTotal = haversineDistance(fromLat, fromLng, cToLat, cToLng)     + haversineDistance(toLat, toLng, cFromLat, cFromLng)
   return reversedTotal < sameDirTotal
 }
 
+const strengthFor = (startDist: number, endDist: number, maxRadius: number) =>
+  Math.round(Math.max(0, Math.min(100, 100 * (1 - (startDist + endDist) / (2 * maxRadius * 2)))))
+
+// Only journeys whose owner has proven the email address take part in matching.
+// 'verification_skipped' covers journeys created while verification was switched off.
+const MATCHABLE = ['email_verified', 'verification_skipped']
+
+async function verifiedIds(ids: number[]): Promise<Set<number>> {
+  const ok = new Set<number>()
+  for (let i = 0; i < ids.length; i += 150) {
+    const { data } = await supabase.from('submissions').select('submission_id')
+      .in('submission_id', ids.slice(i, i + 150)).in('email_verification_status', MATCHABLE)
+    for (const r of data || []) ok.add(r.submission_id)
+  }
+  return ok
+}
+
+type MatchOutcome = { matchesFound: number; skipped?: string }
+
+async function matchSubmission(submissionId: number, cfg: { method: string; mapboxToken: string; trustRatio: number; maxMatches: number }): Promise<MatchOutcome> {
+  const { method, mapboxToken, trustRatio, maxMatches } = cfg
+
+  const { data: sub, error: subError } = await supabase.rpc('get_submission_coords', { p_id: submissionId }).single()
+  if (subError || !sub) throw new Error('Submission not found')
+
+  // Unverified journeys wait. verify-pin (or the hourly sweep) matches them once verified.
+  const { data: me } = await supabase.from('submissions').select('email_verification_status').eq('submission_id', submissionId).single()
+  if (!me || !MATCHABLE.includes(me.email_verification_status)) return { matchesFound: 0, skipped: 'unverified' }
+
+  const fromLat = sub.from_lat as number, fromLng = sub.from_lng as number
+  const toLat = sub.to_lat as number,     toLng = sub.to_lng as number
+
+  // Guard: reject submissions with missing or NaN coordinates (legacy data or DB issue)
+  if (!fromLat || !fromLng || !toLat || !toLng || isNaN(fromLat) || isNaN(fromLng) || isNaN(toLat) || isNaN(toLng)) {
+    console.error(`Submission ${submissionId} has invalid coordinates`)
+    await supabase.from('submissions').update({ matched_at: new Date().toISOString() }).eq('submission_id', submissionId)
+    return { matchesFound: 0, skipped: 'invalid_coordinates' }
+  }
+
+  const radiusMeters = (sub.distance_pref || 3) * 1000
+  const rpcParams = { radius_meters: radiusMeters, exclude_email: sub.email, exclude_id: submissionId, exclude_org_id: sub.org_id }
+
+  const [{ data: sameDir }, { data: reverse }] = await Promise.all([
+    supabase.rpc('find_nearby_users', { user_from_lat: fromLat, user_from_lng: fromLng, user_to_lat: toLat, user_to_lng: toLng, ...rpcParams }),
+    supabase.rpc('find_nearby_users', { user_from_lat: toLat, user_from_lng: toLng, user_to_lat: fromLat, user_to_lng: fromLng, ...rpcParams }),
+  ])
+
+  // Merge the two directions; a candidate in both lists is resolved by straight-line distance
+  const reverseIds = new Set((reverse || []).map((c: any) => c.submission_id))
+  const sameIds = new Set((sameDir || []).map((c: any) => c.submission_id))
+  const pool: any[] = []
+  const seen = new Set<number>()
+  for (const c of sameDir || []) {
+    if (seen.has(c.submission_id)) continue
+    seen.add(c.submission_id)
+    const reversed = reverseIds.has(c.submission_id)
+      ? isReversedCandidate(fromLat, fromLng, toLat, toLng, c.from_lat, c.from_lng, c.to_lat, c.to_lng) : false
+    pool.push({ ...c, _reversed: reversed })
+  }
+  for (const c of reverse || []) {
+    if (seen.has(c.submission_id) || sameIds.has(c.submission_id)) continue
+    seen.add(c.submission_id)
+    pool.push({ ...c, _reversed: true })
+  }
+
+  // What this journey already holds, so we skip known pairs and respect the cap
+  const { data: mineRaw } = await supabase.from('matches')
+    .select('match_id, sub_a_id, sub_b_id, status')
+    .or(`sub_a_id.eq.${submissionId},sub_b_id.eq.${submissionId}`)
+  const mine = (mineRaw || []).filter((m: any) => m.status !== 'user_deleted')
+  const alreadyMatched = new Set<number>((mineRaw || []).map((m: any) => (m.sub_a_id === submissionId ? m.sub_b_id : m.sub_a_id)))
+  const slots = Math.max(0, maxMatches - mine.length)
+
+  let matchesFound = 0
+  if (slots > 0 && pool.length > 0) {
+    const verified = await verifiedIds(pool.map(c => c.submission_id))
+
+    // Cheap pass first: straight-line distances decide who could possibly qualify and rank them
+    const ranked = pool
+      .filter(c => verified.has(c.submission_id) && !alreadyMatched.has(c.submission_id))
+      .map(c => {
+        const [aLat, aLng] = c._reversed ? [c.to_lat, c.to_lng] : [c.from_lat, c.from_lng]
+        const [bLat, bLng] = c._reversed ? [c.from_lat, c.from_lng] : [c.to_lat, c.to_lng]
+        const maxRadius = Math.max(sub.distance_pref || 3, c.distance_pref || 3)
+        const sStart = haversineDistance(fromLat, fromLng, aLat, aLng)
+        const sEnd   = haversineDistance(toLat, toLng, bLat, bLng)
+        return { c, aLat, aLng, bLat, bLng, maxRadius, sStart, sEnd, approx: strengthFor(sStart, sEnd, maxRadius) }
+      })
+      .filter(x => x.sStart <= x.maxRadius && x.sEnd <= x.maxRadius)
+      .sort((x, y) => y.approx - x.approx)
+
+    let accepted = 0
+    for (const x of ranked) {
+      if (accepted >= slots) break   // journey is full: strongest candidates were taken first
+      const [startDist, endDist] = await Promise.all([
+        proximity(fromLat, fromLng, x.aLat, x.aLng, x.maxRadius, method, mapboxToken, trustRatio),
+        proximity(toLat, toLng, x.bLat, x.bLng, x.maxRadius, method, mapboxToken, trustRatio),
+      ])
+      if (startDist > x.maxRadius || endDist > x.maxRadius) continue
+      const matchStrength = strengthFor(startDist, endDist, x.maxRadius)
+
+      // The other journey may be full too. It only makes room for a clearly stronger
+      // match, by retiring its weakest match that has not been emailed yet.
+      const candId = x.c.submission_id
+      const { data: theirRaw } = await supabase.from('matches')
+        .select('match_id, match_strength, status, notification_sent')
+        .or(`sub_a_id.eq.${candId},sub_b_id.eq.${candId}`)
+      const theirs = (theirRaw || []).filter((m: any) => m.status !== 'user_deleted')
+      if (theirs.length >= maxMatches) {
+        const weakest = theirs.filter((m: any) => m.status === 'new' && m.notification_sent === false)
+          .sort((p: any, q: any) => p.match_strength - q.match_strength)[0]
+        if (!weakest || weakest.match_strength >= matchStrength) continue
+        const { error: delErr } = await supabase.from('matches').delete().eq('match_id', weakest.match_id).eq('status', 'new').eq('notification_sent', false)
+        if (delErr) continue   // still referenced elsewhere: leave it, skip this candidate
+      }
+
+      const minId = Math.min(submissionId, candId)
+      const maxId = Math.max(submissionId, candId)
+      const { error: matchError } = await supabase.from('matches').upsert({
+        sub_a_id: minId, sub_b_id: maxId, match_strength: matchStrength, status: 'new', notification_sent: false
+      }, { onConflict: 'sub_a_id,sub_b_id', ignoreDuplicates: true })
+
+      if (!matchError) {
+        accepted++
+        matchesFound++
+        await supabase.from('events').insert({
+          event_type: 'match_detected', submission_id: submissionId,
+          metadata: {
+            matched_with: candId,
+            start_dist: Math.round(startDist * 10) / 10, end_dist: Math.round(endDist * 10) / 10,
+            match_strength: matchStrength, direction: x.c._reversed ? 'reverse' : 'same', distance_method: method
+          }
+        })
+      }
+    }
+  }
+
+  await supabase.from('submissions').update({ matched_at: new Date().toISOString() }).eq('submission_id', submissionId)
+  return { matchesFound }
+}
+
+const json = (data: object, status = 200) =>
+  new Response(JSON.stringify(data), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status })
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+
+  // Privileged: only the cron jobs and our own functions (service-role key) may call this.
+  const denied = await requireInternal(req, supabase, 'find-matches', corsHeaders)
+  if (denied) return denied
+
   try {
-    const { submissionId } = await req.json()
+    const body = await req.json().catch(() => ({}))
 
-    // Read distance method config and Mapbox token once per request
     const { data: methodConfig } = await supabase.from('config').select('value').eq('key', 'distance_method').single()
-    const distanceMethod = methodConfig?.value || 'haversine'  // 'haversine' | 'mapbox' | 'hybrid'
+    const method = methodConfig?.value || 'haversine'   // 'haversine' | 'mapbox' | 'hybrid'
     const mapboxToken = Deno.env.get('MAPBOX_TOKEN') || ''
-
-    // Warn early if Mapbox expected but token missing
-    if ((distanceMethod === 'mapbox' || distanceMethod === 'hybrid') && !mapboxToken) {
-      console.error(`distance_method='${distanceMethod}' but MAPBOX_TOKEN is not set — all distances will use haversine fallback. Set MAPBOX_TOKEN in Supabase Edge Function secrets.`)
+    if ((method === 'mapbox' || method === 'hybrid') && !mapboxToken) {
+      console.error(`distance_method='${method}' but MAPBOX_TOKEN is not set: all distances will use haversine.`)
     }
-
-    // Fetch submission coords as floats (stored directly — no WKB parsing needed)
-    const { data: sub, error: subError } = await supabase.rpc('get_submission_coords', { p_id: submissionId }).single()
-    if (subError || !sub) throw new Error('Submission not found')
-
-    const fromLat = sub.from_lat as number
-    const fromLng = sub.from_lng as number
-    const toLat   = sub.to_lat   as number
-    const toLng   = sub.to_lng   as number
-
-    // Guard: reject submissions with missing or NaN coordinates (legacy data or DB issue)
-    if (!fromLat || !fromLng || !toLat || !toLng ||
-        isNaN(fromLat) || isNaN(fromLng) || isNaN(toLat) || isNaN(toLng)) {
-      console.error(`Submission ${submissionId} has invalid coordinates: from=(${fromLat},${fromLng}) to=(${toLat},${toLng})`)
-      return new Response(JSON.stringify({ success: false, error: 'Submission has no valid coordinates' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400
-      })
+    const cfg = {
+      method, mapboxToken,
+      trustRatio: await getConfigNumber(supabase, 'mapbox_trust_haversine_ratio', 0.6),
+      maxMatches: await getConfigNumber(supabase, 'max_matches_per_submission', 25),
     }
+    const { data: modeConfig } = await supabase.from('config').select('value').eq('key', 'matching_mode').single()
+    const mode = modeConfig?.value || 'hybrid'
 
-    const radiusMeters = (sub.distance_pref || 3) * 1000
+    // ── Sweep: match journeys that are verified but not yet matched ──────────
+    // Runs every 10 minutes. In 'batch' mode it is how matching happens; in 'hybrid' / 'instant'
+    // it is a safety net for journeys whose on-submit call was lost.
+    if (body.sweep === true) {
+      const graceMinutes = mode === 'batch' ? 0 : 10
+      const cutoff = new Date(Date.now() - graceMinutes * 60 * 1000).toISOString()
+      const { data: pending } = await supabase.from('submissions')
+        .select('submission_id').is('matched_at', null).eq('journey_status', 'active')
+        .in('email_verification_status', MATCHABLE).lt('created_at', cutoff)
+        .order('created_at', { ascending: true }).limit(12)
 
-    const rpcParams = {
-      radius_meters:  radiusMeters,
-      exclude_email:  sub.email,
-      exclude_id:     submissionId,
-      exclude_org_id: sub.org_id
-    }
-
-    // ── Call 1: same-direction candidates ──────────────────────────────────
-    const { data: sameDirCandidates } = await supabase.rpc('find_nearby_users', {
-      user_from_lat: fromLat, user_from_lng: fromLng,
-      user_to_lat:   toLat,   user_to_lng:   toLng,
-      ...rpcParams
-    })
-
-    // ── Call 2: reverse-direction candidates ───────────────────────────────
-    const { data: reverseCandidates } = await supabase.rpc('find_nearby_users', {
-      user_from_lat: toLat,   user_from_lng: toLng,
-      user_to_lat:   fromLat, user_to_lng:   fromLng,
-      ...rpcParams
-    })
-
-    // ── Merge, deduplicate, tag reversed candidates ────────────────────────
-    const sameDirIds = new Set((sameDirCandidates  || []).map((c: any) => c.submission_id))
-    const reverseIds = new Set((reverseCandidates  || []).map((c: any) => c.submission_id))
-
-    const allCandidates: any[] = []
-    const seen = new Set<number>()
-
-    // Candidates only in same-dir list → unambiguously same-direction
-    for (const c of (sameDirCandidates || [])) {
-      if (!reverseIds.has(c.submission_id)) {
-        allCandidates.push({ ...c, _reversed: false })
-        seen.add(c.submission_id)
-      }
-    }
-    // Candidates only in reverse list → unambiguously reversed
-    for (const c of (reverseCandidates || [])) {
-      if (!sameDirIds.has(c.submission_id)) {
-        allCandidates.push({ ...c, _reversed: true })
-        seen.add(c.submission_id)
-      }
-    }
-    // Candidates in BOTH lists → disambiguate direction using configured method
-    // 'mapbox': 4 Mapbox calls per ambiguous candidate (fully accurate)
-    // 'haversine'|'hybrid': haversine (O(1), sufficient for relative comparison)
-    for (const c of (sameDirCandidates || [])) {
-      if (seen.has(c.submission_id)) continue
-      const isReversed = await disambiguateDirection(
-        fromLat, fromLng, toLat, toLng,
-        c.from_lat, c.from_lng, c.to_lat, c.to_lng,
-        distanceMethod, mapboxToken
-      )
-      allCandidates.push({ ...c, _reversed: isReversed })
-      seen.add(c.submission_id)
-    }
-
-    if (allCandidates.length === 0) {
-      return new Response(JSON.stringify({ success: true, matchesFound: 0 }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
-
-    let matchesFound = 0
-
-    for (const candidate of allCandidates) {
-      const minId = Math.min(submissionId, candidate.submission_id)
-      const maxId = Math.max(submissionId, candidate.submission_id)
-      const { data: existing } = await supabase.from('matches')
-        .select('match_id').eq('sub_a_id', minId).eq('sub_b_id', maxId).single()
-      if (existing) continue
-
-      const candFromLat = candidate.from_lat as number
-      const candFromLng = candidate.from_lng as number
-      const candToLat   = candidate.to_lat   as number
-      const candToLng   = candidate.to_lng   as number
-      const isReversed  = candidate._reversed === true
-
-      // ── Compute pickup/dropoff proximity ────────────────────────────────
-      // Same-direction:  my FROM ↔ their FROM,  my TO ↔ their TO
-      // Reverse-route:   my FROM ↔ their TO,    my TO ↔ their FROM
-      const [startDist, endDist] = await Promise.all([
-        isReversed
-          ? calcDistance(fromLat, fromLng, candToLat,   candToLng,   distanceMethod, mapboxToken)
-          : calcDistance(fromLat, fromLng, candFromLat, candFromLng, distanceMethod, mapboxToken),
-        isReversed
-          ? calcDistance(toLat, toLng, candFromLat, candFromLng, distanceMethod, mapboxToken)
-          : calcDistance(toLat, toLng, candToLat,   candToLng,   distanceMethod, mapboxToken)
-      ])
-
-      const maxRadius = Math.max(sub.distance_pref || 3, candidate.distance_pref || 3)
-
-      if (startDist <= maxRadius && endDist <= maxRadius) {
-        const matchStrength = Math.round(Math.max(0, Math.min(100,
-          100 * (1 - (startDist + endDist) / (2 * maxRadius * 2))
-        )))
-
-        const { error: matchError } = await supabase.from('matches').upsert({
-          sub_a_id: minId, sub_b_id: maxId,
-          match_strength: matchStrength,
-          status: 'new',
-          notification_sent: false
-        }, { onConflict: 'sub_a_id,sub_b_id', ignoreDuplicates: true })
-
-        if (!matchError) {
-          matchesFound++
-          await supabase.from('events').insert({
-            event_type:    'match_detected',
-            submission_id: submissionId,
-            metadata: {
-              matched_with:    candidate.submission_id,
-              start_dist:      Math.round(startDist * 10) / 10,
-              end_dist:        Math.round(endDist   * 10) / 10,
-              match_strength:  matchStrength,
-              direction:       isReversed ? 'reverse' : 'same',
-              distance_method: distanceMethod
-            }
-          })
+      const started = Date.now()
+      let processed = 0, totalMatches = 0
+      for (const row of pending || []) {
+        if (Date.now() - started > 100_000) break   // stay inside the function time limit
+        try {
+          const r = await matchSubmission(row.submission_id, cfg)
+          totalMatches += r.matchesFound
+        } catch (e: any) {
+          console.error(`sweep: submission ${row.submission_id} failed:`, e.message)
         }
+        processed++
       }
+      return json({ success: true, sweep: true, pending: pending?.length || 0, processed, matchesFound: totalMatches })
     }
 
-    // ── Instant email notification ─────────────────────────────────────────
-    if (matchesFound > 0) {
-      const { data: modeConfig } = await supabase.from('config').select('value').eq('key', 'matching_mode').single()
-      if (modeConfig?.value === 'instant') {
-        fetch(`${Deno.env.get('DB_URL')}/functions/v1/batch-send-emails`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${Deno.env.get('DB_SERVICE_KEY')}`
-          }
-        }).catch((e: any) => console.error('batch-send-emails trigger failed:', e.message))
-      }
+    // ── Single submission ────────────────────────────────────────────────────
+    const submissionId = Number(body.submissionId)
+    if (!Number.isInteger(submissionId) || submissionId <= 0) return json({ success: false, error: 'submissionId required' }, 400)
+
+    const { matchesFound, skipped } = await matchSubmission(submissionId, cfg)
+
+    // ── Instant email notification ───────────────────────────────────────────
+    if (matchesFound > 0 && mode === 'instant') {
+      runInBackground(fetch(`${Deno.env.get('DB_URL')}/functions/v1/batch-send-emails`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('DB_SERVICE_KEY')}` },
+      }))
     }
 
-    return new Response(JSON.stringify({ success: true, matchesFound }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    })
+    return json({ success: true, matchesFound, ...(skipped ? { skipped } : {}) })
   } catch (err: any) {
     console.error('find-matches error:', err)
-    return new Response(JSON.stringify({ success: false, error: err.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500
-    })
+    return json({ success: false, error: err.message }, 500)
   }
 })
