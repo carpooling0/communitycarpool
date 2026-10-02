@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { clientIp, rateLimit, logSecurityEvent } from '../_shared/security.ts'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
 const corsHeaders = {
@@ -10,6 +11,19 @@ const IP_LIMIT_PER_DAY = 3
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+
+  // Public form that notifies the team: per-IP limits keep it from being used to flood the inbox or the database
+  {
+    const ip = clientIp(req)
+    if (ip !== 'unknown') {
+      const h = await rateLimit(supabase, `form:submit-feedback:${ip}:h`, 3600, 10)
+      const d = await rateLimit(supabase, `form:submit-feedback:${ip}:d`, 86400, 40)
+      if (!h.allowed || !d.allowed) {
+        await logSecurityEvent(supabase, 'form_rate_limited', ip, 'submit-feedback', {})
+        return new Response(JSON.stringify({ success: false, error: 'Too many submissions. Please try again later.' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+    }
+  }
 
   try {
     const body = await req.json()
