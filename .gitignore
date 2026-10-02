@@ -12,3 +12,13 @@ marketing/
 # Supabase CLI local cache (project-ref, version stamps)
 supabase/.temp/
 **/supabase/.temp/
+
+# Investigation exports contain personal data - never commit (repo is public)
+investigations/
+
+# Internal operations material - kept locally, never published (repo and site are public)
+docs/super-admin/
+HANDOFF.md
+community-carpool-schema.sql
+backups/
+CLAUDE_MEMORY.md
