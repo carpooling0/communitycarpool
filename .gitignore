@@ -23,3 +23,7 @@ community-carpool-schema.sql
 backups/
 CLAUDE_MEMORY.md
 docs/super-admin.html
+
+# Generated partner onboarding kits (QR codes, emails)
+partner-kits/
+__pycache__/
